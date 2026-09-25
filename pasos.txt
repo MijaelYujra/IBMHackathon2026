@@ -1,0 +1,85 @@
+DRIFT DETECTOR - PASOS MANUALES PARA EL DEMO (WINDOWS)
+======================================================
+
+Este proyecto no usa infraestructura cloud real. El "estado real" se simula
+en archivos JSON, asi que es seguro ejecutar el demo.
+
+REQUISITOS
+----------
+1. Node.js 24 o posterior instalado.
+2. Bob IDE instalado e iniciado con la cuenta registrada en la hackathon.
+3. El repositorio descargado y abierto como carpeta/workspace en Bob IDE.
+
+INSTALAR DEPENDENCIAS (una sola vez)
+-------------------------------------
+Abrir PowerShell en la raiz del repositorio y ejecutar:
+
+  npm.cmd --prefix .\mcp-server install
+
+COMPROBAR EL SERVIDOR MCP (una sola vez)
+-----------------------------------------
+  npm.cmd --prefix .\mcp-server test
+
+Debe aparecer "MCP operativo" y las cuatro tools:
+  - diff_infra
+  - get_actual_state
+  - get_bobalytics_summary
+  - get_declared_state
+
+CONFIGURAR MCP EN BOB IDE
+-------------------------
+1. En Bob IDE, abrir Settings (icono de configuracion) > MCP.
+2. Confirmar que "Use MCP Servers" este activado.
+3. Confirmar que aparece el servidor "drift-detector".
+4. Si no aparece, cerrar y volver a abrir el workspace. La configuracion esta
+   en .bob\mcp.json. No hace falta pegar API keys ni secretos.
+
+PREPARAR EL DEMO: DRIFT DE SEGURIDAD
+------------------------------------
+Desde la raiz del proyecto ejecutar:
+
+  powershell -ExecutionPolicy Bypass -File .\scripts\start-demo.ps1 open-ssh
+
+Esto abre SSH (puerto 22) solo en el estado simulado, ejecuta una prueba y deja
+todo listo para Bob. La politica Bypass se aplica solo a este comando y no
+cambia la configuracion de seguridad permanente de Windows.
+
+En el chat de Bob IDE, usar primero este prompt:
+
+  Usa la herramienta diff_infra del servidor MCP drift-detector. Detecta el
+  drift, explica el riesgo y prioriza la correccion.
+
+Cuando Bob solicite permiso para usar la herramienta MCP, aprobar solamente
+esa llamada. Debe reportar el puerto SSH publico como hallazgo de severidad alta.
+
+PLAN DE CORRECCION
+------------------
+Cambiar Bob a modo Plan y escribir:
+
+  Crea un plan para corregir el hallazgo sin downtime. No apliques cambios.
+
+IMPLEMENTACION PARA MOSTRAR REVISION HUMANA
+-------------------------------------------
+Cambiar Bob a modo Agent. Habilitar el permiso Edit solo para este paso y usar:
+
+  Implementa la correccion en infra/main.tf y dejalo listo para revision humana.
+  No ejecutes terraform apply ni hagas cambios en infraestructura real.
+
+Revisar el diff propuesto antes de aprobarlo. No activar aprobaciones automaticas.
+
+DASHBOARD BOBALYTICS
+--------------------
+1. Abrir dashboard\index.html en un navegador.
+2. Seleccionar el archivo logs\bobalytics-log.jsonl.
+3. Mostrar cantidad de detecciones, riesgo alto y tiempo estimado ahorrado.
+
+OTROS ESCENARIOS DE DEMO
+------------------------
+  powershell -ExecutionPolicy Bypass -File .\scripts\start-demo.ps1 resize
+  powershell -ExecutionPolicy Bypass -File .\scripts\start-demo.ps1 expose-bucket
+
+RESETEAR EL PROYECTO DESPUES DEL DEMO
+-------------------------------------
+  node .\scripts\inject-drift.js reset
+
+Esto vuelve a hacer coincidir el estado simulado con el estado declarado.
