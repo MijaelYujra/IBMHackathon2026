@@ -9,7 +9,8 @@ import path from "path";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const STATE_DIR = path.join(__dirname, "state");
-const DECLARED_PATH = path.join(STATE_DIR, "declared-state.json");
+const GENERATED_DECLARED_PATH = path.join(__dirname, "..", "infra", "declared-state.generated.json");
+const DECLARED_FALLBACK_PATH = path.join(STATE_DIR, "declared-state.json");
 const ACTUAL_PATH = path.join(STATE_DIR, "actual-state.json");
 const LOG_DIR = path.join(__dirname, "..", "logs");
 const LOG_PATH = path.join(LOG_DIR, "bobalytics-log.jsonl");
@@ -21,6 +22,13 @@ function loadState(filePath) {
     throw new Error(`¡ALERTA CRÍTICA! No se pudo acceder al estado: ${path.basename(filePath)}. Posible pérdida de conexión con el proveedor de infraestructura.`);
   }
   return JSON.parse(readFileSync(filePath, "utf-8"));
+}
+
+function loadDeclaredState() {
+  const declaredPath = existsSync(GENERATED_DECLARED_PATH)
+    ? GENERATED_DECLARED_PATH
+    : DECLARED_FALLBACK_PATH;
+  return loadState(declaredPath);
 }
 
 function diffResources(declared, actual) {
@@ -127,7 +135,7 @@ server.tool(
   "Devuelve el estado de infraestructura DECLARADO en el codigo (Terraform), es decir lo que deberia existir.",
   {},
   async () => {
-    const declared = loadState(DECLARED_PATH);
+    const declared = loadDeclaredState();
     return {
       content: [{ type: "text", text: JSON.stringify(declared, null, 2) }],
     };
@@ -151,7 +159,7 @@ server.tool(
   "Compara el estado declarado contra el estado real y devuelve la lista de diferencias (drift), cada una con severidad y explicacion en lenguaje natural. Ademas registra la deteccion para el dashboard de Bobalytics.",
   {},
   async () => {
-    const declared = loadState(DECLARED_PATH);
+    const declared = loadDeclaredState();
     const actual = loadState(ACTUAL_PATH);
     const diffs = diffResources(declared, actual);
 

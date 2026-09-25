@@ -1,13 +1,3 @@
-########################################################
-# Infraestructura de ejemplo para el demo de Drift Detector
-# Nota: para el hackathon esto es un target ILUSTRATIVO.
-# No hace falta aplicarlo a un cloud real: el MCP server lee
-# los recursos "declarados" desde infra/declared-state.json,
-# que representa lo que ESTE archivo dice que debería existir.
-# En una v2 real, ese JSON se generaría con:
-#   terraform show -json terraform.tfstate > declared-state.json
-########################################################
-
 terraform {
   required_providers {
     aws = {
@@ -18,7 +8,13 @@ terraform {
 }
 
 provider "aws" {
-  region = "us-east-1"
+  region                      = "us-east-1"
+  access_key                  = "demo-access-key"
+  secret_key                  = "demo-secret-key"
+  skip_credentials_validation = true
+  skip_metadata_api_check     = true
+  skip_requesting_account_id  = true
+  skip_region_validation      = true
 }
 
 resource "aws_vpc" "main" {
