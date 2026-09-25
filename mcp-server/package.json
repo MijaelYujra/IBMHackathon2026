@@ -1,0 +1,15 @@
+{
+  "name": "drift-detector-mcp",
+  "version": "1.0.0",
+  "description": "Servidor MCP que detecta drift entre infraestructura declarada (Terraform) y real, para usar con IBM Bob.",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "node test-client.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.30.1",
+    "zod": "^3.23.8"
+  }
+}

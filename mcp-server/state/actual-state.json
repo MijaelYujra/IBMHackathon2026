@@ -1,0 +1,36 @@
+{
+  "generated_note": "Version simplificada de 'terraform show -json'. En v2 real se generaria automaticamente desde el .tfstate.",
+  "resources": {
+    "aws_vpc.main": {
+      "type": "aws_vpc",
+      "cidr_block": "10.0.0.0/16"
+    },
+    "aws_security_group.app_sg": {
+      "type": "aws_security_group",
+      "name": "drift-demo-app-sg",
+      "ingress_rules": [
+        {
+          "description": "HTTPS",
+          "from_port": 443,
+          "to_port": 443,
+          "protocol": "tcp",
+          "cidr_blocks": [
+            "0.0.0.0/0"
+          ]
+        }
+      ]
+    },
+    "aws_s3_bucket.data": {
+      "type": "aws_s3_bucket",
+      "bucket": "drift-demo-data-bucket",
+      "public_access_blocked": true
+    },
+    "aws_instance.app_server": {
+      "type": "aws_instance",
+      "instance_type": "t3.micro",
+      "security_groups": [
+        "drift-demo-app-sg"
+      ]
+    }
+  }
+}

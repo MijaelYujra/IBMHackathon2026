@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "drift-detector": {
+      "command": "node",
+      "args": ["mcp-server/index.js"],
+      "description": "Detecta diferencias entre la infraestructura declarada en Terraform y el estado real (simulado para el demo)."
+    }
+  }
+}
