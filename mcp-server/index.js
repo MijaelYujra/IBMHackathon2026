@@ -1,17 +1,4 @@
 #!/usr/bin/env node
-/**
- * Drift Detector - MCP Server
- *
- * Expone 3 tools a Bob via MCP:
- *   - get_declared_state : lo que el codigo (Terraform) dice que deberia existir
- *   - get_actual_state   : lo que realmente existe hoy (real o simulado)
- *   - diff_infra          : calcula la diferencia entre ambos y clasifica el riesgo
- *
- * En este proyecto de hackathon, ambos estados se leen de archivos JSON locales
- * (state/declared-state.json y state/actual-state.json) para poder simular drift
- * facilmente con scripts/inject-drift.js. En una version real, get_actual_state
- * llamaria a la API del proveedor cloud (AWS SDK, GCP SDK, etc).
- */
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
@@ -29,17 +16,13 @@ const LOG_PATH = path.join(LOG_DIR, "bobalytics-log.jsonl");
 
 if (!existsSync(LOG_DIR)) mkdirSync(LOG_DIR, { recursive: true });
 
-// ---- Helpers -------------------------------------------------
-
 function loadState(filePath) {
+  if (!existsSync(filePath)) {
+    throw new Error(`¡ALERTA CRÍTICA! No se pudo acceder al estado: ${path.basename(filePath)}. Posible pérdida de conexión con el proveedor de infraestructura.`);
+  }
   return JSON.parse(readFileSync(filePath, "utf-8"));
 }
 
-/**
- * Comparacion simple y explicable de dos objetos "resources".
- * Devuelve una lista de diffs con: recurso, campo, valor declarado,
- * valor real, y una severidad heuristica.
- */
 function diffResources(declared, actual) {
   const diffs = [];
   const declaredResources = declared.resources || {};
@@ -107,7 +90,6 @@ function diffFields(resourceKey, declaredObj, actualObj, diffs, prefix = "") {
   }
 }
 
-/** Heuristica simple de severidad, pensada para el demo. */
 function classifySeverity(resourceKey, fieldPath) {
   const lower = `${resourceKey}.${fieldPath}`.toLowerCase();
   if (lower.includes("ingress") || lower.includes("public_access") || lower.includes("security_group")) {
@@ -129,14 +111,11 @@ function logDetection(diffs) {
     timestamp: new Date().toISOString(),
     total_diffs: diffs.length,
     high_risk_diffs: highRisk,
-    // Heuristica de tiempo ahorrado: 25 min por diff detectado a mano + 15 extra si es de alto riesgo
     estimated_minutes_saved: diffs.length * 25 + highRisk * 15,
   };
   appendFileSync(LOG_PATH, JSON.stringify(entry) + "\n");
   return entry;
 }
-
-// ---- MCP Server ------------------------------------------------
 
 const server = new McpServer({
   name: "drift-detector",
