@@ -33,6 +33,13 @@ CONFIGURAR MCP EN BOB IDE
 3. Confirmar que aparece el servidor "drift-detector".
 4. Si no aparece, cerrar y volver a abrir el workspace. La configuracion esta
    en .bob\mcp.json. No hace falta pegar API keys ni secretos.
+5. Si aparece "Disconnected", agregar la propiedad "cwd" al servidor con la
+   ruta absoluta de la carpeta del repositorio en esa computadora. Ejemplo:
+
+     "cwd": "C:\\Users\\NOMBRE\\Desktop\\IBMHackathon2026"
+
+   Guardar el archivo y usar Restart en el panel MCP. Esa ruta es personal:
+   cada integrante debe reemplazarla por la ubicacion de su propio clon.
 
 PREPARAR EL DEMO: DRIFT DE SEGURIDAD
 ------------------------------------
