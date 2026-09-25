@@ -6,3 +6,5 @@ infra/*.tfplan
 infra/plan.json
 infra/terraform.tfstate
 infra/terraform.tfstate.*
+infra/tfplan
+infra/declared-state.generated.json
