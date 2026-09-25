@@ -10,12 +10,13 @@ cambios solo: detecta, explica, propone un plan y genera el PR — un humano apr
 drift-detector/
 ├── infra/
 │   ├── main.tf                  # Infraestructura "declarada" (ilustrativa)
-│   └── declared-state.json      # Version simplificada del .tf, en JSON
+│   └── declared-state.json      # Snapshot legible de referencia
 ├── mcp-server/
 │   ├── index.js                 # Servidor MCP: get_declared_state, get_actual_state, diff_infra, get_bobalytics_summary
+│   ├── terraform-declared-state.js # Genera el estado declarado desde un plan Terraform
 │   ├── package.json
 │   └── state/
-│       ├── declared-state.json
+│       ├── declared-state.json  # Fallback si Terraform no está disponible
 │       └── actual-state.json    # Estado "real" (simulado), lo que se compara
 ├── scripts/
 │   ├── inject-drift.js          # Simula cambios manuales para el demo
@@ -30,16 +31,22 @@ drift-detector/
 
 ## 1. Setup (una sola vez)
 
-```bash
-cd drift-detector/mcp-server
-npm install
+```powershell
+npm.cmd --prefix .\mcp-server install
+terraform -chdir=.\infra init
+npm.cmd --prefix .\mcp-server run generate:declared
 ```
+
+El último comando debe mostrar `"source": "terraform_plan"`. Genera un plan
+local con refresh desactivado; no consulta AWS ni crea recursos. Nunca hace
+`terraform apply`. Si Terraform no está disponible durante la demo, el MCP usa
+automáticamente `mcp-server/state/declared-state.json` como respaldo.
 
 Probá el servidor MCP de forma aislada (sin Bob) para confirmar que responde:
 
-```bash
-node index.js
-# debería quedarse esperando en stdio (es normal, así funciona MCP). Ctrl+C para salir.
+```powershell
+npm.cmd --prefix .\mcp-server test
+# debe listar las cuatro tools y reportar "MCP operativo"
 ```
 
 ## 2. Registrar el servidor MCP en Bob
@@ -188,5 +195,5 @@ Esto es lo que usa `scripts/run-drift-check.sh`. La lógica paso a paso:
 
 - Reemplazar `get_actual_state` para que llame al SDK real del cloud provider en vez
   de leer un JSON mockeado.
-- Generar `declared-state.json` automáticamente con `terraform show -json`.
+- Extender el normalizador de planes Terraform para módulos y más tipos de recursos.
 - Conectar `run-drift-check.sh` a Slack para pedir aprobación del plan antes del `--yolo`.

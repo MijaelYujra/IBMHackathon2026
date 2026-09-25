@@ -26,6 +26,20 @@ Debe aparecer "MCP operativo" y las cuatro tools:
   - get_bobalytics_summary
   - get_declared_state
 
+INICIALIZAR TERRAFORM (una sola vez)
+------------------------------------
+Terraform genera el estado declarado directamente desde infra\main.tf. No se
+crean recursos ni se necesitan credenciales AWS reales.
+
+  terraform -chdir=.\infra init
+  npm.cmd --prefix .\mcp-server run generate:declared
+
+La salida debe contener:
+
+  "source": "terraform_plan"
+
+Nunca ejecutar "terraform apply" para este demo.
+
 CONFIGURAR MCP EN BOB IDE
 -------------------------
 1. En Bob IDE, abrir Settings (icono de configuracion) > MCP.

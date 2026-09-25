@@ -19,10 +19,10 @@ import { z } from "zod";
 import { readFileSync, appendFileSync, existsSync, mkdirSync } from "fs";
 import { fileURLToPath } from "url";
 import path from "path";
+import { loadDeclaredState } from "./terraform-declared-state.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const STATE_DIR = path.join(__dirname, "state");
-const DECLARED_PATH = path.join(STATE_DIR, "declared-state.json");
 const ACTUAL_PATH = path.join(STATE_DIR, "actual-state.json");
 const LOG_DIR = path.join(__dirname, "..", "logs");
 const LOG_PATH = path.join(LOG_DIR, "bobalytics-log.jsonl");
@@ -148,7 +148,7 @@ server.tool(
   "Devuelve el estado de infraestructura DECLARADO en el codigo (Terraform), es decir lo que deberia existir.",
   {},
   async () => {
-    const declared = loadState(DECLARED_PATH);
+    const declared = loadDeclaredState();
     return {
       content: [{ type: "text", text: JSON.stringify(declared, null, 2) }],
     };
@@ -172,7 +172,7 @@ server.tool(
   "Compara el estado declarado contra el estado real y devuelve la lista de diferencias (drift), cada una con severidad y explicacion en lenguaje natural. Ademas registra la deteccion para el dashboard de Bobalytics.",
   {},
   async () => {
-    const declared = loadState(DECLARED_PATH);
+    const declared = loadDeclaredState();
     const actual = loadState(ACTUAL_PATH);
     const diffs = diffResources(declared, actual);
 
@@ -191,6 +191,7 @@ server.tool(
 
     const summary = {
       drift_detectado: true,
+      estado_declarado_fuente: declared.source || "snapshot_json",
       cantidad_de_diferencias: diffs.length,
       diferencias_alto_riesgo: diffs.filter((d) => d.severity === "alta").length,
       detalle: diffs,
