@@ -1,0 +1,22 @@
+{
+  "name": "ibmhackathon2026",
+  "version": "1.0.0",
+  "description": "Detecta automáticamente cuándo la infraestructura real se desincroniza de lo declarado\r en el código (Terraform), usando IBM Bob + un servidor MCP custom. Bob nunca aplica\r cambios solo: detecta, explica, propone un plan y genera el PR — un humano aprueba.",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MijaelYujra/IBMHackathon2026.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/MijaelYujra/IBMHackathon2026/issues"
+  },
+  "homepage": "https://github.com/MijaelYujra/IBMHackathon2026#readme"
+}

@@ -28,12 +28,21 @@ resource "aws_vpc" "main" {
   }
 }
 
+# SECURITY FIX — 2025-09-25
+# Drift detectado: regla SSH (port 22, 0.0.0.0/0) fue agregada manualmente
+# en la consola de AWS sin pasar por este codigo (IaC).
+# Riesgo: exposicion de SSH a Internet completo (CVSS critico).
+# Correccion: este archivo es la fuente de verdad. Solo HTTPS (443) esta permitido.
+# Aplicar con: terraform apply  (requiere aprobacion del equipo de seguridad)
+# NUNCA agregar ingress SSH con cidr_blocks = ["0.0.0.0/0"]. Usar AWS SSM Session
+# Manager para acceso operacional sin abrir puertos.
 resource "aws_security_group" "app_sg" {
   name        = "drift-demo-app-sg"
   description = "Security group de la app - reglas minimas declaradas"
   vpc_id      = aws_vpc.main.id
 
-  # Solo HTTPS entrante, nada mas
+  # Unica regla de ingreso autorizada: HTTPS desde Internet.
+  # SSH (port 22) esta EXPLICITAMENTE PROHIBIDO en este security group.
   ingress {
     description = "HTTPS"
     from_port   = 443

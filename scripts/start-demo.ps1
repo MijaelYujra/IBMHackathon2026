@@ -7,14 +7,16 @@ $ErrorActionPreference = "Stop"
 $ProjectRoot = Split-Path -Parent $PSScriptRoot
 
 Write-Host "Preparando demo con el escenario: $Scenario" -ForegroundColor Cyan
-node "$ProjectRoot\scripts\inject-drift.js" $Scenario
+node "$ProjectRoot\scripts\inject-drift.mjs" $Scenario
+if ($LASTEXITCODE -ne 0) { throw "No se pudo inyectar el escenario (codigo $LASTEXITCODE)." }
 
 Write-Host "Comprobando que el servidor MCP detecta el drift..." -ForegroundColor Cyan
 npm.cmd --prefix "$ProjectRoot\mcp-server" test
+if ($LASTEXITCODE -ne 0) { throw "La comprobacion MCP fallo (codigo $LASTEXITCODE)." }
 
 Write-Host ""
 Write-Host "Demo lista. En Bob IDE usa este prompt:" -ForegroundColor Green
 Write-Host 'Usa la herramienta diff_infra del servidor MCP drift-detector. Detecta el drift, explica el riesgo y prioriza la correccion.'
 Write-Host ""
 Write-Host "Al terminar, restablece el escenario con:" -ForegroundColor Yellow
-Write-Host "node scripts\inject-drift.js reset"
+Write-Host "node scripts\inject-drift.mjs reset"

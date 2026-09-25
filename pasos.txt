@@ -14,11 +14,11 @@ INSTALAR DEPENDENCIAS (una sola vez)
 -------------------------------------
 Abrir PowerShell en la raiz del repositorio y ejecutar:
 
-  npm.cmd --prefix .\mcp-server install
+  npm.cmd --prefix ./mcp-server install
 
 COMPROBAR EL SERVIDOR MCP (una sola vez)
 -----------------------------------------
-  npm.cmd --prefix .\mcp-server test
+  npm.cmd --prefix ./mcp-server test
 
 Debe aparecer "MCP operativo" y las cuatro tools:
   - diff_infra
