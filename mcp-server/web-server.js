@@ -13,6 +13,13 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import { applyScenario, listScenarios } from "./scenario-engine.js";
 import { loadDeclaredState } from "./terraform-declared-state.js";
+import {
+  bobRuntimeMetadata,
+  createBobPrompts,
+  initializeArtifactStore,
+  runBobPhase,
+  writeArtifact,
+} from "./bob-runner.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = path.resolve(__dirname, "..");
@@ -99,6 +106,15 @@ function buildTimeline(report) {
       ),
     },
     {
+      id: "bob",
+      status: "pending",
+      title: bilingual("IBM Bob analysis available", "Analisis IBM Bob disponible"),
+      detail: bilingual(
+        "Run Ask, Plan, and Agent phases with local cost and turn limits.",
+        "Ejecuta las fases Ask, Plan y Agent con limites locales de costo y turnos."
+      ),
+    },
+    {
       id: "review",
       status: hasDrift ? "pending" : "completed",
       title: bilingual(
@@ -163,6 +179,7 @@ async function createRun(scenarioId) {
     scenario,
     report,
     timeline: buildTimeline(report),
+    bob: null,
     decision: null,
     verification: null,
     safety: {
@@ -173,6 +190,91 @@ async function createRun(scenarioId) {
   };
   runs.set(run.id, run);
   return run;
+}
+
+function updateBobTimeline(run, status, error) {
+  const step = run.timeline.find((item) => item.id === "bob");
+  if (!step) return;
+  step.status = status;
+  if (status === "running") {
+    step.title = bilingual("IBM Bob analysis running", "Analisis IBM Bob en ejecucion");
+    step.detail = bilingual(
+      "Ask, Plan, and Agent are being captured as stream-json events.",
+      "Ask, Plan y Agent se capturan como eventos stream-json."
+    );
+  } else if (status === "completed") {
+    step.title = bilingual("IBM Bob analysis completed", "Analisis IBM Bob completado");
+    step.detail = bilingual(
+      "The local run has review-ready Ask, Plan, and Agent artifacts.",
+      "La corrida local tiene artefactos Ask, Plan y Agent listos para revision."
+    );
+  } else if (status === "failed") {
+    step.title = bilingual("IBM Bob analysis unavailable", "Analisis IBM Bob no disponible");
+    step.detail = bilingual(
+      error || "Check Bob Shell authentication and retry.",
+      error || "Verifica la autenticacion de Bob Shell e intenta otra vez."
+    );
+  }
+}
+
+async function runBobWorkflow(run) {
+  let artifactDirectory;
+
+  try {
+    artifactDirectory = initializeArtifactStore(run);
+    const prompts = createBobPrompts(run.report);
+    run.artifact_directory = path.relative(PROJECT_ROOT, artifactDirectory).replaceAll("\\", "/");
+    run.bob = {
+      status: "running",
+      started_at: new Date().toISOString(),
+      runtime: bobRuntimeMetadata(),
+      phases: [],
+    };
+    updateBobTimeline(run, "running");
+
+    for (const phase of ["ask", "plan", "agent"]) {
+      const phaseState = { phase, status: "running", events: [] };
+      run.bob.current_phase = phase;
+      run.bob.phases.push(phaseState);
+      const result = await runBobPhase({
+        phase,
+        prompt: prompts[phase],
+        onEvent: (event) => phaseState.events.push(event),
+      });
+      Object.assign(phaseState, result);
+      writeArtifact(artifactDirectory, `${phase}.json`, result);
+      if (result.status !== "completed") {
+        run.bob.status = "failed";
+        run.bob.error = result.error || `IBM Bob ${phase} phase did not complete.`;
+        updateBobTimeline(run, "failed", run.bob.error);
+        writeArtifact(artifactDirectory, "final-report.json", run);
+        return;
+      }
+    }
+
+    run.bob.status = "completed";
+    run.bob.completed_at = new Date().toISOString();
+    delete run.bob.current_phase;
+    updateBobTimeline(run, "completed");
+    writeArtifact(artifactDirectory, "final-report.json", run);
+  } catch (error) {
+    run.bob ||= {
+      status: "failed",
+      started_at: new Date().toISOString(),
+      runtime: bobRuntimeMetadata(),
+      phases: [],
+    };
+    run.bob.status = "failed";
+    run.bob.error = error.message;
+    updateBobTimeline(run, "failed", error.message);
+    if (artifactDirectory) writeArtifact(artifactDirectory, "final-report.json", run);
+  }
+}
+
+function persistFinalRun(run) {
+  if (run.artifact_directory) {
+    writeArtifact(path.join(PROJECT_ROOT, run.artifact_directory), "final-report.json", run);
+  }
 }
 
 async function decideRun(run, decision) {
@@ -197,6 +299,7 @@ async function decideRun(run, decision) {
       "The simulated drift remains available for further review.",
       "El drift simulado permanece disponible para una revision posterior."
     );
+    persistFinalRun(run);
     return run;
   }
 
@@ -217,6 +320,7 @@ async function decideRun(run, decision) {
       ? "El estado observado coincide con Terraform despues del reset local aprobado."
       : "El drift permanece despues de la remediacion simulada."
   );
+  persistFinalRun(run);
   return run;
 }
 
@@ -233,6 +337,11 @@ async function handleApi(request, response, pathname) {
     return true;
   }
 
+  if (request.method === "GET" && pathname === "/api/bob/runtime") {
+    sendJson(response, 200, bobRuntimeMetadata());
+    return true;
+  }
+
   const runMatch = pathname.match(/^\/api\/runs\/([0-9a-f-]+)$/i);
   if (request.method === "GET" && runMatch) {
     const run = runs.get(runMatch[1]);
@@ -241,6 +350,32 @@ async function handleApi(request, response, pathname) {
       return true;
     }
     sendJson(response, 200, run);
+    return true;
+  }
+
+  const bobRunMatch = pathname.match(/^\/api\/runs\/([0-9a-f-]+)\/bob$/i);
+  if (request.method === "POST" && bobRunMatch) {
+    const run = runs.get(bobRunMatch[1]);
+    if (!run) {
+      sendJson(response, 404, { error: "Run not found." });
+      return true;
+    }
+    if (!["healthy", "awaiting_review"].includes(run.status)) {
+      sendJson(response, 409, { error: "IBM Bob analysis can only start before a remediation decision." });
+      return true;
+    }
+    if (run.bob?.status === "running") {
+      sendJson(response, 409, { error: "IBM Bob analysis is already running." });
+      return true;
+    }
+    if (run.bob?.status === "completed") {
+      sendJson(response, 409, { error: "IBM Bob analysis already exists for this run." });
+      return true;
+    }
+    runBobWorkflow(run).catch((error) => {
+      console.error(`[web-console] IBM Bob workflow failed: ${error.stack || error.message}`);
+    });
+    sendJson(response, 202, run);
     return true;
   }
 

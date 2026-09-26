@@ -123,7 +123,8 @@ La experiencia web tiene tres vistas con responsabilidades separadas:
 
 - `dashboard/index.html`: página principal bilingüe de 3ntropy.
 - `dashboard/console.html`: ejecución local automática de escenarios, comparación
-  MCP, recomendaciones, aprobación humana y descarga del reporte.
+  MCP, recomendaciones, análisis real con IBM Bob, aprobación humana y descarga
+  del reporte.
 - `dashboard/impact.html`: dashboard de métricas con la estética creada por el equipo.
 
 Para iniciar la web con la API local:
@@ -135,6 +136,30 @@ npm.cmd --prefix .\mcp-server run web
 Abre `http://127.0.0.1:4173`. Desde la página principal puedes entrar a la
 consola o al dashboard. La consola necesita este servidor local; el dashboard
 también permite cargar manualmente `logs/bobalytics-log.jsonl`.
+
+### IBM Bob local: Ask, Plan y Agent
+
+Después de ejecutar un escenario, usa **Run IBM Bob analysis** dentro de la
+consola. El backend ejecuta `bob.cmd run --format stream-json` localmente en
+tres fases: `ask`, `plan` y `agent`. Cada fase tiene un límite predeterminado
+de USD 0.20, tres turnos y 90 segundos. Bob debe estar instalado, autenticado y
+con el workspace confiable; este flujo no funciona en un hosting estático.
+
+La consola captura los eventos y crea, para cada ejecución, `context.json`,
+`detection.json`, `ask.json`, `plan.json`, `agent.json` y `final-report.json`
+en `demo-runs/<run-id>/`. Esa carpeta está excluida de Git para no publicar
+datos locales. Los prompts prohíben `terraform apply`, cambios de archivos y
+cambios de infraestructura; la aprobación final solo restablece el estado
+simulado local.
+
+Puedes ajustar los límites antes de iniciar la web:
+
+```powershell
+$env:DRIFT_BOB_MAX_COST = "0.20"
+$env:DRIFT_BOB_MAX_TURNS = "3"
+$env:DRIFT_BOB_TIMEOUT_MS = "90000"
+npm.cmd --prefix .\mcp-server run web
+```
 
 ## Estructura principal
 
@@ -148,6 +173,7 @@ scripts/start-demo.ps1                Preparación del demo en Windows
 mcp-server/scenario-engine.js         Catálogo y ejecución reproducible
 mcp-server/drift-engine.js            Comparación y puntuación de riesgo
 mcp-server/recommendation-engine.js   Problemas y acciones recomendadas EN/ES
+mcp-server/bob-runner.js              Adaptador IBM Bob stream-json y artefactos locales
 mcp-server/web-server.js              API local y servidor de la experiencia web
 dashboard/index.html                  Landing bilingüe de 3ntropy
 dashboard/console.html                Consola automática de respuesta

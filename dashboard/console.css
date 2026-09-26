@@ -281,6 +281,31 @@ button { color: inherit; }
 .review-panel { margin-top: 14px; display: flex; align-items: center; justify-content: space-between; gap: 30px; border-color: rgba(247,200,93,.22); }
 .review-panel p { max-width: 690px; margin: 9px 0 0; color: var(--muted); font-size: .78rem; }
 .review-actions { display: flex; flex-shrink: 0; gap: 10px; }
+.bob-panel { margin-top: 14px; padding: clamp(24px, 4vw, 40px); border-radius: 13px; border-color: rgba(139,92,246,.25); }
+.bob-heading, .bob-controls { display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+.bob-heading h2 { margin: 6px 0 0; font-family: var(--heading); font-size: clamp(1.35rem, 3vw, 2rem); }
+.bob-heading p { max-width: 730px; margin: 8px 0 0; color: var(--muted); font-size: .78rem; line-height: 1.6; }
+.bob-status { padding: 7px 10px; flex: 0 0 auto; color: #b89cff; border: 1px solid rgba(139,92,246,.35); border-radius: 5px; background: rgba(139,92,246,.07); font-family: var(--display); font-size: .52rem; letter-spacing: .1em; }
+.bob-status.running { color: var(--yellow); border-color: rgba(247,200,93,.35); }
+.bob-status.completed { color: var(--green); border-color: rgba(55,242,164,.35); }
+.bob-status.failed { color: var(--red); border-color: rgba(255,97,116,.38); }
+.bob-controls { margin-top: 22px; align-items: center; justify-content: flex-start; }
+.bob-button { min-height: 43px; padding: 0 18px; color: #eeeaff; border: 1px solid rgba(139,92,246,.65); border-radius: 6px; background: linear-gradient(110deg, rgba(139,92,246,.26), rgba(0,240,255,.13)); box-shadow: 0 0 20px rgba(139,92,246,.14); cursor: pointer; font-family: var(--heading); font-size: .76rem; font-weight: 600; transition: transform 160ms ease, opacity 160ms ease; }
+.bob-button:hover { transform: translateY(-2px); }
+.bob-button:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+.bob-limits { color: #71829e; font-family: var(--display); font-size: .5rem; letter-spacing: .08em; }
+.bob-phases { margin: 24px 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; list-style: none; }
+.bob-phase { min-height: 65px; padding: 12px; border: 1px solid rgba(255,255,255,.08); border-radius: 7px; background: rgba(0,0,0,.18); }
+.bob-phase strong, .bob-phase span { display: block; }
+.bob-phase strong { color: #d5c8ff; font-family: var(--display); font-size: .58rem; letter-spacing: .09em; text-transform: uppercase; }
+.bob-phase span { margin-top: 6px; color: #74859f; font-size: .66rem; }
+.bob-phase.running { border-color: rgba(247,200,93,.32); }
+.bob-phase.completed { border-color: rgba(55,242,164,.25); }
+.bob-phase.failed, .bob-phase.timed_out { border-color: rgba(255,97,116,.3); }
+.bob-output { min-height: 75px; max-height: 290px; margin-top: 10px; padding: 14px; overflow: auto; color: #b9c9dd; border: 1px solid rgba(139,92,246,.16); border-radius: 7px; background: rgba(0,0,0,.28); font-family: Consolas, monospace; font-size: .66rem; line-height: 1.65; }
+.bob-output-entry { display: grid; grid-template-columns: 70px 1fr; gap: 8px; padding: 3px 0; }
+.bob-output-entry span { color: #a98aff; text-transform: uppercase; }
+.bob-output-empty { color: #687995; font-family: var(--body); }
 .verification-panel { margin-top: 14px; display: flex; align-items: center; gap: 20px; border-color: rgba(55,242,164,.25); }
 .verification-panel.verification-rejected { border-color: rgba(247,200,93,.28); }
 .verification-panel.verification-rejected .verification-icon { color: var(--yellow); border-color: rgba(247,200,93,.4); box-shadow: 0 0 20px rgba(247,200,93,.12); }
@@ -308,13 +333,15 @@ button { color: inherit; }
   .local-badge { display: none; }
   .console-hero { min-height: 390px; padding-top: 55px; align-items: flex-start; flex-direction: column; justify-content: center; gap: 25px; }
   .safety-chip { width: 100%; }
-  .section-title-row, .run-heading, .review-panel { align-items: flex-start; flex-direction: column; }
+  .section-title-row, .run-heading, .review-panel, .bob-heading { align-items: flex-start; flex-direction: column; }
   .scenario-grid, .analysis-grid, .recommendation-list { grid-template-columns: 1fr; }
   .event-panel { grid-column: auto; }
   .scenario-card { min-height: 155px; }
   .diff-values { grid-template-columns: 1fr; }
   .review-actions { width: 100%; flex-direction: column-reverse; }
   .review-actions button { width: 100%; }
+  .bob-controls { align-items: flex-start; flex-direction: column; }
+  .bob-phases { grid-template-columns: 1fr; }
   .console-footer { flex-direction: column; }
 }
 

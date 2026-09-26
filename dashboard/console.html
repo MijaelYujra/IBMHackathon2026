@@ -122,9 +122,26 @@
           <div id="recommendations" class="recommendation-list"></div>
         </section>
 
+        <section id="bobPanel" class="bob-panel glass-panel">
+          <div class="bob-heading">
+            <div>
+              <span class="section-code">04 / IBM BOB</span>
+              <h2 data-console-i18n="bobTitle">IBM Bob analysis</h2>
+              <p data-console-i18n="bobLead">Run the real local Ask, Plan, and Agent workflow. Events and artifacts are captured for this run.</p>
+            </div>
+            <span id="bobStatus" class="bob-status" data-console-i18n="bobReady">READY</span>
+          </div>
+          <div class="bob-controls">
+            <button type="button" id="bobButton" class="bob-button" data-console-i18n="bobStart">Run IBM Bob analysis</button>
+            <span class="bob-limits" data-console-i18n="bobLimits">Max $0.20 and 3 turns per phase · local only</span>
+          </div>
+          <ol id="bobPhases" class="bob-phases"></ol>
+          <div id="bobOutput" class="bob-output" role="log" aria-live="polite"></div>
+        </section>
+
         <section id="reviewPanel" class="review-panel glass-panel hidden">
           <div>
-            <span class="section-code">04 / HUMAN GATE</span>
+            <span class="section-code">05 / HUMAN GATE</span>
             <h2 data-console-i18n="reviewTitle">Human review required</h2>
             <p data-console-i18n="reviewText">Review the problem and recommendations before approving the local simulated remediation.</p>
           </div>

@@ -105,9 +105,14 @@ DASHBOARD BOBALYTICS
      npm.cmd --prefix .\mcp-server run web
 
 3. Abrir http://127.0.0.1:4173 y entrar a Open Response Console.
-4. Seleccionar un escenario, ejecutar el analisis, revisar el problema y las
-   recomendaciones, y aprobar o rechazar la remediacion simulada.
-5. Para ver metricas, entrar a Open Impact Dashboard. Tambien se puede abrir
+4. Seleccionar un escenario y ejecutar el analisis.
+5. Revisar el problema y las recomendaciones. Para generar evidencia real de
+   IBM Bob, presionar Run IBM Bob analysis: ejecuta Ask, Plan y Agent localmente
+   con maximo USD 0.20 y 3 turnos por fase.
+6. Revisar la salida de Bob, aprobar o rechazar la remediacion simulada y
+   descargar el reporte JSON si se necesita evidencia.
+7. Los artefactos locales de Bob quedan en demo-runs\<run-id>\ y no se suben a Git.
+8. Para ver metricas, entrar a Open Impact Dashboard. Tambien se puede abrir
    dashboard\impact.html y cargar logs\bobalytics-log.jsonl manualmente.
 
 ALIASES DE LOS COMANDOS ANTERIORES

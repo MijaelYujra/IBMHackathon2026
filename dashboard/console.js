@@ -21,6 +21,23 @@ const translations = {
     recommendationsTitle: "Recommended actions",
     reviewTitle: "Human review required",
     reviewText: "Review the problem and recommendations before approving the local simulated remediation.",
+    bobTitle: "IBM Bob analysis",
+    bobLead: "Run the real local Ask, Plan, and Agent workflow. Events and artifacts are captured for this run.",
+    bobStart: "Run IBM Bob analysis",
+    bobRetry: "Retry IBM Bob analysis",
+    bobRunning: "IBM Bob is analyzing…",
+    bobReady: "READY",
+    bobCompleted: "COMPLETED",
+    bobFailed: "UNAVAILABLE",
+    bobLimits: "Max $0.20 and 3 turns per phase · local only",
+    bobNoOutput: "Waiting for IBM Bob output. If unavailable, confirm Bob Shell is authenticated and retry.",
+    phaseAsk: "Ask",
+    phasePlan: "Plan",
+    phaseAgent: "Agent",
+    phasePending: "Waiting",
+    phaseRunning: "Running",
+    phaseCompleted: "Captured",
+    phaseFailed: "Failed",
     reject: "Reject",
     approve: "Approve simulated remediation",
     deciding: "Saving decision…",
@@ -81,6 +98,23 @@ const translations = {
     recommendationsTitle: "Acciones recomendadas",
     reviewTitle: "Se requiere revision humana",
     reviewText: "Revisa el problema y las recomendaciones antes de aprobar la remediacion local simulada.",
+    bobTitle: "Analisis IBM Bob",
+    bobLead: "Ejecuta el flujo local real Ask, Plan y Agent. Los eventos y artefactos se guardan para esta corrida.",
+    bobStart: "Ejecutar analisis IBM Bob",
+    bobRetry: "Reintentar analisis IBM Bob",
+    bobRunning: "IBM Bob esta analizando…",
+    bobReady: "LISTO",
+    bobCompleted: "COMPLETADO",
+    bobFailed: "NO DISPONIBLE",
+    bobLimits: "Maximo $0.20 y 3 turnos por fase · solo local",
+    bobNoOutput: "Esperando salida de IBM Bob. Si no esta disponible, confirma que Bob Shell este autenticado y reintenta.",
+    phaseAsk: "Ask",
+    phasePlan: "Plan",
+    phaseAgent: "Agent",
+    phasePending: "En espera",
+    phaseRunning: "Ejecutando",
+    phaseCompleted: "Capturado",
+    phaseFailed: "Fallido",
     reject: "Rechazar",
     approve: "Aprobar remediacion simulada",
     deciding: "Guardando decision…",
@@ -140,6 +174,11 @@ const elements = {
   reviewPanel: document.getElementById("reviewPanel"),
   approveButton: document.getElementById("approveButton"),
   rejectButton: document.getElementById("rejectButton"),
+  bobPanel: document.getElementById("bobPanel"),
+  bobButton: document.getElementById("bobButton"),
+  bobStatus: document.getElementById("bobStatus"),
+  bobPhases: document.getElementById("bobPhases"),
+  bobOutput: document.getElementById("bobOutput"),
   verificationPanel: document.getElementById("verificationPanel"),
   verificationTitle: document.getElementById("verificationTitle"),
   verificationText: document.getElementById("verificationText"),
@@ -154,6 +193,7 @@ let scenarios = [];
 let selectedScenarioId = null;
 let currentRun = null;
 let isBusy = false;
+let bobPollTimer = null;
 
 function text() {
   return translations[currentLanguage] || translations.en;
@@ -221,6 +261,20 @@ function priorityLabel(priority) {
     monitor: text().priorityMonitor,
   };
   return labels[priority] || priority;
+}
+
+function bobPhaseLabel(phase) {
+  return text()[`phase${String(phase).charAt(0).toUpperCase()}${String(phase).slice(1)}`] || phase;
+}
+
+function bobPhaseStatusLabel(status) {
+  return {
+    pending: text().phasePending,
+    running: text().phaseRunning,
+    completed: text().phaseCompleted,
+    failed: text().phaseFailed,
+    timed_out: text().phaseFailed,
+  }[status] || status;
 }
 
 function createElement(tagName, className, value) {
@@ -291,6 +345,7 @@ function setBusy(value, labelKey = "runScenario") {
   elements.rejectButton.disabled = value;
   const runLabel = elements.runButton.querySelector("span");
   runLabel.textContent = text()[value ? "running" : labelKey];
+  if (currentRun) renderBob(currentRun);
 }
 
 function renderTimeline(timeline) {
@@ -391,6 +446,86 @@ function renderRecommendations(recommendations = []) {
   });
 }
 
+function renderBob(run) {
+  const bob = run.bob;
+  const status = bob?.status || "ready";
+  const phases = bob?.phases || [
+    { phase: "ask", status: "pending" },
+    { phase: "plan", status: "pending" },
+    { phase: "agent", status: "pending" },
+  ];
+  const statusText = {
+    ready: text().bobReady,
+    running: text().bobRunning,
+    completed: text().bobCompleted,
+    failed: text().bobFailed,
+  }[status] || status;
+
+  elements.bobStatus.textContent = statusText;
+  elements.bobStatus.className = `bob-status ${status}`;
+  const canRunBob = ["healthy", "awaiting_review"].includes(run.status);
+  elements.bobButton.disabled = !canRunBob || status === "running" || status === "completed" || isBusy;
+  elements.bobButton.textContent = status === "running"
+    ? text().bobRunning
+    : status === "failed"
+      ? text().bobRetry
+      : text().bobStart;
+
+  elements.bobPhases.replaceChildren();
+  phases.forEach((phase) => {
+    const item = createElement("li", `bob-phase ${phase.status || "pending"}`);
+    item.append(
+      createElement("strong", "", bobPhaseLabel(phase.phase)),
+      createElement("span", "", bobPhaseStatusLabel(phase.status || "pending"))
+    );
+    elements.bobPhases.append(item);
+  });
+
+  elements.bobOutput.replaceChildren();
+  const events = phases.flatMap((phase) =>
+    (phase.events || []).map((event) => ({ phase: phase.phase, event }))
+  );
+  if (bob?.error) {
+    events.push({ phase: "system", event: { text: bob.error } });
+  }
+  if (events.length === 0) {
+    elements.bobOutput.append(createElement("p", "bob-output-empty", text().bobNoOutput));
+  } else {
+    events.slice(-80).forEach(({ phase, event }) => {
+      const entry = createElement("div", "bob-output-entry");
+      entry.append(
+        createElement("span", "", phase),
+        createElement("div", "", event.text || event.type || "event")
+      );
+      elements.bobOutput.append(entry);
+    });
+    elements.bobOutput.scrollTop = elements.bobOutput.scrollHeight;
+  }
+}
+
+function stopBobPolling() {
+  if (bobPollTimer) clearInterval(bobPollTimer);
+  bobPollTimer = null;
+}
+
+function startBobPolling(runId) {
+  stopBobPolling();
+  bobPollTimer = setInterval(async () => {
+    try {
+      const run = await api(`/api/runs/${runId}`);
+      if (currentRun?.id !== runId) {
+        stopBobPolling();
+        return;
+      }
+      renderRun(run);
+      if (run.bob?.status !== "running") stopBobPolling();
+    } catch (error) {
+      stopBobPolling();
+      showError(error);
+    }
+  }, 900);
+}
+
 function renderVerification(run) {
   const visible = ["remediated", "rejected", "verification_failed"].includes(run.status);
   elements.verificationPanel.classList.toggle("hidden", !visible);
@@ -432,6 +567,7 @@ function renderRun(run) {
   renderEvents(run);
   renderFindings(report);
   renderRecommendations(report.recommendations || []);
+  renderBob(run);
   elements.reviewPanel.classList.toggle("hidden", run.status !== "awaiting_review");
   renderVerification(run);
 }
@@ -452,6 +588,7 @@ async function loadScenarios() {
 async function runScenario() {
   if (!selectedScenarioId || isBusy) return;
   clearError();
+  stopBobPolling();
   elements.resetNotice.classList.add("hidden");
   setBusy(true);
   elements.runWorkspace.classList.remove("hidden");
@@ -469,6 +606,23 @@ async function runScenario() {
     showError(error);
   } finally {
     setBusy(false);
+  }
+}
+
+async function startBobAnalysis() {
+  if (!currentRun || isBusy || currentRun.bob?.status === "running" || currentRun.bob?.status === "completed") return;
+  clearError();
+  elements.bobButton.disabled = true;
+  try {
+    const run = await api(`/api/runs/${currentRun.id}/bob`, {
+      method: "POST",
+      body: "{}",
+    });
+    renderRun(run);
+    startBobPolling(run.id);
+  } catch (error) {
+    showError(error);
+    renderBob(currentRun);
   }
 }
 
@@ -494,6 +648,7 @@ async function saveDecision(decision) {
 async function resetBaseline() {
   if (isBusy) return;
   clearError();
+  stopBobPolling();
   setBusy(true);
   try {
     await api("/api/reset", { method: "POST", body: "{}" });
@@ -526,6 +681,7 @@ elements.runButton.addEventListener("click", runScenario);
 elements.resetButton.addEventListener("click", resetBaseline);
 elements.approveButton.addEventListener("click", () => saveDecision("approve"));
 elements.rejectButton.addEventListener("click", () => saveDecision("reject"));
+elements.bobButton.addEventListener("click", startBobAnalysis);
 elements.downloadButton.addEventListener("click", downloadReport);
 
 setLanguage(currentLanguage);
