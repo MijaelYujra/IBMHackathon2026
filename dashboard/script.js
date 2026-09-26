@@ -20,7 +20,9 @@ const impactTranslations = {
         highRisk: "High-risk findings",
         timeSaved: "Estimated time saved",
         chartTitle: "Time saved per run (latest 10)",
+        chartSubtitle: "Distribution of time saved per inspection cycle",
         historyTitle: "Detection history",
+        historySubtitle: "Detailed chronological record of drift events",
         date: "Date",
         diffs: "Diffs",
         risk: "Risk",
@@ -50,7 +52,9 @@ const impactTranslations = {
         highRisk: "Hallazgos de alto riesgo",
         timeSaved: "Tiempo estimado ahorrado",
         chartTitle: "Tiempo ahorrado por corrida (últimas 10)",
+        chartSubtitle: "Distribución de tiempo rescatado por cada ciclo de inspección",
         historyTitle: "Historial de detecciones",
+        historySubtitle: "Registro cronológico detallado de eventos de drift",
         date: "Fecha",
         diffs: "Diffs",
         risk: "Riesgo",
@@ -139,10 +143,10 @@ function render(entries) {
         createMetricCard(text.cardTitleScans, totalDetections, text.detections, "scans"),
         createMetricCard(text.cardTitleDiffs, totalDiffs, text.differences, "discrepancy"),
         createMetricCard(text.cardTitleRisk, totalHighRisk, text.highRisk, "severity", "var(--high)"),
-        createMetricCard(text.cardTitleTime, `${totalHours}h`, text.timeSaved, "eficiency", "var(--accent)")
+        createMetricCard(text.cardTitleTime, `${totalHours}h`, text.timeSaved, "eficiency", "var(--low)")
     );
 
-    const chartPanel = createPanel(text.chartTitle);
+    const chartPanel = createPanel(text.chartTitle, text.chartSubtitle);
     entries.slice(-10).forEach((entry) => {
         const percentage = Math.max(4, Math.round(((entry.estimated_minutes_saved || 0) / maxMinutes) * 100));
         const date = new Date(entry.timestamp);
@@ -150,7 +154,7 @@ function render(entries) {
         chartPanel.append(createBar(label, percentage, `${entry.estimated_minutes_saved || 0} ${text.minutes}`));
     });
 
-    const historyPanel = createPanel(text.historyTitle);
+    const historyPanel = createPanel(text.historyTitle, text.historySubtitle);
     const table = document.createElement("table");
     const header = document.createElement("thead");
     const headerRow = document.createElement("tr");
@@ -195,6 +199,7 @@ function createMetricCard(title, value, label, extraClass, color) {
     const colorStyle = color ? `style="color: ${color};"` : "";
 
     card.innerHTML = `
+        <div class="card-bg-glow-${extraClass}"></div>
         <div class="card-header">
             <span class="card-title" ${colorStyle}>${title}</span>
             <span class="card-icon">I</span>
@@ -212,32 +217,33 @@ function createMetricCard(title, value, label, extraClass, color) {
     return card;
 }
 
-function createPanel(title) {
+function createPanel(title, subtitle) {
     const panel = document.createElement("div");
     panel.className = "panel";
-    const heading = document.createElement("h2");
-    heading.textContent = title;
-    panel.append(heading);
+    
+    panel.innerHTML = `
+        <h2>${title}</h2>
+        <p class="panel-subtitle">${subtitle}</p>
+        <br/>
+        <hr/>
+        <br/>
+    `;
+    
     return panel;
 }
 
 function createBar(label, percentage, value) {
     const row = document.createElement("div");
     row.className = "bar-row";
-    const labelElement = document.createElement("div");
-    labelElement.className = "bar-label";
-    labelElement.textContent = label;
-    const track = document.createElement("div");
-    track.className = "bar-track";
-    const fill = document.createElement("div");
-    fill.className = "bar-fill";
-    fill.style.width = `${percentage}%`;
-    fill.style.borderRadius = "999px";
-    track.append(fill);
-    const valueElement = document.createElement("div");
-    valueElement.className = "bar-value";
-    valueElement.textContent = value;
-    row.append(labelElement, track, valueElement);
+    
+    row.innerHTML = `
+        <div class="bar-label">${label}</div>
+        <div class="bar-track">
+            <div class="bar-fill" style="width: ${percentage}%; border-radius: 999px;"></div>
+        </div>
+        <div class="bar-value">${value}</div>
+    `;
+    
     return row;
 }
 
@@ -249,11 +255,12 @@ function createCell(value) {
 
 function createRiskCell(highRiskCount, text) {
     const cell = document.createElement("td");
-    const badge = document.createElement("span");
-    badge.className = `badge ${highRiskCount > 0 ? "alta" : "baja"}`;
-    badge.textContent = highRiskCount > 0
-        ? `${highRiskCount} ${text.highRiskBadge}`
-        : text.noHighRisk;
-    cell.append(badge);
+    
+    const isHigh = highRiskCount > 0;
+    const badgeClass = isHigh ? "alta" : "baja";
+    const badgeText = isHigh ? `${highRiskCount} ${text.highRiskBadge}` : text.noHighRisk;
+
+    cell.innerHTML = `<span class="badge ${badgeClass}">${badgeText}</span>`;
+    
     return cell;
 }

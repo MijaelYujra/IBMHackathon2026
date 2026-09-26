@@ -60,7 +60,8 @@ body {
     border-radius: 12px;
     padding: 18px 35px;
     border: 1px solid rgb(0, 150, 255);
-    box-shadow: inset 0 0 15px 5px rgba(0, 150, 255, 0.2);
+    position: relative;
+    overflow: hidden;
 }
 
 .card .value {
@@ -72,6 +73,7 @@ body {
     color: var(--text);
     font-size: 0.82rem;
     margin-top: 4px;
+    margin-bottom: 15px;
 }
 
 .panel {
@@ -82,13 +84,11 @@ body {
     padding: 35px;
     margin-bottom: 20px;
     border: 1px solid rgb(0, 150, 255);
-    box-shadow: inset 0 0 15px 5px rgba(0, 150, 255, 0.2);
 }
 
 .panel h2 {
     text-transform: uppercase;
-    margin: 0 0 14px;
-    font-size: 1.5rem;
+    font-size: 1.3rem;
 }
 
 input[type="file"] {
@@ -148,33 +148,39 @@ th {
     display: flex;
     align-items: center;
     gap: 10px;
-    margin-bottom: 8px;
+    margin-bottom: 15px;
 }
 
 .bar-label {
+    font-family: 'JetBrains Mono', monospace;
     width: 130px;
     font-size: 0.8rem;
-    color: var(--muted);
+    color: var(--text);
     flex-shrink: 0;
 }
 
 .bar-track {
     flex: 1;
-    background: #1c2130;
+    background: #0F1729;
+    border: 1px solid #141E2F;
     border-radius: 999px;
-    overflow: hidden;
     height: 18px;
+    display: flex;
+    align-items: center;
 }
 
 .bar-fill {
-    height: 100%;
-    background: var(--accent);
+    height: 80%;
+    margin: 0 2px;
+    background: linear-gradient(90deg, #1B50D7, #36BBF6);
+    box-shadow: 0 0 10px 5px rgba(0, 242, 254, 0.2);
 }
 
 .bar-value {
+    font-family: 'JetBrains Mono', monospace;
     width: 76px;
     flex-shrink: 0;
-    color: var(--muted);
+    color: var(--text);
     font-size: 0.8rem;
     text-align: right;
 }
@@ -301,6 +307,12 @@ b {
     margin-bottom: 20px;
 }
 
+.card-header,
+.card-data {
+    position: relative;
+    z-index: 2;
+}
+
 .card-header {
     font-family: 'Inter';
     text-transform: uppercase;
@@ -332,6 +344,117 @@ b {
     display: flex;
     flex-direction: column;
     justify-content: start;
+}
+
+.card-bg-glow-scans {
+    position: absolute;
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    top: -70px;
+    right: -70px;
+    z-index: 1;
+    pointer-events: none;
+    background: #0F1D38;
+}
+
+.card-bg-glow-discrepancy {
+    position: absolute;
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    top: -70px;
+    right: -70px;
+    z-index: 1;
+    pointer-events: none;
+    background: #0A2334;
+}
+
+.card-bg-glow-severity {
+    position: absolute;
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    top: -70px;
+    right: -70px;
+    z-index: 1;
+    pointer-events: none;
+    background: #201926;
+}
+
+.card-bg-glow-eficiency {
+    position: absolute;
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    top: -70px;
+    right: -70px;
+    z-index: 1;
+    pointer-events: none;
+    background: #0A242B;
+}
+
+.scans .card-header .card-icon{
+    background-color: #152648;
+    border: 2px solid #1a2e57;
+    color: #4a75cd;
+}
+
+.discrepancy .card-header .card-icon {
+    background-color: #0f2e43;
+    border: 2px solid #143952;
+    color: #4889b5;
+}
+
+.severity .card-header .card-icon {
+    background-color: #3a2121;
+    border: 2px solid #724747;
+    color: #ba5959;
+}
+
+.severity {
+    border: 1px solid #9f3737;
+}
+
+.eficiency .card-header .card-icon {
+    background-color: #0d350e;
+    border: 2px solid #145116;
+    color: #23a427;
+}
+
+.eficiency {
+    border: 1px solid #156d18;
+}
+
+hr {
+    border: 1px solid rgba(128, 128, 128, 0.332);
+}
+
+.panel-subtitle {
+    font-size: 13px;
+    color: var(--muted);
+}
+
+.left-upload {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+}
+
+.upload-logo {
+    height: 35px;
+    width: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #63cad3;
+    background-color: #1c3e42;
+    border-radius: 7px;
+}
+
+.left-header p {
+    margin: 10px 0;
 }
 
 /* Nuevos */
