@@ -1,5 +1,4 @@
-<img width="1903" height="952" alt="Captura de pantalla 2026-09-26 171337" src="https://github.com/user-attachments/assets/fa32ceee-1f05-47a0-8e7e-529959f85345" />
-# Drift Detector — IBM Bob 2.0 Hackathon
+## Drift Detector — IBM Bob 2.0 Hackathon
 
 Drift Detector conecta IBM Bob con infraestructura declarada como código mediante
 un servidor MCP. Detecta diferencias entre Terraform y el estado real, explica el
@@ -236,5 +235,4 @@ pasos.txt                             Guía operativa para el equipo
 
 ## Media
 
-![Captura de pantalla de Drift Detector](<img width="1903" height="952" alt="Captura de pantalla 2026-09-26 171337" src="https://github.com/user-attachments/assets/20e2f0cb-c683-430d-9db5-c0ebf39cb136" />
-)
+<img width="1903" height="952" alt="Captura de pantalla 2026-09-26 171337" src="https://github.com/user-attachments/assets/fa32ceee-1f05-47a0-8e7e-529959f85345" />
