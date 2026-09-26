@@ -85,13 +85,13 @@ powershell -ExecutionPolicy Bypass -File .\scripts\start-demo.ps1 high-ssh
 Todos los escenarios comienzan desde una línea base limpia generada desde
 Terraform, por lo que pueden repetirse sin acumular cambios:
 
-| Escenario | Riesgo | Score | Cambio simulado |
-|---|---|---:|---|
-| `healthy` | ninguno | 0 | Sin drift |
-| `low` | bajo | 20 | Etiqueta `Environment` modificada |
-| `medium` | medio | 55 | Instancia `t3.micro` cambiada a `t3.xlarge` |
-| `high-ssh` | alto | 95 | Puerto 22 abierto a `0.0.0.0/0` |
-| `high-bucket` | alto | 92 | Protección pública del bucket desactivada |
+| Escenario     | Riesgo  | Score | Cambio simulado                             |
+| ------------- | ------- | ----: | ------------------------------------------- |
+| `healthy`     | ninguno |     0 | Sin drift                                   |
+| `low`         | bajo    |    20 | Etiqueta `Environment` modificada           |
+| `medium`      | medio   |    55 | Instancia `t3.micro` cambiada a `t3.xlarge` |
+| `high-ssh`    | alto    |    95 | Puerto 22 abierto a `0.0.0.0/0`             |
+| `high-bucket` | alto    |    92 | Protección pública del bucket desactivada   |
 
 Los nombres anteriores `reset`, `resize`, `open-ssh` y `expose-bucket` siguen
 funcionando como alias. El modelo completo está documentado en
@@ -228,3 +228,11 @@ pasos.txt                             Guía operativa para el equipo
 - Alexandra Cristal Salazar Gisbert
 - Sheyla Micaela Condori Alcazar
 - Mijael Daniel Yujra Apaza
+
+## Proyecto desplegado
+
+`https://3ntropy-dritf-detector.vercel.app/`
+
+## Media
+
+![Captura de pantalla de Drift Detector](C:\Users\Mijael\Pictures\Screenshots\Captura de pantalla 2026-09-26 171337.png)
