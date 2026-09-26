@@ -6,7 +6,9 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "test": "node test-client.js",
+    "test": "node test-scenarios.js && node test-client.js",
+    "test:mcp": "node test-client.js",
+    "test:scenarios": "node test-scenarios.js",
     "generate:declared": "node terraform-declared-state.js"
   },
   "dependencies": {

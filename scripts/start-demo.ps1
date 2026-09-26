@@ -1,6 +1,6 @@
 param(
-  [ValidateSet("open-ssh", "resize", "expose-bucket")]
-  [string]$Scenario = "open-ssh"
+  [ValidateSet("healthy", "low", "medium", "high-ssh", "high-bucket", "open-ssh", "resize", "expose-bucket")]
+  [string]$Scenario = "high-ssh"
 )
 
 $ErrorActionPreference = "Stop"
@@ -10,7 +10,7 @@ Write-Host "Preparando demo con el escenario: $Scenario" -ForegroundColor Cyan
 node "$ProjectRoot\scripts\inject-drift.js" $Scenario
 
 Write-Host "Comprobando que el servidor MCP detecta el drift..." -ForegroundColor Cyan
-npm.cmd --prefix "$ProjectRoot\mcp-server" test
+npm.cmd --prefix "$ProjectRoot\mcp-server" run test:mcp
 
 Write-Host ""
 Write-Host "Demo lista. En Bob IDE usa este prompt:" -ForegroundColor Green

@@ -3,7 +3,10 @@
   "resources": {
     "aws_vpc.main": {
       "type": "aws_vpc",
-      "cidr_block": "10.0.0.0/16"
+      "cidr_block": "10.0.0.0/16",
+      "tags": {
+        "Name": "drift-demo-vpc"
+      }
     },
     "aws_security_group.app_sg": {
       "type": "aws_security_group",
@@ -16,17 +19,27 @@
           "protocol": "tcp",
           "cidr_blocks": ["0.0.0.0/0"]
         }
-      ]
+      ],
+      "tags": {
+        "Name": "drift-demo-app-sg"
+      }
     },
     "aws_s3_bucket.data": {
       "type": "aws_s3_bucket",
       "bucket": "drift-demo-data-bucket",
-      "public_access_blocked": true
+      "public_access_blocked": true,
+      "tags": {
+        "Environment": "hackathon-demo",
+        "Name": "drift-demo-data-bucket"
+      }
     },
     "aws_instance.app_server": {
       "type": "aws_instance",
       "instance_type": "t3.micro",
-      "security_groups": ["drift-demo-app-sg"]
+      "security_groups": ["drift-demo-app-sg"],
+      "tags": {
+        "Name": "drift-demo-app-server"
+      }
     }
   }
 }

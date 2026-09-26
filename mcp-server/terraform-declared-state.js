@@ -86,6 +86,7 @@ export function normalizePlan(plan) {
       normalized[resource.address] = {
         type: resource.type,
         cidr_block: values.cidr_block,
+        tags: values.tags || {},
       };
     }
 
@@ -94,6 +95,7 @@ export function normalizePlan(plan) {
         type: resource.type,
         name: values.name,
         ingress_rules: normalizeIngressRules(values.ingress),
+        tags: values.tags || {},
       };
     }
 
@@ -101,6 +103,7 @@ export function normalizePlan(plan) {
       normalized[resource.address] = {
         type: resource.type,
         bucket: values.bucket,
+        tags: values.tags || {},
       };
     }
 
@@ -121,6 +124,7 @@ export function normalizePlan(plan) {
         security_groups: securityGroupName
           ? [securityGroupName]
           : values.security_groups || [],
+        tags: values.tags || {},
       };
     }
   }

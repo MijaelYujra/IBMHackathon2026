@@ -2,10 +2,10 @@
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { z } from "zod";
 import { readFileSync, appendFileSync, existsSync, mkdirSync } from "fs";
 import { fileURLToPath } from "url";
 import path from "path";
+import { diffResources, summarizeRisk } from "./drift-engine.js";
 import { loadDeclaredState } from "./terraform-declared-state.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -23,95 +23,17 @@ function loadState(filePath) {
   return JSON.parse(readFileSync(filePath, "utf-8"));
 }
 
-function diffResources(declared, actual) {
-  const diffs = [];
-  const declaredResources = declared.resources || {};
-  const actualResources = actual.resources || {};
-
-  const allKeys = new Set([
-    ...Object.keys(declaredResources),
-    ...Object.keys(actualResources),
-  ]);
-
-  for (const key of allKeys) {
-    const d = declaredResources[key];
-    const a = actualResources[key];
-
-    if (!d) {
-      diffs.push({
-        resource: key,
-        field: "(recurso completo)",
-        declared: null,
-        actual: a,
-        severity: "media",
-        explanation: "Existe en el estado real pero no esta declarado en el codigo.",
-      });
-      continue;
-    }
-    if (!a) {
-      diffs.push({
-        resource: key,
-        field: "(recurso completo)",
-        declared: d,
-        actual: null,
-        severity: "alta",
-        explanation: "Esta declarado en el codigo pero no existe en el estado real (puede haber sido borrado manualmente).",
-      });
-      continue;
-    }
-
-    diffFields(key, d, a, diffs);
-  }
-
-  return diffs;
-}
-
-function diffFields(resourceKey, declaredObj, actualObj, diffs, prefix = "") {
-  const keys = new Set([...Object.keys(declaredObj), ...Object.keys(actualObj)]);
-
-  for (const field of keys) {
-    const dVal = declaredObj[field];
-    const aVal = actualObj[field];
-    const fieldPath = prefix ? `${prefix}.${field}` : field;
-
-    const dStr = JSON.stringify(dVal);
-    const aStr = JSON.stringify(aVal);
-
-    if (dStr === aStr) continue;
-
-    diffs.push({
-      resource: resourceKey,
-      field: fieldPath,
-      declared: dVal,
-      actual: aVal,
-      severity: classifySeverity(resourceKey, fieldPath),
-      explanation: buildExplanation(resourceKey, fieldPath, dVal, aVal),
-    });
-  }
-}
-
-function classifySeverity(resourceKey, fieldPath) {
-  const lower = `${resourceKey}.${fieldPath}`.toLowerCase();
-  if (lower.includes("ingress") || lower.includes("public_access") || lower.includes("security_group")) {
-    return "alta";
-  }
-  if (lower.includes("instance_type") || lower.includes("size")) {
-    return "media";
-  }
-  return "baja";
-}
-
-function buildExplanation(resourceKey, fieldPath, dVal, aVal) {
-  return `En "${resourceKey}", el campo "${fieldPath}" deberia ser ${JSON.stringify(dVal)} segun el codigo, pero el estado real tiene ${JSON.stringify(aVal)}.`;
-}
-
-function logDetection(diffs) {
-  const highRisk = diffs.filter((d) => d.severity === "alta").length;
+function logDetection(differences, risk) {
   const entry = {
     timestamp: new Date().toISOString(),
-    total_diffs: diffs.length,
-    high_risk_diffs: highRisk,
-    estimated_minutes_saved: diffs.length * 25 + highRisk * 15,
+    total_diffs: differences.length,
+    high_risk_diffs: risk.counts.high,
+    medium_risk_diffs: risk.counts.medium,
+    low_risk_diffs: risk.counts.low,
+    risk_score: risk.risk_score,
+    risk_level: risk.risk_level,
+    estimated_minutes_saved:
+      differences.length * 25 + risk.counts.high * 15,
   };
   appendFileSync(LOG_PATH, JSON.stringify(entry) + "\n");
   return entry;
@@ -154,25 +76,39 @@ server.tool(
     const declared = loadDeclaredState();
     const actual = loadState(ACTUAL_PATH);
     const diffs = diffResources(declared, actual);
+    const risk = summarizeRisk(diffs);
 
     if (diffs.length === 0) {
+      const summary = {
+        status: "healthy",
+        drift_detectado: false,
+        estado_declarado_fuente: declared.source || "snapshot_json",
+        scenario_id: actual.scenario_id || "healthy",
+        cantidad_de_diferencias: 0,
+        risk_score: 0,
+        risk_level: "none",
+        detalle: [],
+        message:
+          "No se detecto drift. El estado real coincide exactamente con lo declarado en el codigo.",
+      };
       return {
-        content: [
-          {
-            type: "text",
-            text: "No se detecto drift. El estado real coincide exactamente con lo declarado en el codigo.",
-          },
-        ],
+        content: [{ type: "text", text: JSON.stringify(summary, null, 2) }],
       };
     }
 
-    const logEntry = logDetection(diffs);
+    const logEntry = logDetection(diffs, risk);
 
     const summary = {
+      status: "drift_detected",
       drift_detectado: true,
       estado_declarado_fuente: declared.source || "snapshot_json",
+      scenario_id: actual.scenario_id || "custom",
       cantidad_de_diferencias: diffs.length,
-      diferencias_alto_riesgo: diffs.filter((d) => d.severity === "alta").length,
+      risk_score: risk.risk_score,
+      risk_level: risk.risk_level,
+      diferencias_alto_riesgo: risk.counts.high,
+      diferencias_riesgo_medio: risk.counts.medium,
+      diferencias_riesgo_bajo: risk.counts.low,
       detalle: diffs,
       registro_bobalytics: logEntry,
     };

@@ -79,10 +79,23 @@ La configuración está en `.bob/mcp.json`.
 Prepara el escenario principal:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\start-demo.ps1 open-ssh
+powershell -ExecutionPolicy Bypass -File .\scripts\start-demo.ps1 high-ssh
 ```
 
-También están disponibles `resize` y `expose-bucket`.
+Todos los escenarios comienzan desde una línea base limpia generada desde
+Terraform, por lo que pueden repetirse sin acumular cambios:
+
+| Escenario | Riesgo | Score | Cambio simulado |
+|---|---|---:|---|
+| `healthy` | ninguno | 0 | Sin drift |
+| `low` | bajo | 20 | Etiqueta `Environment` modificada |
+| `medium` | medio | 55 | Instancia `t3.micro` cambiada a `t3.xlarge` |
+| `high-ssh` | alto | 95 | Puerto 22 abierto a `0.0.0.0/0` |
+| `high-bucket` | alto | 92 | Protección pública del bucket desactivada |
+
+Los nombres anteriores `reset`, `resize`, `open-ssh` y `expose-bucket` siguen
+funcionando como alias. El modelo completo está documentado en
+[`docs/risk-model.md`](docs/risk-model.md).
 
 En Bob, modo Ask:
 
@@ -94,7 +107,7 @@ En modo Plan:
 
 En modo Agent:
 
-> Prepara la corrección y déjala lista para revisión humana. No ejecutes `terraform apply`.
+> Prepara una propuesta para devolver el estado observado a lo declarado en Terraform. No modifiques `infra/main.tf`, no ejecutes `terraform apply` y déjala lista para revisión humana.
 
 Al terminar, restablece el estado simulado:
 
@@ -120,6 +133,8 @@ mcp-server/terraform-declared-state.js Generador y normalizador Terraform
 mcp-server/state/actual-state.json    Estado real simulado
 scripts/inject-drift.js               Inyección y reset de escenarios
 scripts/start-demo.ps1                Preparación del demo en Windows
+mcp-server/scenario-engine.js         Catálogo y ejecución reproducible
+mcp-server/drift-engine.js            Comparación y puntuación de riesgo
 dashboard/index.html                  Landing bilingüe de 3ntropy
 dashboard/impact.html                 Dashboard de impacto
 pasos.txt                             Guía operativa para el equipo

@@ -1,16 +1,24 @@
 {
   "generated_note": "Estado actual simulado. Restablecido desde el estado declarado generado por Terraform.",
+  "scenario_id": "healthy",
   "resources": {
     "aws_instance.app_server": {
       "type": "aws_instance",
       "instance_type": "t3.micro",
       "security_groups": [
         "drift-demo-app-sg"
-      ]
+      ],
+      "tags": {
+        "Name": "drift-demo-app-server"
+      }
     },
     "aws_s3_bucket.data": {
       "type": "aws_s3_bucket",
       "bucket": "drift-demo-data-bucket",
+      "tags": {
+        "Environment": "hackathon-demo",
+        "Name": "drift-demo-data-bucket"
+      },
       "public_access_blocked": true
     },
     "aws_security_group.app_sg": {
@@ -26,11 +34,17 @@
             "0.0.0.0/0"
           ]
         }
-      ]
+      ],
+      "tags": {
+        "Name": "drift-demo-app-sg"
+      }
     },
     "aws_vpc.main": {
       "type": "aws_vpc",
-      "cidr_block": "10.0.0.0/16"
+      "cidr_block": "10.0.0.0/16",
+      "tags": {
+        "Name": "drift-demo-vpc"
+      }
     }
   }
 }

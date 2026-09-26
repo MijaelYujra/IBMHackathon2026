@@ -55,7 +55,7 @@ PREPARAR EL DEMO: DRIFT DE SEGURIDAD
 ------------------------------------
 Desde la raiz del proyecto ejecutar:
 
-  powershell -ExecutionPolicy Bypass -File .\scripts\start-demo.ps1 open-ssh
+  powershell -ExecutionPolicy Bypass -File .\scripts\start-demo.ps1 high-ssh
 
 Esto abre SSH (puerto 22) solo en el estado simulado, ejecuta una prueba y deja
 todo listo para Bob. La politica Bypass se aplica solo a este comando y no
@@ -69,6 +69,18 @@ En el chat de Bob IDE, usar primero este prompt:
 Cuando Bob solicite permiso para usar la herramienta MCP, aprobar solamente
 esa llamada. Debe reportar el puerto SSH publico como hallazgo de severidad alta.
 
+OTROS ESCENARIOS REPRODUCIBLES
+------------------------------
+Cada escenario parte de una linea base limpia generada desde Terraform:
+
+  node .\scripts\inject-drift.js healthy      # score 0, sin drift
+  node .\scripts\inject-drift.js low          # score 20, etiqueta modificada
+  node .\scripts\inject-drift.js medium       # score 55, instancia redimensionada
+  node .\scripts\inject-drift.js high-ssh     # score 95, SSH publico
+  node .\scripts\inject-drift.js high-bucket  # score 92, bucket publico
+
+Los alias reset, resize, open-ssh y expose-bucket siguen funcionando.
+
 PLAN DE CORRECCION
 ------------------
 Cambiar Bob a modo Plan y escribir:
@@ -79,21 +91,25 @@ IMPLEMENTACION PARA MOSTRAR REVISION HUMANA
 -------------------------------------------
 Cambiar Bob a modo Agent. Habilitar el permiso Edit solo para este paso y usar:
 
-  Implementa la correccion en infra/main.tf y dejalo listo para revision humana.
-  No ejecutes terraform apply ni hagas cambios en infraestructura real.
+  Prepara una propuesta para devolver el estado observado a lo declarado en
+  Terraform y dejala lista para revision humana. No modifiques infra/main.tf,
+  no ejecutes terraform apply ni hagas cambios en infraestructura real.
 
 Revisar el diff propuesto antes de aprobarlo. No activar aprobaciones automaticas.
 
 DASHBOARD BOBALYTICS
 --------------------
-1. Abrir dashboard\index.html en un navegador.
-2. Seleccionar el archivo logs\bobalytics-log.jsonl.
-3. Mostrar cantidad de detecciones, riesgo alto y tiempo estimado ahorrado.
+1. Abrir dashboard\index.html para ver la introduccion de 3ntropy.
+2. Entrar a Open Impact Dashboard o abrir dashboard\impact.html.
+3. Seleccionar el archivo logs\bobalytics-log.jsonl.
+4. Mostrar cantidad de detecciones, riesgo alto y tiempo estimado ahorrado.
 
-OTROS ESCENARIOS DE DEMO
-------------------------
-  powershell -ExecutionPolicy Bypass -File .\scripts\start-demo.ps1 resize
-  powershell -ExecutionPolicy Bypass -File .\scripts\start-demo.ps1 expose-bucket
+ALIASES DE LOS COMANDOS ANTERIORES
+----------------------------------
+  resize equivale a medium
+  open-ssh equivale a high-ssh
+  expose-bucket equivale a high-bucket
+  reset equivale a healthy
 
 RESETEAR EL PROYECTO DESPUES DEL DEMO
 -------------------------------------
