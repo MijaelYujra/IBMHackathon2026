@@ -1,0 +1,2870 @@
+{
+  "schema_version": 1,
+  "id": "high-ssh",
+  "source": "recorded_local_bob_run",
+  "label": "Recorded IBM Bob Run",
+  "recorded_at": "2026-09-26T23:47:51.640Z",
+  "scenario": {
+    "status": "ready",
+    "scenario_id": "high-ssh",
+    "expected_severity": "high",
+    "expected_risk_score": 95,
+    "title": {
+      "en": "Public SSH exposure",
+      "es": "SSH expuesto a internet"
+    },
+    "description": {
+      "en": "Port 22 was opened to 0.0.0.0/0 outside Terraform.",
+      "es": "El puerto 22 fue abierto a 0.0.0.0/0 fuera de Terraform."
+    },
+    "changed_resource": "aws_security_group.app_sg",
+    "changed_field": "ingress_rules",
+    "declared_state_source": "terraform_plan",
+    "cloud_changes_applied": false
+  },
+  "report": {
+    "status": "drift_detected",
+    "drift_detectado": true,
+    "estado_declarado_fuente": "terraform_plan",
+    "scenario_id": "high-ssh",
+    "cantidad_de_diferencias": 1,
+    "risk_score": 95,
+    "risk_level": "high",
+    "diferencias_alto_riesgo": 1,
+    "diferencias_riesgo_medio": 0,
+    "diferencias_riesgo_bajo": 0,
+    "detalle": [
+      {
+        "resource": "aws_security_group.app_sg",
+        "field": "ingress_rules",
+        "declared": [
+          {
+            "description": "HTTPS",
+            "from_port": 443,
+            "to_port": 443,
+            "protocol": "tcp",
+            "cidr_blocks": [
+              "0.0.0.0/0"
+            ]
+          }
+        ],
+        "actual": [
+          {
+            "description": "HTTPS",
+            "from_port": 443,
+            "to_port": 443,
+            "protocol": "tcp",
+            "cidr_blocks": [
+              "0.0.0.0/0"
+            ]
+          },
+          {
+            "description": "SSH (manual change outside Terraform)",
+            "from_port": 22,
+            "to_port": 22,
+            "protocol": "tcp",
+            "cidr_blocks": [
+              "0.0.0.0/0"
+            ]
+          }
+        ],
+        "severity": "alta",
+        "severity_level": "high",
+        "risk_score": 95,
+        "risk_code": "public_ssh",
+        "risk_reason": "SSH esta expuesto a internet, lo que aumenta el riesgo de acceso no autorizado.",
+        "explanation": "En \"aws_security_group.app_sg\", el campo \"ingress_rules\" deberia ser [{\"description\":\"HTTPS\",\"from_port\":443,\"to_port\":443,\"protocol\":\"tcp\",\"cidr_blocks\":[\"0.0.0.0/0\"]}] segun el codigo, pero el estado real tiene [{\"description\":\"HTTPS\",\"from_port\":443,\"to_port\":443,\"protocol\":\"tcp\",\"cidr_blocks\":[\"0.0.0.0/0\"]},{\"description\":\"SSH (manual change outside Terraform)\",\"from_port\":22,\"to_port\":22,\"protocol\":\"tcp\",\"cidr_blocks\":[\"0.0.0.0/0\"]}].",
+        "problem": {
+          "en": "SSH is open to the entire internet, increasing the chance of unauthorized access and automated attacks.",
+          "es": "SSH esta abierto a todo internet, aumentando el riesgo de accesos no autorizados y ataques automatizados."
+        }
+      }
+    ],
+    "recommendations": [
+      {
+        "id": "remove-public-ssh",
+        "priority": "immediate",
+        "title": {
+          "en": "Remove the public SSH rule",
+          "es": "Eliminar la regla SSH publica"
+        },
+        "action": {
+          "en": "Restore the security group to the Terraform declared rules and verify that port 22 is no longer reachable from 0.0.0.0/0.",
+          "es": "Restaurar el security group a las reglas declaradas en Terraform y verificar que el puerto 22 ya no sea accesible desde 0.0.0.0/0."
+        }
+      },
+      {
+        "id": "use-private-access",
+        "priority": "next",
+        "title": {
+          "en": "Use controlled administration access",
+          "es": "Usar acceso administrativo controlado"
+        },
+        "action": {
+          "en": "Prefer AWS Systems Manager Session Manager, a VPN, or a restricted bastion instead of public SSH.",
+          "es": "Preferir AWS Systems Manager Session Manager, una VPN o un bastion restringido en lugar de SSH publico."
+        }
+      },
+      {
+        "id": "review-access-evidence",
+        "priority": "next",
+        "title": {
+          "en": "Review access evidence",
+          "es": "Revisar evidencia de acceso"
+        },
+        "action": {
+          "en": "Inspect security logs, recent sessions, and authorized keys for activity during the exposure window.",
+          "es": "Revisar logs de seguridad, sesiones recientes y llaves autorizadas durante el periodo de exposicion."
+        }
+      }
+    ],
+    "human_review_required": true,
+    "registro_bobalytics": {
+      "timestamp": "2026-09-26T23:46:40.619Z",
+      "total_diffs": 1,
+      "high_risk_diffs": 1,
+      "medium_risk_diffs": 0,
+      "low_risk_diffs": 0,
+      "risk_score": 95,
+      "risk_level": "high",
+      "estimated_minutes_saved": 40
+    }
+  },
+  "bob": {
+    "status": "completed",
+    "runtime": {
+      "command": "agy.exe",
+      "max_cost_per_phase": 0.2,
+      "max_turns_per_phase": 3,
+      "timeout_seconds": 90,
+      "mode": "live_local_only"
+    },
+    "phases": [
+      {
+        "phase": "ask",
+        "status": "completed",
+        "summary": "### English\n\n#### 1. Incident Confirmation & Operational Assumptions\n* **Scenario ID:** `high-ssh`\n* **Tool Confirmation:** MCP tool `diff_infra` (`drift-detector`) was invoked for scenario `high-ssh` and confirmed against the declared state source (`terraform_plan`).\n* **Operational Assumptions:** This review is conducted under strict simulation mode. No Terraform applies, cloud CLI commands, or destructive remediation actions were executed against the infrastructure.\n\n---\n\n#### 2. Detected Drift Summary\n* **Resource:** `aws_security_group.app_sg`\n* **Affected Field:** `ingress_rules`\n* **Declared State (IaC):**\n  * `HTTPS`: Port `443` (TCP) allowed from `0.0.0.0/0`.\n* **Actual Runtime State:**\n  * `HTTPS`: Port `443` (TCP) allowed from `0.0.0.0/0`.\n  * **Drift Identified:** `SSH`: Port `22` (TCP) exposed to `0.0.0.0/0` via manual out-of-band modification outside Terraform.\n\n---\n\n#### 3. Business & Security Impact\n* **Attack Surface Expansion:** Publicly exposing port 22 directly to the open internet (`0.0.0.0/0`) exposes host infrastructure to persistent automated scanning, credential brute-forcing, and exploit attempts targeting SSH daemons.\n* **Blast Radius:** If breached, attackers gain host-level access, enabling lateral movement within VPC subnets, privilege escalation, and potential data exfiltration or operational disruption.\n* **Compliance Violation:** Violates least privilege, SOC 2, and CIS AWS Foundations benchmarks regarding public ingress to administrative ports.\n\n---\n\n#### 4. Risk Priority & Severity\n* **Risk Level:** **High / Critical**\n* **Risk Score:** `95 / 100` (`risk_code: public_ssh`)\n* **Priority:** **P1 - Immediate Intervention**\n\n---\n\n#### 5. Recommended Next Actions\n1. **Immediate Remediation (P1):**\n   * Remove the unauthorized `0.0.0.0/0 -> TCP:22` ingress rule from `aws_security_group.app_sg` to reconcile runtime state with the declared Terraform plan. Verify port 22 is non-routable from the public internet.\n2. **Access Architecture Transition (P2):**\n   * Discontinue direct inbound SSH access. Transition instance management to **AWS Systems Manager (SSM) Session Manager**, a private VPN, or a hardened bastion host with strict IP allowlisting.\n3. **Forensic Audit & Log Review (P2):**\n   * Inspect VPC Flow Logs, CloudTrail event logs (identifying who created the rule), `/var/log/secure` or `/var/log/auth.log`, active user sessions, and `~/.ssh/authorized_keys` for suspicious activity during the exposure window.\n\n---\n---\n\n### Español\n\n#### 1. Confirmación del Incidente y Supuestos Operativos\n* **ID de Escenario:** `high-ssh`\n* **Confirmación por Herramienta:** Se invocó la herramienta MCP `diff_infra` (`drift-detector`) para el escenario `high-ssh` y se validó contra la fuente de estado declarada (`terraform_plan`).\n* **Supuestos Operativos:** Evaluación realizada bajo simulación local. No se ejecutaron comandos `terraform apply`, CLI de nube ni acciones destructivas sobre la infraestructura.\n\n---\n\n#### 2. Resumen de la Desviación (Drift)\n* **Recurso:** `aws_security_group.app_sg`\n* **Campo Afectado:** `ingress_rules`\n* **Estado Declarado (IaC):**\n  * `HTTPS`: Puerto `443` (TCP) permitido desde `0.0.0.0/0`.\n* **Estado Real en Ejecución:**\n  * `HTTPS`: Puerto `443` (TCP) permitido desde `0.0.0.0/0`.\n  * **Drift Detectado:** `SSH`: Puerto `22` (TCP) expuesto a `0.0.0.0/0` mediante un cambio manual realizado fuera del flujo de Terraform.\n\n---\n\n#### 3. Impacto de Negocio y Seguridad\n* **Ampliación de Superficie de Ataque:** La exposición del puerto administrativo 22 a todo internet (`0.0.0.0/0`) expone la instancia a escaneos automatizados, ataques de fuerza bruta y explotación de vulnerabilidades en el daemon SSH.\n* **Radio de Impacto:** Un compromiso de este servicio otorga acceso a nivel de sistema operativo, permitiendo escalación de privilegios, desplazamiento lateral en la VPC y riesgo de fuga de datos.\n* **Incumplimiento Normativo:** Infringe políticas de mínimo privilegio y estándares como CIS AWS Foundations y SOC 2.\n\n---\n\n#### 4. Prioridad y Nivel de Riesgo\n* **Nivel de Riesgo:** **Alto / Crítico**\n* **Puntuación de Riesgo:** `95 / 100` (`risk_code: public_ssh`)\n* **Prioridad:** **P1 - Atención Inmediata**\n\n---\n\n#### 5. Próximas Acciones Recomendadas\n1. **Remediación Inmediata (P1):**\n   * Eliminar la regla de ingreso no autorizada `0.0.0.0/0 -> TCP:22` de `aws_security_group.app_sg` para restablecer el estado al código declarado en Terraform. Validar que el puerto 22 no sea accesible públicamente.\n2. **Control de Acceso Administrativo (P2):**\n   * Reemplazar SSH público por métodos administrados como **AWS Systems Manager (SSM) Session Manager**, una VPN privada o un host bastion con lista blanca estricta de IPs.\n3. **Auditoría e Investigación Forense (P2):**\n   * Analizar VPC Flow Logs, eventos de CloudTrail (para identificar al autor del cambio), logs de autenticación (`/var/log/secure` o `auth.log`), sesiones activas y `authorized_keys` durante la ventana de tiempo en que la regla estuvo activa.\n",
+        "events": [
+          {
+            "type": "init",
+            "text": "",
+            "at": "2026-09-26T23:46:47.787Z"
+          },
+          {
+            "type": "step_update",
+            "text": "",
+            "at": "2026-09-26T23:46:48.029Z"
+          },
+          {
+            "type": "step_update",
+            "text": "",
+            "at": "2026-09-26T23:46:53.863Z"
+          },
+          {
+            "type": "step_update",
+            "text": "",
+            "at": "2026-09-26T23:46:53.864Z"
+          },
+          {
+            "type": "step_update",
+            "text": "",
+            "at": "2026-09-26T23:46:53.966Z"
+          },
+          {
+            "type": "step_update",
+            "text": "",
+            "at": "2026-09-26T23:46:56.203Z"
+          },
+          {
+            "type": "step_update",
+            "text": "",
+            "at": "2026-09-26T23:46:56.203Z"
+          },
+          {
+            "type": "step_update",
+            "text": "",
+            "at": "2026-09-26T23:46:56.304Z"
+          },
+          {
+            "type": "step_update",
+            "text": "",
+            "at": "2026-09-26T23:46:59.893Z"
+          },
+          {
+            "type": "step_update",
+            "text": "",
+            "at": "2026-09-26T23:46:59.893Z"
+          },
+          {
+            "type": "step_update",
+            "text": "",
+            "at": "2026-09-26T23:46:59.969Z"
+          },
+          {
+            "type": "step_update",
+            "text": "### English\n",
+            "at": "2026-09-26T23:47:08.844Z"
+          },
+          {
+            "type": "step_update",
+            "text": "\n#### 1. Incident Confirmation & Operational Assumptions\n* **Scena",
+            "at": "2026-09-26T23:47:08.895Z"
+          },
+          {
+            "type": "step_update",
+            "text": "rio ID:** `h",
+            "at": "2026-09-26T23:47:08.920Z"
+          },
+          {
+            "type": "step_update",
+            "text": "igh-ssh`\n* **Tool Confir",
+            "at": "2026-09-26T23:47:08.946Z"
+          },
+          {
+            "type": "step_update",
+            "text": "mation:** MC",
+            "at": "2026-09-26T23:47:08.972Z"
+          },
+          {
+            "type": "step_update",
+            "text": "P tool `diff_infra` (`drift-detector`) was invok",
+            "at": "2026-09-26T23:47:08.997Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ed for scenario `high-ssh` and confi",
+            "at": "2026-09-26T23:47:09.022Z"
+          },
+          {
+            "type": "step_update",
+            "text": "rmed against the declare",
+            "at": "2026-09-26T23:47:09.048Z"
+          },
+          {
+            "type": "step_update",
+            "text": "d state source (`terraform_plan`).\n* **Operation",
+            "at": "2026-09-26T23:47:09.073Z"
+          },
+          {
+            "type": "step_update",
+            "text": "al Assumptio",
+            "at": "2026-09-26T23:47:09.099Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ns:** This review is con",
+            "at": "2026-09-26T23:47:09.124Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ducted under strict simulation mode.",
+            "at": "2026-09-26T23:47:09.150Z"
+          },
+          {
+            "type": "step_update",
+            "text": " No Terraform applies, c",
+            "at": "2026-09-26T23:47:09.174Z"
+          },
+          {
+            "type": "step_update",
+            "text": "loud CLI commands, or destructive remediation ac",
+            "at": "2026-09-26T23:47:09.199Z"
+          },
+          {
+            "type": "step_update",
+            "text": "tions were e",
+            "at": "2026-09-26T23:47:09.225Z"
+          },
+          {
+            "type": "step_update",
+            "text": "xecuted against the infrastructure.\n\n---\n\n#### 2",
+            "at": "2026-09-26T23:47:09.251Z"
+          },
+          {
+            "type": "step_update",
+            "text": ". Detected D",
+            "at": "2026-09-26T23:47:09.276Z"
+          },
+          {
+            "type": "step_update",
+            "text": "rift Summary\n* **Resourc",
+            "at": "2026-09-26T23:47:09.302Z"
+          },
+          {
+            "type": "step_update",
+            "text": "e:** `aws_security_group",
+            "at": "2026-09-26T23:47:09.327Z"
+          },
+          {
+            "type": "step_update",
+            "text": ".app_sg`\n* **Affected Field:** `ingr",
+            "at": "2026-09-26T23:47:09.353Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ess_rules`\n* **Declared State (IaC):",
+            "at": "2026-09-26T23:47:09.378Z"
+          },
+          {
+            "type": "step_update",
+            "text": "**\n  * `HTTPS`: Port `44",
+            "at": "2026-09-26T23:47:09.403Z"
+          },
+          {
+            "type": "step_update",
+            "text": "3` (TCP) allowed from `0",
+            "at": "2026-09-26T23:47:09.428Z"
+          },
+          {
+            "type": "step_update",
+            "text": ".0.0.0/0`.\n*",
+            "at": "2026-09-26T23:47:09.454Z"
+          },
+          {
+            "type": "step_update",
+            "text": " **Actual Runtime State:**\n  * `HTTPS`: Port `44",
+            "at": "2026-09-26T23:47:09.479Z"
+          },
+          {
+            "type": "step_update",
+            "text": "3` (TCP) allowed from `0",
+            "at": "2026-09-26T23:47:09.504Z"
+          },
+          {
+            "type": "step_update",
+            "text": ".0.0.0/0`.\n ",
+            "at": "2026-09-26T23:47:09.529Z"
+          },
+          {
+            "type": "step_update",
+            "text": " * **Drift Identified:**",
+            "at": "2026-09-26T23:47:09.555Z"
+          },
+          {
+            "type": "step_update",
+            "text": " `SSH`: Port `22` (TCP) ",
+            "at": "2026-09-26T23:47:09.580Z"
+          },
+          {
+            "type": "step_update",
+            "text": "exposed to `0.0.0.0/0` via manual ou",
+            "at": "2026-09-26T23:47:09.605Z"
+          },
+          {
+            "type": "step_update",
+            "text": "t-of-band modification o",
+            "at": "2026-09-26T23:47:09.630Z"
+          },
+          {
+            "type": "step_update",
+            "text": "utside Terraform.\n\n---\n\n",
+            "at": "2026-09-26T23:47:09.656Z"
+          },
+          {
+            "type": "step_update",
+            "text": "#### 3. Business & Security Impact\n*",
+            "at": "2026-09-26T23:47:09.682Z"
+          },
+          {
+            "type": "step_update",
+            "text": " **Attack Surface Expans",
+            "at": "2026-09-26T23:47:09.708Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ion:** Publicly exposing",
+            "at": "2026-09-26T23:47:09.733Z"
+          },
+          {
+            "type": "step_update",
+            "text": " port 22 directly to the",
+            "at": "2026-09-26T23:47:09.758Z"
+          },
+          {
+            "type": "step_update",
+            "text": " open internet (`0.0.0.0/0`) exposes",
+            "at": "2026-09-26T23:47:09.784Z"
+          },
+          {
+            "type": "step_update",
+            "text": " host infrastructure to ",
+            "at": "2026-09-26T23:47:09.809Z"
+          },
+          {
+            "type": "step_update",
+            "text": "persistent automated sca",
+            "at": "2026-09-26T23:47:09.834Z"
+          },
+          {
+            "type": "step_update",
+            "text": "nning, credential brute-",
+            "at": "2026-09-26T23:47:09.860Z"
+          },
+          {
+            "type": "step_update",
+            "text": "forcing, and exploit attempts target",
+            "at": "2026-09-26T23:47:09.885Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ing SSH daemons.\n* **Bla",
+            "at": "2026-09-26T23:47:09.910Z"
+          },
+          {
+            "type": "step_update",
+            "text": "st Radius:** If breached",
+            "at": "2026-09-26T23:47:09.936Z"
+          },
+          {
+            "type": "step_update",
+            "text": ", attackers gain host-le",
+            "at": "2026-09-26T23:47:09.962Z"
+          },
+          {
+            "type": "step_update",
+            "text": "vel access, enabling lat",
+            "at": "2026-09-26T23:47:09.988Z"
+          },
+          {
+            "type": "step_update",
+            "text": "eral movement within VPC subnets, pr",
+            "at": "2026-09-26T23:47:10.013Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ivilege escalation, and ",
+            "at": "2026-09-26T23:47:10.039Z"
+          },
+          {
+            "type": "step_update",
+            "text": "potential data exfiltrat",
+            "at": "2026-09-26T23:47:10.064Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ion or operational disru",
+            "at": "2026-09-26T23:47:10.090Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ption.\n* **Compliance Vi",
+            "at": "2026-09-26T23:47:10.116Z"
+          },
+          {
+            "type": "step_update",
+            "text": "olation:** Violates leas",
+            "at": "2026-09-26T23:47:10.141Z"
+          },
+          {
+            "type": "step_update",
+            "text": "t privilege, SOC 2, and ",
+            "at": "2026-09-26T23:47:10.166Z"
+          },
+          {
+            "type": "step_update",
+            "text": "CIS AWS Foundations benc",
+            "at": "2026-09-26T23:47:10.192Z"
+          },
+          {
+            "type": "step_update",
+            "text": "hmarks regarding public ",
+            "at": "2026-09-26T23:47:10.217Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ingress to administrativ",
+            "at": "2026-09-26T23:47:10.242Z"
+          },
+          {
+            "type": "step_update",
+            "text": "e ports.\n\n---\n\n#### 4. R",
+            "at": "2026-09-26T23:47:10.270Z"
+          },
+          {
+            "type": "step_update",
+            "text": "isk Priority",
+            "at": "2026-09-26T23:47:10.295Z"
+          },
+          {
+            "type": "step_update",
+            "text": " & Severity\n* **Risk Lev",
+            "at": "2026-09-26T23:47:10.320Z"
+          },
+          {
+            "type": "step_update",
+            "text": "el:** **High / Critical*",
+            "at": "2026-09-26T23:47:10.346Z"
+          },
+          {
+            "type": "step_update",
+            "text": "*\n* **Risk Score:** `95 ",
+            "at": "2026-09-26T23:47:10.371Z"
+          },
+          {
+            "type": "step_update",
+            "text": "/ 100` (`risk_code: publ",
+            "at": "2026-09-26T23:47:10.397Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ic_ssh`)\n* *",
+            "at": "2026-09-26T23:47:10.422Z"
+          },
+          {
+            "type": "step_update",
+            "text": "*Priority:** **P1 - Imme",
+            "at": "2026-09-26T23:47:10.448Z"
+          },
+          {
+            "type": "step_update",
+            "text": "diate Intervention**\n\n--",
+            "at": "2026-09-26T23:47:10.474Z"
+          },
+          {
+            "type": "step_update",
+            "text": "-\n\n#### 5. Recommended N",
+            "at": "2026-09-26T23:47:10.499Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ext Actions\n",
+            "at": "2026-09-26T23:47:10.525Z"
+          },
+          {
+            "type": "step_update",
+            "text": "1. **Immediate Remediati",
+            "at": "2026-09-26T23:47:10.551Z"
+          },
+          {
+            "type": "step_update",
+            "text": "on (P1):**\n ",
+            "at": "2026-09-26T23:47:10.576Z"
+          },
+          {
+            "type": "step_update",
+            "text": "  * Remove the unauthori",
+            "at": "2026-09-26T23:47:10.601Z"
+          },
+          {
+            "type": "step_update",
+            "text": "zed `0.0.0.0",
+            "at": "2026-09-26T23:47:10.627Z"
+          },
+          {
+            "type": "step_update",
+            "text": "/0 -> TCP:22` ingress ru",
+            "at": "2026-09-26T23:47:10.652Z"
+          },
+          {
+            "type": "step_update",
+            "text": "le from `aws",
+            "at": "2026-09-26T23:47:10.677Z"
+          },
+          {
+            "type": "step_update",
+            "text": "_security_group.app_sg` ",
+            "at": "2026-09-26T23:47:10.703Z"
+          },
+          {
+            "type": "step_update",
+            "text": "to reconcile",
+            "at": "2026-09-26T23:47:10.728Z"
+          },
+          {
+            "type": "step_update",
+            "text": " runtime state with the ",
+            "at": "2026-09-26T23:47:10.753Z"
+          },
+          {
+            "type": "step_update",
+            "text": "declared Ter",
+            "at": "2026-09-26T23:47:10.779Z"
+          },
+          {
+            "type": "step_update",
+            "text": "raform plan. Verify port",
+            "at": "2026-09-26T23:47:10.804Z"
+          },
+          {
+            "type": "step_update",
+            "text": " 22 is non-r",
+            "at": "2026-09-26T23:47:10.830Z"
+          },
+          {
+            "type": "step_update",
+            "text": "outable from the public ",
+            "at": "2026-09-26T23:47:10.860Z"
+          },
+          {
+            "type": "step_update",
+            "text": "internet.\n2.",
+            "at": "2026-09-26T23:47:10.884Z"
+          },
+          {
+            "type": "step_update",
+            "text": " **Access Architecture T",
+            "at": "2026-09-26T23:47:10.909Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ransition (P",
+            "at": "2026-09-26T23:47:10.936Z"
+          },
+          {
+            "type": "step_update",
+            "text": "2):**\n   * Discontinue d",
+            "at": "2026-09-26T23:47:10.961Z"
+          },
+          {
+            "type": "step_update",
+            "text": "irect inboun",
+            "at": "2026-09-26T23:47:10.987Z"
+          },
+          {
+            "type": "step_update",
+            "text": "d SSH access. Transition",
+            "at": "2026-09-26T23:47:11.016Z"
+          },
+          {
+            "type": "step_update",
+            "text": " instance ma",
+            "at": "2026-09-26T23:47:11.041Z"
+          },
+          {
+            "type": "step_update",
+            "text": "nagement to ",
+            "at": "2026-09-26T23:47:11.067Z"
+          },
+          {
+            "type": "step_update",
+            "text": "**AWS System",
+            "at": "2026-09-26T23:47:11.093Z"
+          },
+          {
+            "type": "step_update",
+            "text": "s Manager (SSM) Session ",
+            "at": "2026-09-26T23:47:11.118Z"
+          },
+          {
+            "type": "step_update",
+            "text": "Manager**, a",
+            "at": "2026-09-26T23:47:11.144Z"
+          },
+          {
+            "type": "step_update",
+            "text": " private VPN, or a harde",
+            "at": "2026-09-26T23:47:11.170Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ned bastion ",
+            "at": "2026-09-26T23:47:11.195Z"
+          },
+          {
+            "type": "step_update",
+            "text": "host with st",
+            "at": "2026-09-26T23:47:11.221Z"
+          },
+          {
+            "type": "step_update",
+            "text": "rict IP allowlisting.\n3.",
+            "at": "2026-09-26T23:47:11.246Z"
+          },
+          {
+            "type": "step_update",
+            "text": " **Forensic ",
+            "at": "2026-09-26T23:47:11.271Z"
+          },
+          {
+            "type": "step_update",
+            "text": "Audit & Log ",
+            "at": "2026-09-26T23:47:11.297Z"
+          },
+          {
+            "type": "step_update",
+            "text": "Review (P2):**\n   * Insp",
+            "at": "2026-09-26T23:47:11.323Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ect VPC Flow",
+            "at": "2026-09-26T23:47:11.349Z"
+          },
+          {
+            "type": "step_update",
+            "text": " Logs, Cloud",
+            "at": "2026-09-26T23:47:11.375Z"
+          },
+          {
+            "type": "step_update",
+            "text": "Trail event logs (identi",
+            "at": "2026-09-26T23:47:11.400Z"
+          },
+          {
+            "type": "step_update",
+            "text": "fying who cr",
+            "at": "2026-09-26T23:47:11.426Z"
+          },
+          {
+            "type": "step_update",
+            "text": "eated the rule), `/var/l",
+            "at": "2026-09-26T23:47:11.476Z"
+          },
+          {
+            "type": "step_update",
+            "text": "og/secure` o",
+            "at": "2026-09-26T23:47:11.501Z"
+          },
+          {
+            "type": "step_update",
+            "text": "r `/var/log/",
+            "at": "2026-09-26T23:47:11.527Z"
+          },
+          {
+            "type": "step_update",
+            "text": "auth.log`, active user s",
+            "at": "2026-09-26T23:47:11.552Z"
+          },
+          {
+            "type": "step_update",
+            "text": "essions, and",
+            "at": "2026-09-26T23:47:11.578Z"
+          },
+          {
+            "type": "step_update",
+            "text": " `~/.ssh/aut",
+            "at": "2026-09-26T23:47:11.604Z"
+          },
+          {
+            "type": "step_update",
+            "text": "horized_keys` for suspic",
+            "at": "2026-09-26T23:47:11.629Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ious activit",
+            "at": "2026-09-26T23:47:11.655Z"
+          },
+          {
+            "type": "step_update",
+            "text": "y during the",
+            "at": "2026-09-26T23:47:11.683Z"
+          },
+          {
+            "type": "step_update",
+            "text": " exposure wi",
+            "at": "2026-09-26T23:47:11.708Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ndow.\n\n---\n-",
+            "at": "2026-09-26T23:47:11.734Z"
+          },
+          {
+            "type": "step_update",
+            "text": "--\n\n### Espa",
+            "at": "2026-09-26T23:47:11.759Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ñol\n\n#### 1",
+            "at": "2026-09-26T23:47:11.785Z"
+          },
+          {
+            "type": "step_update",
+            "text": ". Confirmación del Inci",
+            "at": "2026-09-26T23:47:11.811Z"
+          },
+          {
+            "type": "step_update",
+            "text": "dente y Supu",
+            "at": "2026-09-26T23:47:11.836Z"
+          },
+          {
+            "type": "step_update",
+            "text": "estos Operat",
+            "at": "2026-09-26T23:47:11.861Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ivos\n* **ID ",
+            "at": "2026-09-26T23:47:11.887Z"
+          },
+          {
+            "type": "step_update",
+            "text": "de Escenario",
+            "at": "2026-09-26T23:47:11.913Z"
+          },
+          {
+            "type": "step_update",
+            "text": ":** `high-ssh`\n* **Confi",
+            "at": "2026-09-26T23:47:11.939Z"
+          },
+          {
+            "type": "step_update",
+            "text": "rmación por",
+            "at": "2026-09-26T23:47:11.965Z"
+          },
+          {
+            "type": "step_update",
+            "text": " Herramienta",
+            "at": "2026-09-26T23:47:11.990Z"
+          },
+          {
+            "type": "step_update",
+            "text": ":** Se invoc",
+            "at": "2026-09-26T23:47:12.015Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ó la herram",
+            "at": "2026-09-26T23:47:12.041Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ienta MCP `d",
+            "at": "2026-09-26T23:47:12.066Z"
+          },
+          {
+            "type": "step_update",
+            "text": "iff_infra` (",
+            "at": "2026-09-26T23:47:12.092Z"
+          },
+          {
+            "type": "step_update",
+            "text": "`drift-detec",
+            "at": "2026-09-26T23:47:12.118Z"
+          },
+          {
+            "type": "step_update",
+            "text": "tor`) para el escenario `high-ssh` y se validó contra la fuente de estado declarada (`terraform_plan`).\n* **Supuestos Operativos:** Evaluación realizada bajo simulación local. No se ejecutaron comandos `terraform apply`, CLI de nube ni acciones destructivas sobre la infraestructura.\n\n---\n\n#### 2. Resumen de la Desviación (Drift)\n* **Recurso:** `aws_security_group.app_sg`\n* **Campo Afectado:** `ingress_rules`\n* **Estado Declarado (IaC):**\n  * `HTTPS`: Puerto `443` (TCP) permitido desde `0.0.0.0/0`.\n* **Estado Real en Ejecución:**\n  * `HTTPS`: Puerto `443` (TCP) permitido desde `0.0.0.0/0`.\n  * **Drift Detectado:** `SSH`: Puerto `22` (TCP) expuesto a `0.0.0.0/0` mediante un cambio manual realizado fuera del flujo de Terraform.\n\n---\n\n#### 3. Impacto de Negocio y Seguridad\n* **Ampliación de Superficie de Ataque:** La exposición del puerto administrativo 22 a todo internet (`0.0.0.0/0`) expone la instancia a escaneos automatizados, ataques de fuerza bruta y explotación de vulnerabilidades en el daemon SSH.\n* **Radio de Impacto:** Un compromiso de este servicio otorga acceso a nivel de sistema operativo, permitiendo escalación de privilegios, desplazamiento lateral en la VPC y riesgo de fuga de datos.\n* **Incumplimiento Normativo:** Infringe políticas de mínimo privilegio y estándares como CIS AWS Foundations y SOC 2.\n\n---\n\n#### 4. Prioridad y Nivel de Riesgo\n* **Nivel de Riesgo:** **Alto / Crítico**\n* **Puntuación de Riesgo:** `95 / 100` (`risk_code: public_ssh`)\n* **Prioridad:** **P1 - Atención Inmediata**\n\n---\n\n#### 5. Próximas Acciones Recomendadas\n1. **Remediación Inmediata (P1):**\n   * Eliminar la regla de ingreso no autorizada `0.0.0.0/0 -> TCP:22` de `aws_security_group.app_sg` para restablecer el estado al código declarado en Terraform. Validar que el puerto 22 no sea accesible públicamente.\n2. **Control de Acceso Administrativo (P2):**\n   * Reemplazar SSH público por métodos administrados como **AWS Systems Manager (SSM) Session Manager**, una VPN privada o un host bastion con lista blanca estricta de IPs.\n3. **Auditoría e Investigación Forense (P2):**\n   * Analizar VPC Flow Logs, eventos de CloudTrail (para identificar al autor del cambio), logs de autenticación (`/var/log/secure` o `auth.log`), sesiones activas y `authorized_keys` durante la ventana de tiempo en que la regla estuvo activa.\n",
+            "at": "2026-09-26T23:47:12.144Z"
+          },
+          {
+            "type": "result",
+            "text": "### English\n\n#### 1. Incident Confirmation & Operational Assumptions\n* **Scenario ID:** `high-ssh`\n* **Tool Confirmation:** MCP tool `diff_infra` (`drift-detector`) was invoked for scenario `high-ssh` and confirmed against the declared state source (`terraform_plan`).\n* **Operational Assumptions:** This review is conducted under strict simulation mode. No Terraform applies, cloud CLI commands, or destructive remediation actions were executed against the infrastructure.\n\n---\n\n#### 2. Detected Drift Summary\n* **Resource:** `aws_security_group.app_sg`\n* **Affected Field:** `ingress_rules`\n* **Declared State (IaC):**\n  * `HTTPS`: Port `443` (TCP) allowed from `0.0.0.0/0`.\n* **Actual Runtime State:**\n  * `HTTPS`: Port `443` (TCP) allowed from `0.0.0.0/0`.\n  * **Drift Identified:** `SSH`: Port `22` (TCP) exposed to `0.0.0.0/0` via manual out-of-band modification outside Terraform.\n\n---\n\n#### 3. Business & Security Impact\n* **Attack Surface Expansion:** Publicly exposing port 22 directly to the open internet (`0.0.0.0/0`) exposes host infrastructure to persistent automated scanning, credential brute-forcing, and exploit attempts targeting SSH daemons.\n* **Blast Radius:** If breached, attackers gain host-level access, enabling lateral movement within VPC subnets, privilege escalation, and potential data exfiltration or operational disruption.\n* **Compliance Violation:** Violates least privilege, SOC 2, and CIS AWS Foundations benchmarks regarding public ingress to administrative ports.\n\n---\n\n#### 4. Risk Priority & Severity\n* **Risk Level:** **High / Critical**\n* **Risk Score:** `95 / 100` (`risk_code: public_ssh`)\n* **Priority:** **P1 - Immediate Intervention**\n\n---\n\n#### 5. Recommended Next Actions\n1. **Immediate Remediation (P1):**\n   * Remove the unauthorized `0.0.0.0/0 -> TCP:22` ingress rule from `aws_security_group.app_sg` to reconcile runtime state with the declared Terraform plan. Verify port 22 is non-routable from the public internet.\n2. **Access Architecture Transition (P2):**\n   * Discontinue direct inbound SSH access. Transition instance management to **AWS Systems Manager (SSM) Session Manager**, a private VPN, or a hardened bastion host with strict IP allowlisting.\n3. **Forensic Audit & Log Review (P2):**\n   * Inspect VPC Flow Logs, CloudTrail event logs (identifying who created the rule), `/var/log/secure` or `/var/log/auth.log`, active user sessions, and `~/.ssh/authorized_keys` for suspicious activity during the exposure window.\n\n---\n---\n\n### Español\n\n#### 1. Confirmación del Incidente y Supuestos Operativos\n* **ID de Escenario:** `high-ssh`\n* **Confirmación por Herramienta:** Se invocó la herramienta MCP `diff_infra` (`drift-detector`) para el escenario `high-ssh` y se validó contra la fuente de estado declarada (`terraform_plan`).\n* **Supuestos Operativos:** Evaluación realizada bajo simulación local. No se ejecutaron comandos `terraform apply`, CLI de nube ni acciones destructivas sobre la infraestructura.\n\n---\n\n#### 2. Resumen de la Desviación (Drift)\n* **Recurso:** `aws_security_group.app_sg`\n* **Campo Afectado:** `ingress_rules`\n* **Estado Declarado (IaC):**\n  * `HTTPS`: Puerto `443` (TCP) permitido desde `0.0.0.0/0`.\n* **Estado Real en Ejecución:**\n  * `HTTPS`: Puerto `443` (TCP) permitido desde `0.0.0.0/0`.\n  * **Drift Detectado:** `SSH`: Puerto `22` (TCP) expuesto a `0.0.0.0/0` mediante un cambio manual realizado fuera del flujo de Terraform.\n\n---\n\n#### 3. Impacto de Negocio y Seguridad\n* **Ampliación de Superficie de Ataque:** La exposición del puerto administrativo 22 a todo internet (`0.0.0.0/0`) expone la instancia a escaneos automatizados, ataques de fuerza bruta y explotación de vulnerabilidades en el daemon SSH.\n* **Radio de Impacto:** Un compromiso de este servicio otorga acceso a nivel de sistema operativo, permitiendo escalación de privilegios, desplazamiento lateral en la VPC y riesgo de fuga de datos.\n* **Incumplimiento Normativo:** Infringe políticas de mínimo privilegio y estándares como CIS AWS Foundations y SOC 2.\n\n---\n\n#### 4. Prioridad y Nivel de Riesgo\n* **Nivel de Riesgo:** **Alto / Crítico**\n* **Puntuación de Riesgo:** `95 / 100` (`risk_code: public_ssh`)\n* **Prioridad:** **P1 - Atención Inmediata**\n\n---\n\n#### 5. Próximas Acciones Recomendadas\n1. **Remediación Inmediata (P1):**\n   * Eliminar la regla de ingreso no autorizada `0.0.0.0/0 -> TCP:22` de `aws_security_group.app_sg` para restablecer el estado al código declarado en Terraform. Validar que el puerto 22 no sea accesible públicamente.\n2. **Control de Acceso Administrativo (P2):**\n   * Reemplazar SSH público por métodos administrados como **AWS Systems Manager (SSM) Session Manager**, una VPN privada o un host bastion con lista blanca estricta de IPs.\n3. **Auditoría e Investigación Forense (P2):**\n   * Analizar VPC Flow Logs, eventos de CloudTrail (para identificar al autor del cambio), logs de autenticación (`/var/log/secure` o `auth.log`), sesiones activas y `authorized_keys` durante la ventana de tiempo en que la regla estuvo activa.\n",
+            "at": "2026-09-26T23:47:12.171Z"
+          }
+        ]
+      },
+      {
+        "phase": "plan",
+        "status": "completed",
+        "summary": "Here is the review-ready remediation plan presented in **English**, followed by **Spanish**.\n\n---\n\n# English: Remediation Plan\n\n## 1. Executive Summary & Drift Overview\n* **Target Resource**: `aws_security_group.app_sg`\n* **Detected Drift**: Ingress rule for TCP Port 22 (SSH) open to `0.0.0.0/0` (added out-of-band manually).\n* **Declared State**: Ingress restricted solely to TCP Port 443 (HTTPS) from `0.0.0.0/0`.\n* **Risk Score / Level**: 95 / High (`public_ssh`).\n* **Objective**: Remove the unauthorized public SSH ingress rule and restore declared state with **zero application downtime**.\n\n---\n\n## 2. Assumptions\n1. **Traffic Segregation**: Production application traffic strictly uses HTTPS (TCP 443); SSH (TCP 22) is not required for end-user functionality.\n2. **Stateful AWS Security Groups**: Modifying or revoking an ingress rule in an AWS Security Group is an in-place API operation that does not disrupt or restart existing network interfaces (ENIs), instances, or active HTTPS sessions.\n3. **Alternative Administrative Access**: Systems administration is handled via AWS Systems Manager (SSM) Session Manager or private network bastions/VPNs, rendering direct public SSH exposure unnecessary.\n4. **Terraform Authority**: The declared Terraform codebase is the single source of truth.\n5. **Read-Only / Simulation Context**: No automated destructive commands or executions are performed during this review.\n\n---\n\n## 3. Explicit Approval Gate\n> [!IMPORTANT]\n> **Action Required**: Prior to applying any remediation to the environment, explicit written approval is required from the **Security Lead / Change Advisory Board (CAB)**.\n\n* **Pre-Approval Checklist**:\n  * [ ] Verify that no active incident triage depends on public SSH connectivity.\n  * [ ] Confirm that AWS SSM Session Manager or an authorized private access path is operational.\n  * [ ] Obtain sign-off from: Security Operations (SecOps) & Platform Owner.\n\n---\n\n## 4. Ordered Remediation Steps (No Downtime)\n\n### Step 1: Pre-Remediation Telemetry & Session Audit\n* Check AWS CloudTrail to identify who created the out-of-band rule and when.\n* Check VPC Flow Logs / OS-level logs to verify if any unauthorized connections occurred via port 22 during the exposure window.\n\n### Step 2: Pass Approval Gate\n* Secure formal sign-off as defined in Section 3.\n\n### Step 3: Remove Ingress Rule (State Reconciliation)\n* Reconcile the live resource with Terraform declared state by removing the ingress rule (`port 22`, `0.0.0.0/0`) from `aws_security_group.app_sg`.\n* Execution method: Run standard CI/CD deployment (`terraform plan` to confirm only the unauthorized rule is revoked, followed by review and controlled apply) or revoke the unmanaged rule via AWS authorized security workflow and sync Terraform state.\n* **Downtime Impact**: **0 seconds**. Port 443 rules and existing traffic flows remain completely untouched.\n\n### Step 4: Post-Remediation Verification\n* Execute verification procedures (detailed in Section 5).\n\n### Step 5: Exposure Investigation & Security Hardening\n* Audit SSH authorized keys and system integrity on instances attached to `app_sg`.\n* Enforce AWS SCPs (Service Control Policies) or AWS Config rule `restricted-ssh` to prevent future unauthorized manual security group modifications.\n\n---\n\n## 5. Verification Plan\n1. **Network Boundary Check**:\n   * Probe port 22 from an external network (e.g., `nc -zv <public-ip> 22` or test connection timeout). Port 22 must be unreachable / timed out.\n2. **Configuration & Drift Check**:\n   * Inspect security group ingress rules: only TCP 443 from `0.0.0.0/0` must be present.\n   * Run `terraform plan`: verify output indicates `\"No changes. Your infrastructure matches the configuration.\"`\n3. **Application Availability Check**:\n   * Send continuous HTTPS synthetic requests to port 443 throughout the window. Ensure HTTP 200 responses, 0% packet loss, and zero connection resets.\n\n---\n\n## 6. Rollback Considerations\n* **Rollback Trigger**:\n  * Remediation causes an unexpected loss of critical operational access where SSM is unavailable and immediate remote access is vital for business continuity.\n* **Controlled Rollback Procedure**:\n  * **Never** roll back to `0.0.0.0/0`.\n  * If emergency SSH access is strictly required, apply a temporary, time-bound ingress rule restricted **only** to the specific administrator's static IP (`/32`) with a maximum TTL (e.g., 2 hours).\n  * Log the emergency temporary rule as an exception in the change management system.\n\n---\n---\n\n# Español: Plan de Remediación\n\n## 1. Resumen Ejecutivo y Descripción del Drift\n* **Recurso Objetivo**: `aws_security_group.app_sg`\n* **Drift Detectado**: Regla de ingreso para TCP Puerto 22 (SSH) abierta a `0.0.0.0/0` (agregada manualmente fuera de Terraform).\n* **Estado Declarado**: Ingreso restringido únicamente a TCP Puerto 443 (HTTPS) desde `0.0.0.0/0`.\n* **Nivel / Puntuación de Riesgo**: 95 / Alto (`public_ssh`).\n* **Objetivo**: Eliminar la regla de ingreso SSH pública no autorizada y restaurar el estado declarado con **cero tiempo de inactividad** (zero downtime).\n\n---\n\n## 2. Suposiciones (Assumptions)\n1. **Segregación de Tráfico**: El tráfico legítimo de la aplicación es exclusivamente HTTPS (TCP 443); SSH (TCP 22) no es requerido por los usuarios finales.\n2. **Naturaleza Stateful de AWS Security Groups**: Modificar o revocar una regla de ingreso en un Security Group es una operación API en caliente que no interrumpe interfaces de red (ENIs), no reinicia instancias ni corta sesiones activas de HTTPS.\n3. **Acceso Administrativo Alternativo**: La administración se gestiona mediante AWS Systems Manager (SSM) Session Manager, VPN o bastión privado, haciendo innecesaria la exposición pública de SSH.\n4. **Autoridad de Terraform**: El código declarado en Terraform representa la única fuente de verdad.\n5. **Entorno de Simulación / Solo Lectura**: No se ejecutan comandos destructivos ni cambios automáticos en este análisis.\n\n---\n\n## 3. Puerta de Aprobación Explícita (Approval Gate)\n> [!IMPORTANT]\n> **Acción Requerida**: Antes de aplicar cualquier cambio en el entorno, se requiere la aprobación explícita y documentada del **Líder de Seguridad / Comité de Control de Cambios (CAB)**.\n\n* **Lista de Verificación Previa a la Aprobación**:\n  * [ ] Confirmar que no hay incidentes activos cuya resolución dependa de conectividad SSH pública.\n  * [ ] Verificar que AWS SSM Session Manager o la vía de acceso privada alternativa esté operativa.\n  * [ ] Firma de visto bueno por: Operaciones de Seguridad (SecOps) y Responsable de Plataforma.\n\n---\n\n## 4. Pasos Ordenados de Remediación (Sin Tiempo de Inactividad)\n\n### Paso 1: Telemetría Previa y Auditoría de Sesiones\n* Consultar AWS CloudTrail para identificar el origen y usuario que creó la regla manual fuera de Terraform.\n* Analizar VPC Flow Logs y registros del sistema operativo para verificar si hubo conexiones entrantes al puerto 22 durante la ventana de exposición.\n\n### Paso 2: Validación de la Puerta de Aprobación\n* Obtener la aprobación formal estipulada en la Sección 3.\n\n### Paso 3: Eliminación de la Regla (Reconciliación de Estado)\n* Alinear el estado real con el código de Terraform eliminando la regla de ingreso (`puerto 22`, `0.0.0.0/0`) en `aws_security_group.app_sg`.\n* Método de ejecución: Mediante el pipeline de CI/CD (`terraform plan` para confirmar que solo se revoca la regla no autorizada, seguido de aprobación y apply controlado) o revocación out-of-band autorizada y posterior sincronización del estado.\n* **Impacto en Disponibilidad**: **0 segundos**. El puerto 443 y las conexiones HTTPS continúan funcionando sin interrupción.\n\n### Paso 4: Verificación Post-Remediación\n* Ejecutar el protocolo de verificación (detallado en la Sección 5).\n\n### Paso 5: Investigación Post-Incidente y Fortalecimiento (Hardening)\n* Auditar `authorized_keys` e integridad de las instancias asociadas a `app_sg`.\n* Habilitar reglas de AWS Config (`restricted-ssh`) o directivas SCP para prevenir modificaciones manuales no controladas en Security Groups.\n\n---\n\n## 5. Plan de Verificación\n1. **Comprobación de Frontera de Red**:\n   * Sondeo externo al puerto 22 (ej. `nc -zv <ip-publica> 22` o test de timeout). El puerto 22 debe responder como inalcanzable / timeout.\n2. **Comprobación de Configuración y Drift**:\n   * Inspeccionar reglas del Security Group: únicamente debe existir TCP 443 desde `0.0.0.0/0`.\n   * Ejecutar `terraform plan`: verificar que el resultado sea `\"No changes. Your infrastructure matches the configuration.\"` (cero drift).\n3. **Disponibilidad del Servicio**:\n   * Pruebas sintéticas continuas hacia el endpoint HTTPS (puerto 443) garantizando respuestas HTTP 200, 0% pérdida de paquetes y cero caídas de conexión.\n\n---\n\n## 6. Consideraciones de Rollback\n* **Criterio de Activación de Rollback**:\n  * La remediación provoca una pérdida imprevista de acceso operativo crítico donde SSM no está disponible y el acceso remoto es indispensable para la continuidad del negocio.\n* **Procedimiento de Rollback Controlado**:\n  * **Bajo ninguna circunstancia** restaurar la regla a `0.0.0.0/0`.\n  * Si el acceso SSH de emergencia es estrictamente necesario, aplicar una regla temporal acotada **exclusivamente** a la IP estática del operador (`/32`) con caducidad/TTL máxima (ej. 2 horas).\n  * Registrar la excepción en el sistema de gestión de cambios para evitar drift silencioso.\n",
+        "events": [
+          {
+            "type": "init",
+            "text": "",
+            "at": "2026-09-26T23:47:16.834Z"
+          },
+          {
+            "type": "step_update",
+            "text": "",
+            "at": "2026-09-26T23:47:16.939Z"
+          },
+          {
+            "type": "step_update",
+            "text": "Here is the ",
+            "at": "2026-09-26T23:47:25.991Z"
+          },
+          {
+            "type": "step_update",
+            "text": "review-ready remediation plan presen",
+            "at": "2026-09-26T23:47:26.017Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ted in **Eng",
+            "at": "2026-09-26T23:47:26.042Z"
+          },
+          {
+            "type": "step_update",
+            "text": "lish**, followed by **Spanish**.\n\n--",
+            "at": "2026-09-26T23:47:26.067Z"
+          },
+          {
+            "type": "step_update",
+            "text": "-\n\n# English: Remediatio",
+            "at": "2026-09-26T23:47:26.093Z"
+          },
+          {
+            "type": "step_update",
+            "text": "n Plan\n\n## 1. Executive ",
+            "at": "2026-09-26T23:47:26.118Z"
+          },
+          {
+            "type": "step_update",
+            "text": "Summary & Drift Overview",
+            "at": "2026-09-26T23:47:26.143Z"
+          },
+          {
+            "type": "step_update",
+            "text": "\n* **Target Resource**: `aws_securit",
+            "at": "2026-09-26T23:47:26.169Z"
+          },
+          {
+            "type": "step_update",
+            "text": "y_group.app_sg`\n* **Dete",
+            "at": "2026-09-26T23:47:26.194Z"
+          },
+          {
+            "type": "step_update",
+            "text": "cted Drift**: Ingress ru",
+            "at": "2026-09-26T23:47:26.221Z"
+          },
+          {
+            "type": "step_update",
+            "text": "le for TCP Port 22 (SSH) open to `0.",
+            "at": "2026-09-26T23:47:26.245Z"
+          },
+          {
+            "type": "step_update",
+            "text": "0.0.0/0` (added out-of-b",
+            "at": "2026-09-26T23:47:26.271Z"
+          },
+          {
+            "type": "step_update",
+            "text": "and manually).\n* **Declared State**:",
+            "at": "2026-09-26T23:47:26.296Z"
+          },
+          {
+            "type": "step_update",
+            "text": " Ingress restricted sole",
+            "at": "2026-09-26T23:47:26.321Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ly to TCP Po",
+            "at": "2026-09-26T23:47:26.346Z"
+          },
+          {
+            "type": "step_update",
+            "text": "rt 443 (HTTPS) from `0.0",
+            "at": "2026-09-26T23:47:26.372Z"
+          },
+          {
+            "type": "step_update",
+            "text": ".0.0/0`.\n* **Risk Score / Level**: 9",
+            "at": "2026-09-26T23:47:26.397Z"
+          },
+          {
+            "type": "step_update",
+            "text": "5 / High (`public_ssh`).",
+            "at": "2026-09-26T23:47:26.423Z"
+          },
+          {
+            "type": "step_update",
+            "text": "\n* **Objecti",
+            "at": "2026-09-26T23:47:26.448Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ve",
+            "at": "2026-09-26T23:47:26.474Z"
+          },
+          {
+            "type": "step_update",
+            "text": "**: Remove the unauthori",
+            "at": "2026-09-26T23:47:26.527Z"
+          },
+          {
+            "type": "step_update",
+            "text": "zed public SSH ingress rule and restore declared",
+            "at": "2026-09-26T23:47:26.553Z"
+          },
+          {
+            "type": "step_update",
+            "text": " state with **zero appli",
+            "at": "2026-09-26T23:47:26.578Z"
+          },
+          {
+            "type": "step_update",
+            "text": "cation downtime**.\n\n---\n",
+            "at": "2026-09-26T23:47:26.603Z"
+          },
+          {
+            "type": "step_update",
+            "text": "\n## 2. Assumptions\n1. **Traffic Segr",
+            "at": "2026-09-26T23:47:26.629Z"
+          },
+          {
+            "type": "step_update",
+            "text": "egation**: P",
+            "at": "2026-09-26T23:47:26.654Z"
+          },
+          {
+            "type": "step_update",
+            "text": "roduction application tr",
+            "at": "2026-09-26T23:47:26.679Z"
+          },
+          {
+            "type": "step_update",
+            "text": "affic strictly uses HTTP",
+            "at": "2026-09-26T23:47:26.705Z"
+          },
+          {
+            "type": "step_update",
+            "text": "S (TCP 443); SSH (TCP 22) is not req",
+            "at": "2026-09-26T23:47:26.730Z"
+          },
+          {
+            "type": "step_update",
+            "text": "uired for end-user functionality.\n2.",
+            "at": "2026-09-26T23:47:26.756Z"
+          },
+          {
+            "type": "step_update",
+            "text": " **Stateful AWS Security",
+            "at": "2026-09-26T23:47:26.782Z"
+          },
+          {
+            "type": "step_update",
+            "text": " Groups**: Modifying or ",
+            "at": "2026-09-26T23:47:26.807Z"
+          },
+          {
+            "type": "step_update",
+            "text": "revoking an ingress rule",
+            "at": "2026-09-26T23:47:26.833Z"
+          },
+          {
+            "type": "step_update",
+            "text": " in an AWS Security Grou",
+            "at": "2026-09-26T23:47:26.860Z"
+          },
+          {
+            "type": "step_update",
+            "text": "p is an in-place API operation that ",
+            "at": "2026-09-26T23:47:26.885Z"
+          },
+          {
+            "type": "step_update",
+            "text": "does not dis",
+            "at": "2026-09-26T23:47:26.911Z"
+          },
+          {
+            "type": "step_update",
+            "text": "rupt or restart existing network int",
+            "at": "2026-09-26T23:47:26.936Z"
+          },
+          {
+            "type": "step_update",
+            "text": "erfaces (ENIs), instance",
+            "at": "2026-09-26T23:47:26.961Z"
+          },
+          {
+            "type": "step_update",
+            "text": "s, or active HTTPS sessi",
+            "at": "2026-09-26T23:47:26.986Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ons.\n3. **Al",
+            "at": "2026-09-26T23:47:27.012Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ternative Administrative",
+            "at": "2026-09-26T23:47:27.037Z"
+          },
+          {
+            "type": "step_update",
+            "text": " Access**: Systems administration is handled via",
+            "at": "2026-09-26T23:47:27.062Z"
+          },
+          {
+            "type": "step_update",
+            "text": " AWS Systems",
+            "at": "2026-09-26T23:47:27.088Z"
+          },
+          {
+            "type": "step_update",
+            "text": " Manager (SSM) Session M",
+            "at": "2026-09-26T23:47:27.113Z"
+          },
+          {
+            "type": "step_update",
+            "text": "anager or private networ",
+            "at": "2026-09-26T23:47:27.138Z"
+          },
+          {
+            "type": "step_update",
+            "text": "k bastions/VPNs, rendering direct pu",
+            "at": "2026-09-26T23:47:27.164Z"
+          },
+          {
+            "type": "step_update",
+            "text": "blic SSH exposure unnecessary.\n4. **",
+            "at": "2026-09-26T23:47:27.189Z"
+          },
+          {
+            "type": "step_update",
+            "text": "Terraform Authority**: T",
+            "at": "2026-09-26T23:47:27.215Z"
+          },
+          {
+            "type": "step_update",
+            "text": "he declared Terraform co",
+            "at": "2026-09-26T23:47:27.241Z"
+          },
+          {
+            "type": "step_update",
+            "text": "debase is the single source of truth",
+            "at": "2026-09-26T23:47:27.266Z"
+          },
+          {
+            "type": "step_update",
+            "text": ".\n5. **Read-Only / Simul",
+            "at": "2026-09-26T23:47:27.292Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ation Context**: No auto",
+            "at": "2026-09-26T23:47:27.317Z"
+          },
+          {
+            "type": "step_update",
+            "text": "mated destructive comman",
+            "at": "2026-09-26T23:47:27.342Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ds or executions are performed durin",
+            "at": "2026-09-26T23:47:27.368Z"
+          },
+          {
+            "type": "step_update",
+            "text": "g this review.\n\n---\n\n## ",
+            "at": "2026-09-26T23:47:27.394Z"
+          },
+          {
+            "type": "step_update",
+            "text": "3. Explicit Approval Gat",
+            "at": "2026-09-26T23:47:27.419Z"
+          },
+          {
+            "type": "step_update",
+            "text": "e\n> [!IMPORTANT]\n> **Act",
+            "at": "2026-09-26T23:47:27.445Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ion Required**: Prior to",
+            "at": "2026-09-26T23:47:27.470Z"
+          },
+          {
+            "type": "step_update",
+            "text": " applying any remediatio",
+            "at": "2026-09-26T23:47:27.496Z"
+          },
+          {
+            "type": "step_update",
+            "text": "n to the environment, ex",
+            "at": "2026-09-26T23:47:27.521Z"
+          },
+          {
+            "type": "step_update",
+            "text": "plicit written approval ",
+            "at": "2026-09-26T23:47:27.546Z"
+          },
+          {
+            "type": "step_update",
+            "text": "is required from the **S",
+            "at": "2026-09-26T23:47:27.571Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ecurity Lead / Change Ad",
+            "at": "2026-09-26T23:47:27.597Z"
+          },
+          {
+            "type": "step_update",
+            "text": "visory Board (CAB)**.\n\n*",
+            "at": "2026-09-26T23:47:27.622Z"
+          },
+          {
+            "type": "step_update",
+            "text": " **Pre-Approval Checklis",
+            "at": "2026-09-26T23:47:27.648Z"
+          },
+          {
+            "type": "step_update",
+            "text": "t**:\n  * [ ] Verify that",
+            "at": "2026-09-26T23:47:27.673Z"
+          },
+          {
+            "type": "step_update",
+            "text": " no active i",
+            "at": "2026-09-26T23:47:27.699Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ncident triage depends o",
+            "at": "2026-09-26T23:47:27.724Z"
+          },
+          {
+            "type": "step_update",
+            "text": "n public SSH connectivit",
+            "at": "2026-09-26T23:47:27.750Z"
+          },
+          {
+            "type": "step_update",
+            "text": "y.\n  * [ ] C",
+            "at": "2026-09-26T23:47:27.776Z"
+          },
+          {
+            "type": "step_update",
+            "text": "onfirm that AWS SSM Sess",
+            "at": "2026-09-26T23:47:27.802Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ion Manager ",
+            "at": "2026-09-26T23:47:27.827Z"
+          },
+          {
+            "type": "step_update",
+            "text": "or an authorized private",
+            "at": "2026-09-26T23:47:27.853Z"
+          },
+          {
+            "type": "step_update",
+            "text": " access path",
+            "at": "2026-09-26T23:47:27.879Z"
+          },
+          {
+            "type": "step_update",
+            "text": " is operational.\n  * [ ]",
+            "at": "2026-09-26T23:47:27.904Z"
+          },
+          {
+            "type": "step_update",
+            "text": " Obtain sign",
+            "at": "2026-09-26T23:47:27.930Z"
+          },
+          {
+            "type": "step_update",
+            "text": "-off from: Security Oper",
+            "at": "2026-09-26T23:47:27.956Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ations (SecOps) & Platfo",
+            "at": "2026-09-26T23:47:27.982Z"
+          },
+          {
+            "type": "step_update",
+            "text": "rm Owner.\n\n-",
+            "at": "2026-09-26T23:47:28.007Z"
+          },
+          {
+            "type": "step_update",
+            "text": "--\n\n## 4. Ordered Remedi",
+            "at": "2026-09-26T23:47:28.033Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ation Steps ",
+            "at": "2026-09-26T23:47:28.058Z"
+          },
+          {
+            "type": "step_update",
+            "text": "(No Downtime",
+            "at": "2026-09-26T23:47:28.083Z"
+          },
+          {
+            "type": "step_update",
+            "text": ")\n\n### Step 1: Pre-Remed",
+            "at": "2026-09-26T23:47:28.109Z"
+          },
+          {
+            "type": "step_update",
+            "text": "iation Telem",
+            "at": "2026-09-26T23:47:28.135Z"
+          },
+          {
+            "type": "step_update",
+            "text": "etry & Session Audit\n* C",
+            "at": "2026-09-26T23:47:28.160Z"
+          },
+          {
+            "type": "step_update",
+            "text": "heck AWS Clo",
+            "at": "2026-09-26T23:47:28.193Z"
+          },
+          {
+            "type": "step_update",
+            "text": "udTrail to i",
+            "at": "2026-09-26T23:47:28.212Z"
+          },
+          {
+            "type": "step_update",
+            "text": "dentify who created the ",
+            "at": "2026-09-26T23:47:28.238Z"
+          },
+          {
+            "type": "step_update",
+            "text": "out-of-band ",
+            "at": "2026-09-26T23:47:28.264Z"
+          },
+          {
+            "type": "step_update",
+            "text": "rule and whe",
+            "at": "2026-09-26T23:47:28.289Z"
+          },
+          {
+            "type": "step_update",
+            "text": "n.\n* Check V",
+            "at": "2026-09-26T23:47:28.314Z"
+          },
+          {
+            "type": "step_update",
+            "text": "PC Flow Logs / OS-level ",
+            "at": "2026-09-26T23:47:28.339Z"
+          },
+          {
+            "type": "step_update",
+            "text": "logs to veri",
+            "at": "2026-09-26T23:47:28.365Z"
+          },
+          {
+            "type": "step_update",
+            "text": "fy if any un",
+            "at": "2026-09-26T23:47:28.390Z"
+          },
+          {
+            "type": "step_update",
+            "text": "authorized c",
+            "at": "2026-09-26T23:47:28.415Z"
+          },
+          {
+            "type": "step_update",
+            "text": "onnections occurred via ",
+            "at": "2026-09-26T23:47:28.441Z"
+          },
+          {
+            "type": "step_update",
+            "text": "port 22 duri",
+            "at": "2026-09-26T23:47:28.467Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ng the exposure window.\n",
+            "at": "2026-09-26T23:47:28.492Z"
+          },
+          {
+            "type": "step_update",
+            "text": "\n### Step 2:",
+            "at": "2026-09-26T23:47:28.519Z"
+          },
+          {
+            "type": "step_update",
+            "text": " Pass Approv",
+            "at": "2026-09-26T23:47:28.544Z"
+          },
+          {
+            "type": "step_update",
+            "text": "al Gate\n* Se",
+            "at": "2026-09-26T23:47:28.570Z"
+          },
+          {
+            "type": "step_update",
+            "text": "cure formal sign-off as ",
+            "at": "2026-09-26T23:47:28.595Z"
+          },
+          {
+            "type": "step_update",
+            "text": "defined in S",
+            "at": "2026-09-26T23:47:28.621Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ection 3.\n\n#",
+            "at": "2026-09-26T23:47:28.646Z"
+          },
+          {
+            "type": "step_update",
+            "text": "## Step 3: R",
+            "at": "2026-09-26T23:47:28.671Z"
+          },
+          {
+            "type": "step_update",
+            "text": "emove Ingress Rule (Stat",
+            "at": "2026-09-26T23:47:28.697Z"
+          },
+          {
+            "type": "step_update",
+            "text": "e Reconcilia",
+            "at": "2026-09-26T23:47:28.722Z"
+          },
+          {
+            "type": "step_update",
+            "text": "tion)\n* Reco",
+            "at": "2026-09-26T23:47:28.747Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ncile the li",
+            "at": "2026-09-26T23:47:28.774Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ve resource with Terrafo",
+            "at": "2026-09-26T23:47:28.801Z"
+          },
+          {
+            "type": "step_update",
+            "text": "rm declared ",
+            "at": "2026-09-26T23:47:28.827Z"
+          },
+          {
+            "type": "step_update",
+            "text": "state by rem",
+            "at": "2026-09-26T23:47:28.853Z"
+          },
+          {
+            "type": "step_update",
+            "text": "oving the in",
+            "at": "2026-09-26T23:47:28.878Z"
+          },
+          {
+            "type": "step_update",
+            "text": "gress rule (",
+            "at": "2026-09-26T23:47:28.904Z"
+          },
+          {
+            "type": "step_update",
+            "text": "`port 22`, `0.0.0.0/0`) ",
+            "at": "2026-09-26T23:47:28.929Z"
+          },
+          {
+            "type": "step_update",
+            "text": "from `aws_se",
+            "at": "2026-09-26T23:47:28.954Z"
+          },
+          {
+            "type": "step_update",
+            "text": "curity_group",
+            "at": "2026-09-26T23:47:28.980Z"
+          },
+          {
+            "type": "step_update",
+            "text": ".app_sg`.\n* ",
+            "at": "2026-09-26T23:47:29.005Z"
+          },
+          {
+            "type": "step_update",
+            "text": "Execution me",
+            "at": "2026-09-26T23:47:29.031Z"
+          },
+          {
+            "type": "step_update",
+            "text": "thod: Run standard CI/CD",
+            "at": "2026-09-26T23:47:29.056Z"
+          },
+          {
+            "type": "step_update",
+            "text": " deployment ",
+            "at": "2026-09-26T23:47:29.081Z"
+          },
+          {
+            "type": "step_update",
+            "text": "(`terraform ",
+            "at": "2026-09-26T23:47:29.109Z"
+          },
+          {
+            "type": "step_update",
+            "text": "plan` to con",
+            "at": "2026-09-26T23:47:29.134Z"
+          },
+          {
+            "type": "step_update",
+            "text": "firm only th",
+            "at": "2026-09-26T23:47:29.159Z"
+          },
+          {
+            "type": "step_update",
+            "text": "e unauthoriz",
+            "at": "2026-09-26T23:47:29.185Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ed rule is r",
+            "at": "2026-09-26T23:47:29.210Z"
+          },
+          {
+            "type": "step_update",
+            "text": "evoked, foll",
+            "at": "2026-09-26T23:47:29.236Z"
+          },
+          {
+            "type": "step_update",
+            "text": "owed by review and contr",
+            "at": "2026-09-26T23:47:29.262Z"
+          },
+          {
+            "type": "step_update",
+            "text": "olled apply)",
+            "at": "2026-09-26T23:47:29.287Z"
+          },
+          {
+            "type": "step_update",
+            "text": " or revoke t",
+            "at": "2026-09-26T23:47:29.312Z"
+          },
+          {
+            "type": "step_update",
+            "text": "he unmanaged",
+            "at": "2026-09-26T23:47:29.338Z"
+          },
+          {
+            "type": "step_update",
+            "text": " rule via AW",
+            "at": "2026-09-26T23:47:29.364Z"
+          },
+          {
+            "type": "step_update",
+            "text": "S authorized",
+            "at": "2026-09-26T23:47:29.390Z"
+          },
+          {
+            "type": "step_update",
+            "text": " security wo",
+            "at": "2026-09-26T23:47:29.415Z"
+          },
+          {
+            "type": "step_update",
+            "text": "rkflow and sync Terrafor",
+            "at": "2026-09-26T23:47:29.441Z"
+          },
+          {
+            "type": "step_update",
+            "text": "m state.\n* *",
+            "at": "2026-09-26T23:47:29.466Z"
+          },
+          {
+            "type": "step_update",
+            "text": "*Downtime Im",
+            "at": "2026-09-26T23:47:29.492Z"
+          },
+          {
+            "type": "step_update",
+            "text": "pact**: **0 ",
+            "at": "2026-09-26T23:47:29.517Z"
+          },
+          {
+            "type": "step_update",
+            "text": "seconds**. P",
+            "at": "2026-09-26T23:47:29.543Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ort 443 rule",
+            "at": "2026-09-26T23:47:29.569Z"
+          },
+          {
+            "type": "step_update",
+            "text": "s and existi",
+            "at": "2026-09-26T23:47:29.594Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ng traffic flows remain ",
+            "at": "2026-09-26T23:47:29.620Z"
+          },
+          {
+            "type": "step_update",
+            "text": "completely u",
+            "at": "2026-09-26T23:47:29.645Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ntouched.\n\n#",
+            "at": "2026-09-26T23:47:29.670Z"
+          },
+          {
+            "type": "step_update",
+            "text": "## Step 4: P",
+            "at": "2026-09-26T23:47:29.721Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ost-Remediat",
+            "at": "2026-09-26T23:47:29.747Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ion Verifica",
+            "at": "2026-09-26T23:47:29.772Z"
+          },
+          {
+            "type": "step_update",
+            "text": "tion\n* Execu",
+            "at": "2026-09-26T23:47:29.797Z"
+          },
+          {
+            "type": "step_update",
+            "text": "te verificat",
+            "at": "2026-09-26T23:47:29.823Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ion procedur",
+            "at": "2026-09-26T23:47:29.848Z"
+          },
+          {
+            "type": "step_update",
+            "text": "es (detailed",
+            "at": "2026-09-26T23:47:29.874Z"
+          },
+          {
+            "type": "step_update",
+            "text": " in Section ",
+            "at": "2026-09-26T23:47:29.899Z"
+          },
+          {
+            "type": "step_update",
+            "text": "5).\n\n### Step 5: Exposur",
+            "at": "2026-09-26T23:47:29.925Z"
+          },
+          {
+            "type": "step_update",
+            "text": "e Investigat",
+            "at": "2026-09-26T23:47:29.951Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ion & Securi",
+            "at": "2026-09-26T23:47:30.001Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ty Hardening",
+            "at": "2026-09-26T23:47:30.027Z"
+          },
+          {
+            "type": "step_update",
+            "text": "\n* Audit SSH",
+            "at": "2026-09-26T23:47:30.052Z"
+          },
+          {
+            "type": "step_update",
+            "text": " authorized ",
+            "at": "2026-09-26T23:47:30.078Z"
+          },
+          {
+            "type": "step_update",
+            "text": "keys and sys",
+            "at": "2026-09-26T23:47:30.103Z"
+          },
+          {
+            "type": "step_update",
+            "text": "tem integrit",
+            "at": "2026-09-26T23:47:30.128Z"
+          },
+          {
+            "type": "step_update",
+            "text": "y on instanc",
+            "at": "2026-09-26T23:47:30.154Z"
+          },
+          {
+            "type": "step_update",
+            "text": "es attached to `app_sg`.",
+            "at": "2026-09-26T23:47:30.179Z"
+          },
+          {
+            "type": "step_update",
+            "text": "\n* Enforce A",
+            "at": "2026-09-26T23:47:30.205Z"
+          },
+          {
+            "type": "step_update",
+            "text": "WS SCPs (Ser",
+            "at": "2026-09-26T23:47:30.256Z"
+          },
+          {
+            "type": "step_update",
+            "text": "vice Control Policies) o",
+            "at": "2026-09-26T23:47:30.281Z"
+          },
+          {
+            "type": "step_update",
+            "text": "r AWS Config",
+            "at": "2026-09-26T23:47:30.307Z"
+          },
+          {
+            "type": "step_update",
+            "text": " rule `restr",
+            "at": "2026-09-26T23:47:30.332Z"
+          },
+          {
+            "type": "step_update",
+            "text": "icted-ssh` t",
+            "at": "2026-09-26T23:47:30.358Z"
+          },
+          {
+            "type": "step_update",
+            "text": "o prevent fu",
+            "at": "2026-09-26T23:47:30.383Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ture unautho",
+            "at": "2026-09-26T23:47:30.408Z"
+          },
+          {
+            "type": "step_update",
+            "text": "rized manual security gr",
+            "at": "2026-09-26T23:47:30.459Z"
+          },
+          {
+            "type": "step_update",
+            "text": "oup modifica",
+            "at": "2026-09-26T23:47:30.510Z"
+          },
+          {
+            "type": "step_update",
+            "text": "tions.\n\n---\n",
+            "at": "2026-09-26T23:47:30.536Z"
+          },
+          {
+            "type": "step_update",
+            "text": "\n## 5. Verif",
+            "at": "2026-09-26T23:47:30.561Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ication Plan",
+            "at": "2026-09-26T23:47:30.587Z"
+          },
+          {
+            "type": "step_update",
+            "text": "\n1. **Networ",
+            "at": "2026-09-26T23:47:30.613Z"
+          },
+          {
+            "type": "step_update",
+            "text": "k Boundary C",
+            "at": "2026-09-26T23:47:30.639Z"
+          },
+          {
+            "type": "step_update",
+            "text": "heck**:\n   *",
+            "at": "2026-09-26T23:47:30.665Z"
+          },
+          {
+            "type": "step_update",
+            "text": " Probe port ",
+            "at": "2026-09-26T23:47:30.690Z"
+          },
+          {
+            "type": "step_update",
+            "text": "22 from an e",
+            "at": "2026-09-26T23:47:30.716Z"
+          },
+          {
+            "type": "step_update",
+            "text": "xternal netw",
+            "at": "2026-09-26T23:47:30.742Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ork (e.g., `",
+            "at": "2026-09-26T23:47:30.767Z"
+          },
+          {
+            "type": "step_update",
+            "text": "nc -zv <publ",
+            "at": "2026-09-26T23:47:30.793Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ic-ip> 22` o",
+            "at": "2026-09-26T23:47:30.819Z"
+          },
+          {
+            "type": "step_update",
+            "text": "r test conne",
+            "at": "2026-09-26T23:47:30.845Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ction timeou",
+            "at": "2026-09-26T23:47:30.896Z"
+          },
+          {
+            "type": "step_update",
+            "text": "t). Port 22 ",
+            "at": "2026-09-26T23:47:30.947Z"
+          },
+          {
+            "type": "step_update",
+            "text": "must be unre",
+            "at": "2026-09-26T23:47:30.973Z"
+          },
+          {
+            "type": "step_update",
+            "text": "achable / ti",
+            "at": "2026-09-26T23:47:30.998Z"
+          },
+          {
+            "type": "step_update",
+            "text": "med out.\n2. ",
+            "at": "2026-09-26T23:47:31.050Z"
+          },
+          {
+            "type": "step_update",
+            "text": "**Configurat",
+            "at": "2026-09-26T23:47:31.075Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ion & Drift ",
+            "at": "2026-09-26T23:47:31.125Z"
+          },
+          {
+            "type": "step_update",
+            "text": "Check**:\n   ",
+            "at": "2026-09-26T23:47:31.150Z"
+          },
+          {
+            "type": "step_update",
+            "text": "* Inspect se",
+            "at": "2026-09-26T23:47:31.175Z"
+          },
+          {
+            "type": "step_update",
+            "text": "curity group",
+            "at": "2026-09-26T23:47:31.201Z"
+          },
+          {
+            "type": "step_update",
+            "text": " ingress rul",
+            "at": "2026-09-26T23:47:31.226Z"
+          },
+          {
+            "type": "step_update",
+            "text": "es: only TCP",
+            "at": "2026-09-26T23:47:31.252Z"
+          },
+          {
+            "type": "step_update",
+            "text": " 443 from `0",
+            "at": "2026-09-26T23:47:31.277Z"
+          },
+          {
+            "type": "step_update",
+            "text": ".0.0.0/0` mu",
+            "at": "2026-09-26T23:47:31.329Z"
+          },
+          {
+            "type": "step_update",
+            "text": "st be presen",
+            "at": "2026-09-26T23:47:31.355Z"
+          },
+          {
+            "type": "step_update",
+            "text": "t.\n   * Run ",
+            "at": "2026-09-26T23:47:31.380Z"
+          },
+          {
+            "type": "step_update",
+            "text": "`terraform p",
+            "at": "2026-09-26T23:47:31.406Z"
+          },
+          {
+            "type": "step_update",
+            "text": "lan`: verify",
+            "at": "2026-09-26T23:47:31.432Z"
+          },
+          {
+            "type": "step_update",
+            "text": " output indi",
+            "at": "2026-09-26T23:47:31.458Z"
+          },
+          {
+            "type": "step_update",
+            "text": "cates `\"No c",
+            "at": "2026-09-26T23:47:31.510Z"
+          },
+          {
+            "type": "step_update",
+            "text": "hanges. Your",
+            "at": "2026-09-26T23:47:31.535Z"
+          },
+          {
+            "type": "step_update",
+            "text": " infrastruct",
+            "at": "2026-09-26T23:47:31.561Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ure matches ",
+            "at": "2026-09-26T23:47:31.586Z"
+          },
+          {
+            "type": "step_update",
+            "text": "the configur",
+            "at": "2026-09-26T23:47:31.612Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ation.\"`\n3. ",
+            "at": "2026-09-26T23:47:31.663Z"
+          },
+          {
+            "type": "step_update",
+            "text": "**Applicatio",
+            "at": "2026-09-26T23:47:31.688Z"
+          },
+          {
+            "type": "step_update",
+            "text": "n Availabili",
+            "at": "2026-09-26T23:47:31.713Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ty Check**:\n",
+            "at": "2026-09-26T23:47:31.739Z"
+          },
+          {
+            "type": "step_update",
+            "text": "   * Send co",
+            "at": "2026-09-26T23:47:31.765Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ntinuous HTT",
+            "at": "2026-09-26T23:47:31.828Z"
+          },
+          {
+            "type": "step_update",
+            "text": "PS synthetic",
+            "at": "2026-09-26T23:47:31.854Z"
+          },
+          {
+            "type": "step_update",
+            "text": " requests to",
+            "at": "2026-09-26T23:47:31.905Z"
+          },
+          {
+            "type": "step_update",
+            "text": " port 443 th",
+            "at": "2026-09-26T23:47:31.930Z"
+          },
+          {
+            "type": "step_update",
+            "text": "roughout the",
+            "at": "2026-09-26T23:47:31.955Z"
+          },
+          {
+            "type": "step_update",
+            "text": " window. Ens",
+            "at": "2026-09-26T23:47:31.980Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ure HTTP 200",
+            "at": "2026-09-26T23:47:32.031Z"
+          },
+          {
+            "type": "step_update",
+            "text": " responses, ",
+            "at": "2026-09-26T23:47:32.058Z"
+          },
+          {
+            "type": "step_update",
+            "text": "0% packet lo",
+            "at": "2026-09-26T23:47:32.109Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ss, and zero",
+            "at": "2026-09-26T23:47:32.160Z"
+          },
+          {
+            "type": "step_update",
+            "text": " connection ",
+            "at": "2026-09-26T23:47:32.185Z"
+          },
+          {
+            "type": "step_update",
+            "text": "resets.\n\n---",
+            "at": "2026-09-26T23:47:32.236Z"
+          },
+          {
+            "type": "step_update",
+            "text": "\n\n## 6. Roll",
+            "at": "2026-09-26T23:47:32.262Z"
+          },
+          {
+            "type": "step_update",
+            "text": "back Conside",
+            "at": "2026-09-26T23:47:32.288Z"
+          },
+          {
+            "type": "step_update",
+            "text": "rations\n* **",
+            "at": "2026-09-26T23:47:32.339Z"
+          },
+          {
+            "type": "step_update",
+            "text": "Rollback Tri",
+            "at": "2026-09-26T23:47:32.365Z"
+          },
+          {
+            "type": "step_update",
+            "text": "gger**:\n  * ",
+            "at": "2026-09-26T23:47:32.390Z"
+          },
+          {
+            "type": "step_update",
+            "text": "Remediation ",
+            "at": "2026-09-26T23:47:32.416Z"
+          },
+          {
+            "type": "step_update",
+            "text": "causes an un",
+            "at": "2026-09-26T23:47:32.467Z"
+          },
+          {
+            "type": "step_update",
+            "text": "expected los",
+            "at": "2026-09-26T23:47:32.493Z"
+          },
+          {
+            "type": "step_update",
+            "text": "s of critica",
+            "at": "2026-09-26T23:47:32.544Z"
+          },
+          {
+            "type": "step_update",
+            "text": "l operationa",
+            "at": "2026-09-26T23:47:32.569Z"
+          },
+          {
+            "type": "step_update",
+            "text": "l access whe",
+            "at": "2026-09-26T23:47:32.620Z"
+          },
+          {
+            "type": "step_update",
+            "text": "re SSM is un",
+            "at": "2026-09-26T23:47:32.676Z"
+          },
+          {
+            "type": "step_update",
+            "text": "available an",
+            "at": "2026-09-26T23:47:32.723Z"
+          },
+          {
+            "type": "step_update",
+            "text": "d immediate ",
+            "at": "2026-09-26T23:47:32.748Z"
+          },
+          {
+            "type": "step_update",
+            "text": "remote acces",
+            "at": "2026-09-26T23:47:32.827Z"
+          },
+          {
+            "type": "step_update",
+            "text": "s is vital for business continuity.\n* **Controlled Rollback Procedure**:\n  * **Never** roll back to `0.0.0.0/0`.\n  * If emergency SSH access is strictly required, apply a temporary, time-bound ingress rule restricted **only** to the specific administrator's static IP (`/32`) with a maximum TTL (e.g., 2 hours).\n  * Log the emergency temporary rule as an exception in the change management system.\n\n---\n---\n\n# Español: Plan de Remediación\n\n## 1. Resumen Ejecutivo y Descripción del Drift\n* **Recurso Objetivo**: `aws_security_group.app_sg`\n* **Drift Detectado**: Regla de ingreso para TCP Puerto 22 (SSH) abierta a `0.0.0.0/0` (agregada manualmente fuera de Terraform).\n* **Estado Declarado**: Ingreso restringido únicamente a TCP Puerto 443 (HTTPS) desde `0.0.0.0/0`.\n* **Nivel / Puntuación de Riesgo**: 95 / Alto (`public_ssh`).\n* **Objetivo**: Eliminar la regla de ingreso SSH pública no autorizada y restaurar el estado declarado con **cero tiempo de inactividad** (zero downtime).\n\n---\n\n## 2. Suposiciones (Assumptions)\n1. **Segregación de Tráfico**: El tráfico legítimo de la aplicación es exclusivamente HTTPS (TCP 443); SSH (TCP 22) no es requerido por los usuarios finales.\n2. **Naturaleza Stateful de AWS Security Groups**: Modificar o revocar una regla de ingreso en un Security Group es una operación API en caliente que no interrumpe interfaces de red (ENIs), no reinicia instancias ni corta sesiones activas de HTTPS.\n3. **Acceso Administrativo Alternativo**: La administración se gestiona mediante AWS Systems Manager (SSM) Session Manager, VPN o bastión privado, haciendo innecesaria la exposición pública de SSH.\n4. **Autoridad de Terraform**: El código declarado en Terraform representa la única fuente de verdad.\n5. **Entorno de Simulación / Solo Lectura**: No se ejecutan comandos destructivos ni cambios automáticos en este análisis.\n\n---\n\n## 3. Puerta de Aprobación Explícita (Approval Gate)\n> [!IMPORTANT]\n> **Acción Requerida**: Antes de aplicar cualquier cambio en el entorno, se requiere la aprobación explícita y documentada del **Líder de Seguridad / Comité de Control de Cambios (CAB)**.\n\n* **Lista de Verificación Previa a la Aprobación**:\n  * [ ] Confirmar que no hay incidentes activos cuya resolución dependa de conectividad SSH pública.\n  * [ ] Verificar que AWS SSM Session Manager o la vía de acceso privada alternativa esté operativa.\n  * [ ] Firma de visto bueno por: Operaciones de Seguridad (SecOps) y Responsable de Plataforma.\n\n---\n\n## 4. Pasos Ordenados de Remediación (Sin Tiempo de Inactividad)\n\n### Paso 1: Telemetría Previa y Auditoría de Sesiones\n* Consultar AWS CloudTrail para identificar el origen y usuario que creó la regla manual fuera de Terraform.\n* Analizar VPC Flow Logs y registros del sistema operativo para verificar si hubo conexiones entrantes al puerto 22 durante la ventana de exposición.\n\n### Paso 2: Validación de la Puerta de Aprobación\n* Obtener la aprobación formal estipulada en la Sección 3.\n\n### Paso 3: Eliminación de la Regla (Reconciliación de Estado)\n* Alinear el estado real con el código de Terraform eliminando la regla de ingreso (`puerto 22`, `0.0.0.0/0`) en `aws_security_group.app_sg`.\n* Método de ejecución: Mediante el pipeline de CI/CD (`terraform plan` para confirmar que solo se revoca la regla no autorizada, seguido de aprobación y apply controlado) o revocación out-of-band autorizada y posterior sincronización del estado.\n* **Impacto en Disponibilidad**: **0 segundos**. El puerto 443 y las conexiones HTTPS continúan funcionando sin interrupción.\n\n### Paso 4: Verificación Post-Remediación\n* Ejecutar el protocolo de verificación (detallado en la Sección 5).\n\n### Paso 5: Investigación Post-Incidente y Fortalecimiento (Hardening)\n* Auditar `authorized_keys` e integridad de las instancias asociadas a `app_sg`.\n* Habilitar reglas de AWS Config (`restricted-ssh`) o directivas SCP para prevenir modificaciones manuales no controladas en Security Groups.\n\n---\n\n## 5. Plan de Verificación\n1. **Comprobación de Frontera de Red**:\n   * Sondeo externo al puerto 22 (ej. `nc -zv <ip-publica> 22` o test de timeout). El puerto 22 debe responder como inalcanzable / timeout.\n2. **Comprobación de Configuración y Drift**:\n   * Inspeccionar reglas del Security Group: únicamente debe existir TCP 443 desde `0.0.0.0/0`.\n   * Ejecutar `terraform plan`: verificar que el resultado sea `\"No changes. Your infrastructure matches the configuration.\"` (cero drift).\n3. **Disponibilidad del Servicio**:\n   * Pruebas sintéticas continuas hacia el endpoint HTTPS (puerto 443) garantizando respuestas HTTP 200, 0% pérdida de paquetes y cero caídas de conexión.\n\n---\n\n## 6. Consideraciones de Rollback\n* **Criterio de Activación de Rollback**:\n  * La remediación provoca una pérdida imprevista de acceso operativo crítico donde SSM no está disponible y el acceso remoto es indispensable para la continuidad del negocio.\n* **Procedimiento de Rollback Controlado**:\n  * **Bajo ninguna circunstancia** restaurar la regla a `0.0.0.0/0`.\n  * Si el acceso SSH de emergencia es estrictamente necesario, aplicar una regla temporal acotada **exclusivamente** a la IP estática del operador (`/32`) con caducidad/TTL máxima (ej. 2 horas).\n  * Registrar la excepción en el sistema de gestión de cambios para evitar drift silencioso.\n",
+            "at": "2026-09-26T23:47:32.852Z"
+          },
+          {
+            "type": "result",
+            "text": "Here is the review-ready remediation plan presented in **English**, followed by **Spanish**.\n\n---\n\n# English: Remediation Plan\n\n## 1. Executive Summary & Drift Overview\n* **Target Resource**: `aws_security_group.app_sg`\n* **Detected Drift**: Ingress rule for TCP Port 22 (SSH) open to `0.0.0.0/0` (added out-of-band manually).\n* **Declared State**: Ingress restricted solely to TCP Port 443 (HTTPS) from `0.0.0.0/0`.\n* **Risk Score / Level**: 95 / High (`public_ssh`).\n* **Objective**: Remove the unauthorized public SSH ingress rule and restore declared state with **zero application downtime**.\n\n---\n\n## 2. Assumptions\n1. **Traffic Segregation**: Production application traffic strictly uses HTTPS (TCP 443); SSH (TCP 22) is not required for end-user functionality.\n2. **Stateful AWS Security Groups**: Modifying or revoking an ingress rule in an AWS Security Group is an in-place API operation that does not disrupt or restart existing network interfaces (ENIs), instances, or active HTTPS sessions.\n3. **Alternative Administrative Access**: Systems administration is handled via AWS Systems Manager (SSM) Session Manager or private network bastions/VPNs, rendering direct public SSH exposure unnecessary.\n4. **Terraform Authority**: The declared Terraform codebase is the single source of truth.\n5. **Read-Only / Simulation Context**: No automated destructive commands or executions are performed during this review.\n\n---\n\n## 3. Explicit Approval Gate\n> [!IMPORTANT]\n> **Action Required**: Prior to applying any remediation to the environment, explicit written approval is required from the **Security Lead / Change Advisory Board (CAB)**.\n\n* **Pre-Approval Checklist**:\n  * [ ] Verify that no active incident triage depends on public SSH connectivity.\n  * [ ] Confirm that AWS SSM Session Manager or an authorized private access path is operational.\n  * [ ] Obtain sign-off from: Security Operations (SecOps) & Platform Owner.\n\n---\n\n## 4. Ordered Remediation Steps (No Downtime)\n\n### Step 1: Pre-Remediation Telemetry & Session Audit\n* Check AWS CloudTrail to identify who created the out-of-band rule and when.\n* Check VPC Flow Logs / OS-level logs to verify if any unauthorized connections occurred via port 22 during the exposure window.\n\n### Step 2: Pass Approval Gate\n* Secure formal sign-off as defined in Section 3.\n\n### Step 3: Remove Ingress Rule (State Reconciliation)\n* Reconcile the live resource with Terraform declared state by removing the ingress rule (`port 22`, `0.0.0.0/0`) from `aws_security_group.app_sg`.\n* Execution method: Run standard CI/CD deployment (`terraform plan` to confirm only the unauthorized rule is revoked, followed by review and controlled apply) or revoke the unmanaged rule via AWS authorized security workflow and sync Terraform state.\n* **Downtime Impact**: **0 seconds**. Port 443 rules and existing traffic flows remain completely untouched.\n\n### Step 4: Post-Remediation Verification\n* Execute verification procedures (detailed in Section 5).\n\n### Step 5: Exposure Investigation & Security Hardening\n* Audit SSH authorized keys and system integrity on instances attached to `app_sg`.\n* Enforce AWS SCPs (Service Control Policies) or AWS Config rule `restricted-ssh` to prevent future unauthorized manual security group modifications.\n\n---\n\n## 5. Verification Plan\n1. **Network Boundary Check**:\n   * Probe port 22 from an external network (e.g., `nc -zv <public-ip> 22` or test connection timeout). Port 22 must be unreachable / timed out.\n2. **Configuration & Drift Check**:\n   * Inspect security group ingress rules: only TCP 443 from `0.0.0.0/0` must be present.\n   * Run `terraform plan`: verify output indicates `\"No changes. Your infrastructure matches the configuration.\"`\n3. **Application Availability Check**:\n   * Send continuous HTTPS synthetic requests to port 443 throughout the window. Ensure HTTP 200 responses, 0% packet loss, and zero connection resets.\n\n---\n\n## 6. Rollback Considerations\n* **Rollback Trigger**:\n  * Remediation causes an unexpected loss of critical operational access where SSM is unavailable and immediate remote access is vital for business continuity.\n* **Controlled Rollback Procedure**:\n  * **Never** roll back to `0.0.0.0/0`.\n  * If emergency SSH access is strictly required, apply a temporary, time-bound ingress rule restricted **only** to the specific administrator's static IP (`/32`) with a maximum TTL (e.g., 2 hours).\n  * Log the emergency temporary rule as an exception in the change management system.\n\n---\n---\n\n# Español: Plan de Remediación\n\n## 1. Resumen Ejecutivo y Descripción del Drift\n* **Recurso Objetivo**: `aws_security_group.app_sg`\n* **Drift Detectado**: Regla de ingreso para TCP Puerto 22 (SSH) abierta a `0.0.0.0/0` (agregada manualmente fuera de Terraform).\n* **Estado Declarado**: Ingreso restringido únicamente a TCP Puerto 443 (HTTPS) desde `0.0.0.0/0`.\n* **Nivel / Puntuación de Riesgo**: 95 / Alto (`public_ssh`).\n* **Objetivo**: Eliminar la regla de ingreso SSH pública no autorizada y restaurar el estado declarado con **cero tiempo de inactividad** (zero downtime).\n\n---\n\n## 2. Suposiciones (Assumptions)\n1. **Segregación de Tráfico**: El tráfico legítimo de la aplicación es exclusivamente HTTPS (TCP 443); SSH (TCP 22) no es requerido por los usuarios finales.\n2. **Naturaleza Stateful de AWS Security Groups**: Modificar o revocar una regla de ingreso en un Security Group es una operación API en caliente que no interrumpe interfaces de red (ENIs), no reinicia instancias ni corta sesiones activas de HTTPS.\n3. **Acceso Administrativo Alternativo**: La administración se gestiona mediante AWS Systems Manager (SSM) Session Manager, VPN o bastión privado, haciendo innecesaria la exposición pública de SSH.\n4. **Autoridad de Terraform**: El código declarado en Terraform representa la única fuente de verdad.\n5. **Entorno de Simulación / Solo Lectura**: No se ejecutan comandos destructivos ni cambios automáticos en este análisis.\n\n---\n\n## 3. Puerta de Aprobación Explícita (Approval Gate)\n> [!IMPORTANT]\n> **Acción Requerida**: Antes de aplicar cualquier cambio en el entorno, se requiere la aprobación explícita y documentada del **Líder de Seguridad / Comité de Control de Cambios (CAB)**.\n\n* **Lista de Verificación Previa a la Aprobación**:\n  * [ ] Confirmar que no hay incidentes activos cuya resolución dependa de conectividad SSH pública.\n  * [ ] Verificar que AWS SSM Session Manager o la vía de acceso privada alternativa esté operativa.\n  * [ ] Firma de visto bueno por: Operaciones de Seguridad (SecOps) y Responsable de Plataforma.\n\n---\n\n## 4. Pasos Ordenados de Remediación (Sin Tiempo de Inactividad)\n\n### Paso 1: Telemetría Previa y Auditoría de Sesiones\n* Consultar AWS CloudTrail para identificar el origen y usuario que creó la regla manual fuera de Terraform.\n* Analizar VPC Flow Logs y registros del sistema operativo para verificar si hubo conexiones entrantes al puerto 22 durante la ventana de exposición.\n\n### Paso 2: Validación de la Puerta de Aprobación\n* Obtener la aprobación formal estipulada en la Sección 3.\n\n### Paso 3: Eliminación de la Regla (Reconciliación de Estado)\n* Alinear el estado real con el código de Terraform eliminando la regla de ingreso (`puerto 22`, `0.0.0.0/0`) en `aws_security_group.app_sg`.\n* Método de ejecución: Mediante el pipeline de CI/CD (`terraform plan` para confirmar que solo se revoca la regla no autorizada, seguido de aprobación y apply controlado) o revocación out-of-band autorizada y posterior sincronización del estado.\n* **Impacto en Disponibilidad**: **0 segundos**. El puerto 443 y las conexiones HTTPS continúan funcionando sin interrupción.\n\n### Paso 4: Verificación Post-Remediación\n* Ejecutar el protocolo de verificación (detallado en la Sección 5).\n\n### Paso 5: Investigación Post-Incidente y Fortalecimiento (Hardening)\n* Auditar `authorized_keys` e integridad de las instancias asociadas a `app_sg`.\n* Habilitar reglas de AWS Config (`restricted-ssh`) o directivas SCP para prevenir modificaciones manuales no controladas en Security Groups.\n\n---\n\n## 5. Plan de Verificación\n1. **Comprobación de Frontera de Red**:\n   * Sondeo externo al puerto 22 (ej. `nc -zv <ip-publica> 22` o test de timeout). El puerto 22 debe responder como inalcanzable / timeout.\n2. **Comprobación de Configuración y Drift**:\n   * Inspeccionar reglas del Security Group: únicamente debe existir TCP 443 desde `0.0.0.0/0`.\n   * Ejecutar `terraform plan`: verificar que el resultado sea `\"No changes. Your infrastructure matches the configuration.\"` (cero drift).\n3. **Disponibilidad del Servicio**:\n   * Pruebas sintéticas continuas hacia el endpoint HTTPS (puerto 443) garantizando respuestas HTTP 200, 0% pérdida de paquetes y cero caídas de conexión.\n\n---\n\n## 6. Consideraciones de Rollback\n* **Criterio de Activación de Rollback**:\n  * La remediación provoca una pérdida imprevista de acceso operativo crítico donde SSM no está disponible y el acceso remoto es indispensable para la continuidad del negocio.\n* **Procedimiento de Rollback Controlado**:\n  * **Bajo ninguna circunstancia** restaurar la regla a `0.0.0.0/0`.\n  * Si el acceso SSH de emergencia es estrictamente necesario, aplicar una regla temporal acotada **exclusivamente** a la IP estática del operador (`/32`) con caducidad/TTL máxima (ej. 2 horas).\n  * Registrar la excepción en el sistema de gestión de cambios para evitar drift silencioso.\n",
+            "at": "2026-09-26T23:47:32.853Z"
+          }
+        ]
+      },
+      {
+        "phase": "agent",
+        "status": "completed",
+        "summary": "# Remediation Proposal: Drift Resolution for `aws_security_group.app_sg`\n\n---\n\n## English\n\n### 1. Assumptions\n* **Source of Truth:** The Terraform configuration represents the authorized, target architectural state (only HTTPS / port 443 allowed from `0.0.0.0/0`).\n* **Origin of Drift:** The public SSH rule (`0.0.0.0/0` on port 22) was introduced manually out-of-band (e.g., during troubleshooting) and is not an uncommitted valid architectural requirement.\n* **Alternative Administration:** Administrative access can be achieved through secure private channels (e.g., AWS Systems Manager Session Manager, internal VPN, or private bastion).\n* **Execution Environment:** This is a read-only assessment in a hackathon simulation; no commands or infrastructure modifications will be executed automatically.\n\n---\n\n### 2. Intended Terraform-Aligned Change\n* **Target Resource:** `aws_security_group.app_sg`\n* **Action:** Remove the rogue ingress rule:\n  * **Protocol:** TCP\n  * **Port Range:** 22\n  * **CIDR Block:** `0.0.0.0/0`\n  * **Description:** `\"SSH (manual change outside Terraform)\"`\n* **Target State:** Revert ingress rules strictly to the declared specification: only allow TCP port 443 (HTTPS) from `0.0.0.0/0`.\n\n---\n\n### 3. Pre-Checks\n1. **Active Session Verification:** Check whether there are active SSH sessions on the associated EC2 instances to avoid abruptly dropping legitimate troubleshooting sessions.\n2. **Alternative Access Readiness:** Verify that AWS Systems Manager (SSM) Session Manager agents are online or that a private VPN/bastion path is functional.\n3. **Plan Inspection (Read-Only):** Run a non-destructive `terraform plan` to confirm that the proposed execution only strips the unmanaged ingress rule and does not trigger resource replacement or unintended side effects.\n\n---\n\n### 4. Post-Checks\n1. **Network Reachability Test:** Verify externally that TCP port 22 is closed/unreachable from public IP space (`0.0.0.0/0`).\n2. **Drift Verification:** Run an automated drift detection / `terraform plan` to verify zero drift (`Infrastructure is up-to-date`).\n3. **Application Availability:** Confirm that HTTPS ingress on port 443 continues serving production traffic normally.\n4. **Security Audit & Log Review:** Inspect CloudTrail, VPC Flow Logs, and target instance authentication logs (`/var/log/auth.log` or `secure`) across the exposure window to identify whether unauthorized access occurred.\n\n---\n\n### 5. Why Human Approval Remains Required\n* **Operational Disruption Risk:** Severing port 22 without human coordination could lock out system engineers or disrupt an active incident response session.\n* **Forensic & Incident Awareness:** If the rule was created by an adversary or during an active breach investigation, removing it without security team consensus may disrupt incident response procedures or evidence gathering.\n* **Intent Validation:** Human operators must confirm why the manual change occurred and ensure alternative remote management channels are adopted before enforcing the change.\n\n---\n---\n\n## Español\n\n### 1. Supuestos\n* **Fuente de Verdad:** La configuración de Terraform define el estado arquitectónico deseado y autorizado (únicamente HTTPS / puerto 443 permitido desde `0.0.0.0/0`).\n* **Origen del Drift:** La regla SSH pública (`0.0.0.0/0` en el puerto 22) se introdujo manualmente fuera de banda (por ejemplo, para depuración) y no corresponde a un requerimiento de arquitectura válido pendiente de documentar.\n* **Acceso Administrativo Alternativo:** Los accesos de administración pueden canalizarse mediante vías privadas y seguras (por ejemplo, AWS Systems Manager Session Manager, VPN corporativa o bastión privado).\n* **Entorno de Ejecución:** Es una evaluación de solo lectura en simulación local; no se ejecutarán comandos ni modificaciones sobre la infraestructura.\n\n---\n\n### 2. Cambio Previsto Alineado con Terraform\n* **Recurso Afectado:** `aws_security_group.app_sg`\n* **Acción:** Eliminar la regla de ingreso no gestionada:\n  * **Protocolo:** TCP\n  * **Rango de Puertos:** 22\n  * **Bloque CIDR:** `0.0.0.0/0`\n  * **Descripción:** `\"SSH (manual change outside Terraform)\"`\n* **Estado Objetivo:** Restaurar las reglas de ingreso exactamente a lo declarado en Terraform: permitir exclusivamente tráfico TCP en puerto 443 (HTTPS) desde `0.0.0.0/0`.\n\n---\n\n### 3. Verificaciones Previas (Pre-Checks)\n1. **Verificación de Sesiones Activas:** Comprobar si existen sesiones SSH activas en las instancias EC2 vinculadas para evitar desconectar inesperadamente a operadores en tareas de resolución.\n2. **Disponibilidad de Vías Alternativas:** Confirmar que AWS Systems Manager (SSM) Session Manager esté operativo o que exista una ruta segura mediante VPN/bastión privado.\n3. **Inspección de Plan (Solo Lectura):** Ejecutar `terraform plan` para validar que el cambio planificado únicamente remueva la regla de ingreso del puerto 22, sin provocar recreación ni impactos colaterales en el recurso.\n\n---\n\n### 4. Verificaciones Posteriores (Post-Checks)\n1. **Prueba de Accesibilidad de Red:** Validar externamente que el puerto TCP 22 ya no sea accesible desde internet público (`0.0.0.0/0`).\n2. **Certificación de Cero Drift:** Correr una nueva detección de drift o `terraform plan` para certificar la alineación total con el código.\n3. **Disponibilidad del Servicio:** Asegurar que el tráfico HTTPS en el puerto 443 continúe operando con normalidad.\n4. **Revisión de Auditoría y Logs:** Analizar VPC Flow Logs, CloudTrail y los logs de autenticación de las instancias durante el periodo de exposición para detectar posibles accesos no autorizados.\n\n---\n\n### 5. Por Qué se Requiere Aprobación Humana\n* **Riesgo de Disrupción Operativa:** Cerrar el puerto 22 sin coordinación previa puede interrumpir tareas críticas de soporte o dejar fuera al equipo administrativo.\n* **Preservación Forense y Respuesta a Incidentes:** Si la regla fue generada por un actor no autorizado o en el contexto de un incidente de seguridad, eliminarla sin visto bueno del equipo de seguridad podría alterar la recolección de evidencia forense.\n* **Validación de Intención:** Un responsable humano debe corroborar la causa raíz del cambio manual y asegurar que el equipo cuente con el mecanismo de acceso recomendado antes de aplicar la remediación.\n",
+        "events": [
+          {
+            "type": "init",
+            "text": "",
+            "at": "2026-09-26T23:47:38.288Z"
+          },
+          {
+            "type": "step_update",
+            "text": "",
+            "at": "2026-09-26T23:47:38.399Z"
+          },
+          {
+            "type": "step_update",
+            "text": "# Remediation Proposal: ",
+            "at": "2026-09-26T23:47:47.290Z"
+          },
+          {
+            "type": "step_update",
+            "text": "Drift Resolu",
+            "at": "2026-09-26T23:47:47.315Z"
+          },
+          {
+            "type": "step_update",
+            "text": "tion for `aws_security_g",
+            "at": "2026-09-26T23:47:47.341Z"
+          },
+          {
+            "type": "step_update",
+            "text": "roup.app_sg`\n\n---\n\n## English\n\n### 1. Assumption",
+            "at": "2026-09-26T23:47:47.366Z"
+          },
+          {
+            "type": "step_update",
+            "text": "s\n* **Source",
+            "at": "2026-09-26T23:47:47.391Z"
+          },
+          {
+            "type": "step_update",
+            "text": " of Truth:** The Terraform configura",
+            "at": "2026-09-26T23:47:47.417Z"
+          },
+          {
+            "type": "step_update",
+            "text": "tion represents the auth",
+            "at": "2026-09-26T23:47:47.443Z"
+          },
+          {
+            "type": "step_update",
+            "text": "orized, target architect",
+            "at": "2026-09-26T23:47:47.468Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ural state (only HTTPS / port 443 allowed from `",
+            "at": "2026-09-26T23:47:47.494Z"
+          },
+          {
+            "type": "step_update",
+            "text": "0.0.0.0/0`).",
+            "at": "2026-09-26T23:47:47.519Z"
+          },
+          {
+            "type": "step_update",
+            "text": "\n* **Origin of Drift:** ",
+            "at": "2026-09-26T23:47:47.546Z"
+          },
+          {
+            "type": "step_update",
+            "text": "The public S",
+            "at": "2026-09-26T23:47:47.572Z"
+          },
+          {
+            "type": "step_update",
+            "text": "SH rule (`0.0.0.0/0` on port 22) was introduced ",
+            "at": "2026-09-26T23:47:47.596Z"
+          },
+          {
+            "type": "step_update",
+            "text": "manually out-of-band (e.",
+            "at": "2026-09-26T23:47:47.621Z"
+          },
+          {
+            "type": "step_update",
+            "text": "g., during t",
+            "at": "2026-09-26T23:47:47.647Z"
+          },
+          {
+            "type": "step_update",
+            "text": "roubleshooting) and is not an uncommitted valid ",
+            "at": "2026-09-26T23:47:47.672Z"
+          },
+          {
+            "type": "step_update",
+            "text": "architectura",
+            "at": "2026-09-26T23:47:47.698Z"
+          },
+          {
+            "type": "step_update",
+            "text": "l requirement.\n* **Alternative Admin",
+            "at": "2026-09-26T23:47:47.723Z"
+          },
+          {
+            "type": "step_update",
+            "text": "istration:** Administrative access c",
+            "at": "2026-09-26T23:47:47.748Z"
+          },
+          {
+            "type": "step_update",
+            "text": "an be achiev",
+            "at": "2026-09-26T23:47:47.774Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ed through secure privat",
+            "at": "2026-09-26T23:47:47.799Z"
+          },
+          {
+            "type": "step_update",
+            "text": "e channels (e.g., AWS Systems Manage",
+            "at": "2026-09-26T23:47:47.824Z"
+          },
+          {
+            "type": "step_update",
+            "text": "r Session Manager, inter",
+            "at": "2026-09-26T23:47:47.850Z"
+          },
+          {
+            "type": "step_update",
+            "text": "nal VPN, or private bastion).\n* **Execution Envi",
+            "at": "2026-09-26T23:47:47.876Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ronment:** T",
+            "at": "2026-09-26T23:47:47.901Z"
+          },
+          {
+            "type": "step_update",
+            "text": "his is a read-only assessment in a h",
+            "at": "2026-09-26T23:47:47.926Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ackathon simulation; no ",
+            "at": "2026-09-26T23:47:47.952Z"
+          },
+          {
+            "type": "step_update",
+            "text": "commands or infrastructu",
+            "at": "2026-09-26T23:47:47.978Z"
+          },
+          {
+            "type": "step_update",
+            "text": "re modifications will be executed au",
+            "at": "2026-09-26T23:47:48.003Z"
+          },
+          {
+            "type": "step_update",
+            "text": "tomatically.\n\n---\n\n### 2",
+            "at": "2026-09-26T23:47:48.028Z"
+          },
+          {
+            "type": "step_update",
+            "text": ". Intended Terraform-Aligned Change\n",
+            "at": "2026-09-26T23:47:48.054Z"
+          },
+          {
+            "type": "step_update",
+            "text": "* **Target Resource:** `",
+            "at": "2026-09-26T23:47:48.079Z"
+          },
+          {
+            "type": "step_update",
+            "text": "aws_security_group.app_s",
+            "at": "2026-09-26T23:47:48.104Z"
+          },
+          {
+            "type": "step_update",
+            "text": "g`\n* **Action:** Remove ",
+            "at": "2026-09-26T23:47:48.129Z"
+          },
+          {
+            "type": "step_update",
+            "text": "the rogue ingress rule:\n  * **Protoc",
+            "at": "2026-09-26T23:47:48.155Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ol:** TCP\n  * **Port Ran",
+            "at": "2026-09-26T23:47:48.180Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ge:** 22\n  * **CIDR Bloc",
+            "at": "2026-09-26T23:47:48.205Z"
+          },
+          {
+            "type": "step_update",
+            "text": "k:** `0.0.0.0/0`\n  * **D",
+            "at": "2026-09-26T23:47:48.231Z"
+          },
+          {
+            "type": "step_update",
+            "text": "escription:** `\"SSH (man",
+            "at": "2026-09-26T23:47:48.256Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ual change outside Terraform)\"`\n* **",
+            "at": "2026-09-26T23:47:48.282Z"
+          },
+          {
+            "type": "step_update",
+            "text": "Target State:** Revert i",
+            "at": "2026-09-26T23:47:48.307Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ngress rules strictly to the declare",
+            "at": "2026-09-26T23:47:48.333Z"
+          },
+          {
+            "type": "step_update",
+            "text": "d specification: only al",
+            "at": "2026-09-26T23:47:48.358Z"
+          },
+          {
+            "type": "step_update",
+            "text": "low TCP port 443 (HTTPS)",
+            "at": "2026-09-26T23:47:48.384Z"
+          },
+          {
+            "type": "step_update",
+            "text": " from `0.0.0.0/0`.\n\n---\n\n### 3. Pre-",
+            "at": "2026-09-26T23:47:48.413Z"
+          },
+          {
+            "type": "step_update",
+            "text": "Checks\n1. **Active Sessi",
+            "at": "2026-09-26T23:47:48.438Z"
+          },
+          {
+            "type": "step_update",
+            "text": "on Verification:** Check",
+            "at": "2026-09-26T23:47:48.463Z"
+          },
+          {
+            "type": "step_update",
+            "text": " whether there are activ",
+            "at": "2026-09-26T23:47:48.489Z"
+          },
+          {
+            "type": "step_update",
+            "text": "e SSH sessions on the as",
+            "at": "2026-09-26T23:47:48.514Z"
+          },
+          {
+            "type": "step_update",
+            "text": "sociated EC2 instances to avoid abru",
+            "at": "2026-09-26T23:47:48.539Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ptly dropping legitimate",
+            "at": "2026-09-26T23:47:48.566Z"
+          },
+          {
+            "type": "step_update",
+            "text": " troubleshooting session",
+            "at": "2026-09-26T23:47:48.590Z"
+          },
+          {
+            "type": "step_update",
+            "text": "s.\n2. **Alternative Acce",
+            "at": "2026-09-26T23:47:48.616Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ss Readiness:** Verify t",
+            "at": "2026-09-26T23:47:48.641Z"
+          },
+          {
+            "type": "step_update",
+            "text": "hat AWS Systems Manager ",
+            "at": "2026-09-26T23:47:48.667Z"
+          },
+          {
+            "type": "step_update",
+            "text": "(SSM) Session Manager ag",
+            "at": "2026-09-26T23:47:48.693Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ents are onl",
+            "at": "2026-09-26T23:47:48.718Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ine or that a private VPN/bastion pa",
+            "at": "2026-09-26T23:47:48.743Z"
+          },
+          {
+            "type": "step_update",
+            "text": "th is functional.\n3. **P",
+            "at": "2026-09-26T23:47:48.768Z"
+          },
+          {
+            "type": "step_update",
+            "text": "lan Inspection (Read-Onl",
+            "at": "2026-09-26T23:47:48.795Z"
+          },
+          {
+            "type": "step_update",
+            "text": "y):** Run a non-destruct",
+            "at": "2026-09-26T23:47:48.821Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ive `terrafo",
+            "at": "2026-09-26T23:47:48.846Z"
+          },
+          {
+            "type": "step_update",
+            "text": "rm plan` to confirm that",
+            "at": "2026-09-26T23:47:48.871Z"
+          },
+          {
+            "type": "step_update",
+            "text": " the proposed execution ",
+            "at": "2026-09-26T23:47:48.897Z"
+          },
+          {
+            "type": "step_update",
+            "text": "only strips the unmanage",
+            "at": "2026-09-26T23:47:48.922Z"
+          },
+          {
+            "type": "step_update",
+            "text": "d ingress ru",
+            "at": "2026-09-26T23:47:48.947Z"
+          },
+          {
+            "type": "step_update",
+            "text": "le and does not trigger ",
+            "at": "2026-09-26T23:47:48.973Z"
+          },
+          {
+            "type": "step_update",
+            "text": "resource replacement or ",
+            "at": "2026-09-26T23:47:48.999Z"
+          },
+          {
+            "type": "step_update",
+            "text": "unintended side effects.",
+            "at": "2026-09-26T23:47:49.024Z"
+          },
+          {
+            "type": "step_update",
+            "text": "\n\n---\n\n### 4. Post-Check",
+            "at": "2026-09-26T23:47:49.050Z"
+          },
+          {
+            "type": "step_update",
+            "text": "s\n1. **Netwo",
+            "at": "2026-09-26T23:47:49.075Z"
+          },
+          {
+            "type": "step_update",
+            "text": "rk Reachability Test:** ",
+            "at": "2026-09-26T23:47:49.101Z"
+          },
+          {
+            "type": "step_update",
+            "text": "Verify exter",
+            "at": "2026-09-26T23:47:49.126Z"
+          },
+          {
+            "type": "step_update",
+            "text": "nally that TCP port 22 i",
+            "at": "2026-09-26T23:47:49.152Z"
+          },
+          {
+            "type": "step_update",
+            "text": "s closed/unr",
+            "at": "2026-09-26T23:47:49.178Z"
+          },
+          {
+            "type": "step_update",
+            "text": "eachable from public IP ",
+            "at": "2026-09-26T23:47:49.203Z"
+          },
+          {
+            "type": "step_update",
+            "text": "space (`0.0.0.0/0`).\n2. ",
+            "at": "2026-09-26T23:47:49.228Z"
+          },
+          {
+            "type": "step_update",
+            "text": "**Drift Veri",
+            "at": "2026-09-26T23:47:49.254Z"
+          },
+          {
+            "type": "step_update",
+            "text": "fication:** Run an autom",
+            "at": "2026-09-26T23:47:49.280Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ated drift detection / `",
+            "at": "2026-09-26T23:47:49.308Z"
+          },
+          {
+            "type": "step_update",
+            "text": "terraform plan` to verif",
+            "at": "2026-09-26T23:47:49.333Z"
+          },
+          {
+            "type": "step_update",
+            "text": "y zero drift",
+            "at": "2026-09-26T23:47:49.358Z"
+          },
+          {
+            "type": "step_update",
+            "text": " (`Infrastructure is up-",
+            "at": "2026-09-26T23:47:49.384Z"
+          },
+          {
+            "type": "step_update",
+            "text": "to-date`).\n3. **Applicat",
+            "at": "2026-09-26T23:47:49.409Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ion Availabi",
+            "at": "2026-09-26T23:47:49.434Z"
+          },
+          {
+            "type": "step_update",
+            "text": "lity:** Confirm that HTT",
+            "at": "2026-09-26T23:47:49.460Z"
+          },
+          {
+            "type": "step_update",
+            "text": "PS ingress on port 443 c",
+            "at": "2026-09-26T23:47:49.511Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ontinues ser",
+            "at": "2026-09-26T23:47:49.536Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ving production traffic ",
+            "at": "2026-09-26T23:47:49.561Z"
+          },
+          {
+            "type": "step_update",
+            "text": "normally.\n4. **Security ",
+            "at": "2026-09-26T23:47:49.586Z"
+          },
+          {
+            "type": "step_update",
+            "text": "Audit & Log ",
+            "at": "2026-09-26T23:47:49.612Z"
+          },
+          {
+            "type": "step_update",
+            "text": "Review:** Inspect CloudT",
+            "at": "2026-09-26T23:47:49.637Z"
+          },
+          {
+            "type": "step_update",
+            "text": "rail, VPC Fl",
+            "at": "2026-09-26T23:47:49.663Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ow Logs, and target inst",
+            "at": "2026-09-26T23:47:49.688Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ance authent",
+            "at": "2026-09-26T23:47:49.713Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ication logs (`/var/log/",
+            "at": "2026-09-26T23:47:49.739Z"
+          },
+          {
+            "type": "step_update",
+            "text": "auth.log` or `secure`) a",
+            "at": "2026-09-26T23:47:49.765Z"
+          },
+          {
+            "type": "step_update",
+            "text": "cross the exposure windo",
+            "at": "2026-09-26T23:47:49.816Z"
+          },
+          {
+            "type": "step_update",
+            "text": "w to identif",
+            "at": "2026-09-26T23:47:49.842Z"
+          },
+          {
+            "type": "step_update",
+            "text": "y whether unauthorized a",
+            "at": "2026-09-26T23:47:49.867Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ccess occurr",
+            "at": "2026-09-26T23:47:49.893Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ed.\n\n---\n\n### 5. Why Hum",
+            "at": "2026-09-26T23:47:49.919Z"
+          },
+          {
+            "type": "step_update",
+            "text": "an Approval ",
+            "at": "2026-09-26T23:47:49.945Z"
+          },
+          {
+            "type": "step_update",
+            "text": "Remains Required\n* **Ope",
+            "at": "2026-09-26T23:47:49.970Z"
+          },
+          {
+            "type": "step_update",
+            "text": "rational Dis",
+            "at": "2026-09-26T23:47:49.996Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ruption Risk:** Severing",
+            "at": "2026-09-26T23:47:50.021Z"
+          },
+          {
+            "type": "step_update",
+            "text": " port 22 wit",
+            "at": "2026-09-26T23:47:50.046Z"
+          },
+          {
+            "type": "step_update",
+            "text": "hout human coordination ",
+            "at": "2026-09-26T23:47:50.073Z"
+          },
+          {
+            "type": "step_update",
+            "text": "could lock o",
+            "at": "2026-09-26T23:47:50.098Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ut system engineers or d",
+            "at": "2026-09-26T23:47:50.123Z"
+          },
+          {
+            "type": "step_update",
+            "text": "isrupt an ac",
+            "at": "2026-09-26T23:47:50.149Z"
+          },
+          {
+            "type": "step_update",
+            "text": "tive incident response s",
+            "at": "2026-09-26T23:47:50.175Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ession.\n* **",
+            "at": "2026-09-26T23:47:50.201Z"
+          },
+          {
+            "type": "step_update",
+            "text": "Forensic & I",
+            "at": "2026-09-26T23:47:50.226Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ncident Awareness:** If ",
+            "at": "2026-09-26T23:47:50.252Z"
+          },
+          {
+            "type": "step_update",
+            "text": "the rule was",
+            "at": "2026-09-26T23:47:50.277Z"
+          },
+          {
+            "type": "step_update",
+            "text": " created by an adversary",
+            "at": "2026-09-26T23:47:50.303Z"
+          },
+          {
+            "type": "step_update",
+            "text": " or during a",
+            "at": "2026-09-26T23:47:50.328Z"
+          },
+          {
+            "type": "step_update",
+            "text": "n active bre",
+            "at": "2026-09-26T23:47:50.354Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ach investigation, remov",
+            "at": "2026-09-26T23:47:50.379Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ing it witho",
+            "at": "2026-09-26T23:47:50.406Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ut security team consens",
+            "at": "2026-09-26T23:47:50.431Z"
+          },
+          {
+            "type": "step_update",
+            "text": "us may disru",
+            "at": "2026-09-26T23:47:50.456Z"
+          },
+          {
+            "type": "step_update",
+            "text": "pt incident response pro",
+            "at": "2026-09-26T23:47:50.481Z"
+          },
+          {
+            "type": "step_update",
+            "text": "cedures or e",
+            "at": "2026-09-26T23:47:50.506Z"
+          },
+          {
+            "type": "step_update",
+            "text": "vidence gath",
+            "at": "2026-09-26T23:47:50.532Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ering.\n* **Intent Valida",
+            "at": "2026-09-26T23:47:50.583Z"
+          },
+          {
+            "type": "step_update",
+            "text": "tion:** Huma",
+            "at": "2026-09-26T23:47:50.608Z"
+          },
+          {
+            "type": "step_update",
+            "text": "n operators must confirm",
+            "at": "2026-09-26T23:47:50.634Z"
+          },
+          {
+            "type": "step_update",
+            "text": " why the man",
+            "at": "2026-09-26T23:47:50.659Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ual change o",
+            "at": "2026-09-26T23:47:50.686Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ccurred and ensure alter",
+            "at": "2026-09-26T23:47:50.712Z"
+          },
+          {
+            "type": "step_update",
+            "text": "native remot",
+            "at": "2026-09-26T23:47:50.737Z"
+          },
+          {
+            "type": "step_update",
+            "text": "e management",
+            "at": "2026-09-26T23:47:50.762Z"
+          },
+          {
+            "type": "step_update",
+            "text": " channels are adopted be",
+            "at": "2026-09-26T23:47:50.788Z"
+          },
+          {
+            "type": "step_update",
+            "text": "fore enforci",
+            "at": "2026-09-26T23:47:50.813Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ng the change.\n\n---\n---\n",
+            "at": "2026-09-26T23:47:50.838Z"
+          },
+          {
+            "type": "step_update",
+            "text": "\n## Español",
+            "at": "2026-09-26T23:47:50.864Z"
+          },
+          {
+            "type": "step_update",
+            "text": "\n\n### 1. Sup",
+            "at": "2026-09-26T23:47:50.890Z"
+          },
+          {
+            "type": "step_update",
+            "text": "uestos\n* **F",
+            "at": "2026-09-26T23:47:50.915Z"
+          },
+          {
+            "type": "step_update",
+            "text": "uente de Ver",
+            "at": "2026-09-26T23:47:50.940Z"
+          },
+          {
+            "type": "step_update",
+            "text": "dad:** La configuración",
+            "at": "2026-09-26T23:47:50.965Z"
+          },
+          {
+            "type": "step_update",
+            "text": " de Terrafor",
+            "at": "2026-09-26T23:47:50.991Z"
+          },
+          {
+            "type": "step_update",
+            "text": "m define el ",
+            "at": "2026-09-26T23:47:51.017Z"
+          },
+          {
+            "type": "step_update",
+            "text": "estado arqui",
+            "at": "2026-09-26T23:47:51.043Z"
+          },
+          {
+            "type": "step_update",
+            "text": "tectónico deseado y autorizado (únicamente HTTPS / puerto 443 permitido desde `0.0.0.0/0`).\n* **Origen del Drift:** La regla SSH pública (`0.0.0.0/0` en el puerto 22) se introdujo manualmente fuera de banda (por ejemplo, para depuración) y no corresponde a un requerimiento de arquitectura válido pendiente de documentar.\n* **Acceso Administrativo Alternativo:** Los accesos de administración pueden canalizarse mediante vías privadas y seguras (por ejemplo, AWS Systems Manager Session Manager, VPN corporativa o bastión privado).\n* **Entorno de Ejecución:** Es una evaluación de solo lectura en simulación local; no se ejecutarán comandos ni modificaciones sobre la infraestructura.\n\n---\n\n### 2. Cambio Previsto Alineado con Terraform\n* **Recurso Afectado:** `aws_security_group.app_sg`\n* **Acción:** Eliminar la regla de ingreso no gestionada:\n  * **Protocolo:** TCP\n  * **Rango de Puertos:** 22\n  * **Bloque CIDR:** `0.0.0.0/0`\n  * **Descripción:** `\"SSH (manual change outside Terraform)\"`\n* **Estado Objetivo:** Restaurar las reglas de ingreso exactamente a lo declarado en Terraform: permitir exclusivamente tráfico TCP en puerto 443 (HTTPS) desde `0.0.0.0/0`.\n\n---\n\n### 3. Verificaciones Previas (Pre-Checks)\n1. **Verificación de Sesiones Activas:** Comprobar si existen sesiones SSH activas en las instancias EC2 vinculadas para evitar desconectar inesperadamente a operadores en tareas de resolución.\n2. **Disponibilidad de Vías Alternativas:** Confirmar que AWS Systems Manager (SSM) Session Manager esté operativo o que exista una ruta segura mediante VPN/bastión privado.\n3. **Inspección de Plan (Solo Lectura):** Ejecutar `terraform plan` para validar que el cambio planificado únicamente remueva la regla de ingreso del puerto 22, sin provocar recreación ni impactos colaterales en el recurso.\n\n---\n\n### 4. Verificaciones Posteriores (Post-Checks)\n1. **Prueba de Accesibilidad de Red:** Validar externamente que el puerto TCP 22 ya no sea accesible desde internet público (`0.0.0.0/0`).\n2. **Certificación de Cero Drift:** Correr una nueva detección de drift o `terraform plan` para certificar la alineación total con el código.\n3. **Disponibilidad del Servicio:** Asegurar que el tráfico HTTPS en el puerto 443 continúe operando con normalidad.\n4. **Revisión de Auditoría y Logs:** Analizar VPC Flow Logs, CloudTrail y los logs de autenticación de las instancias durante el periodo de exposición para detectar posibles accesos no autorizados.\n\n---\n\n### 5. Por Qué se Requiere Aprobación Humana\n* **Riesgo de Disrupción Operativa:** Cerrar el puerto 22 sin coordinación previa puede interrumpir tareas críticas de soporte o dejar fuera al equipo administrativo.\n* **Preservación Forense y Respuesta a Incidentes:** Si la regla fue generada por un actor no autorizado o en el contexto de un incidente de seguridad, eliminarla sin visto bueno del equipo de seguridad podría alterar la recolección de evidencia forense.\n* **Validación de Intención:** Un responsable humano debe corroborar la causa raíz del cambio manual y asegurar que el equipo cuente con el mecanismo de acceso recomendado antes de aplicar la remediación.\n",
+            "at": "2026-09-26T23:47:51.068Z"
+          },
+          {
+            "type": "result",
+            "text": "# Remediation Proposal: Drift Resolution for `aws_security_group.app_sg`\n\n---\n\n## English\n\n### 1. Assumptions\n* **Source of Truth:** The Terraform configuration represents the authorized, target architectural state (only HTTPS / port 443 allowed from `0.0.0.0/0`).\n* **Origin of Drift:** The public SSH rule (`0.0.0.0/0` on port 22) was introduced manually out-of-band (e.g., during troubleshooting) and is not an uncommitted valid architectural requirement.\n* **Alternative Administration:** Administrative access can be achieved through secure private channels (e.g., AWS Systems Manager Session Manager, internal VPN, or private bastion).\n* **Execution Environment:** This is a read-only assessment in a hackathon simulation; no commands or infrastructure modifications will be executed automatically.\n\n---\n\n### 2. Intended Terraform-Aligned Change\n* **Target Resource:** `aws_security_group.app_sg`\n* **Action:** Remove the rogue ingress rule:\n  * **Protocol:** TCP\n  * **Port Range:** 22\n  * **CIDR Block:** `0.0.0.0/0`\n  * **Description:** `\"SSH (manual change outside Terraform)\"`\n* **Target State:** Revert ingress rules strictly to the declared specification: only allow TCP port 443 (HTTPS) from `0.0.0.0/0`.\n\n---\n\n### 3. Pre-Checks\n1. **Active Session Verification:** Check whether there are active SSH sessions on the associated EC2 instances to avoid abruptly dropping legitimate troubleshooting sessions.\n2. **Alternative Access Readiness:** Verify that AWS Systems Manager (SSM) Session Manager agents are online or that a private VPN/bastion path is functional.\n3. **Plan Inspection (Read-Only):** Run a non-destructive `terraform plan` to confirm that the proposed execution only strips the unmanaged ingress rule and does not trigger resource replacement or unintended side effects.\n\n---\n\n### 4. Post-Checks\n1. **Network Reachability Test:** Verify externally that TCP port 22 is closed/unreachable from public IP space (`0.0.0.0/0`).\n2. **Drift Verification:** Run an automated drift detection / `terraform plan` to verify zero drift (`Infrastructure is up-to-date`).\n3. **Application Availability:** Confirm that HTTPS ingress on port 443 continues serving production traffic normally.\n4. **Security Audit & Log Review:** Inspect CloudTrail, VPC Flow Logs, and target instance authentication logs (`/var/log/auth.log` or `secure`) across the exposure window to identify whether unauthorized access occurred.\n\n---\n\n### 5. Why Human Approval Remains Required\n* **Operational Disruption Risk:** Severing port 22 without human coordination could lock out system engineers or disrupt an active incident response session.\n* **Forensic & Incident Awareness:** If the rule was created by an adversary or during an active breach investigation, removing it without security team consensus may disrupt incident response procedures or evidence gathering.\n* **Intent Validation:** Human operators must confirm why the manual change occurred and ensure alternative remote management channels are adopted before enforcing the change.\n\n---\n---\n\n## Español\n\n### 1. Supuestos\n* **Fuente de Verdad:** La configuración de Terraform define el estado arquitectónico deseado y autorizado (únicamente HTTPS / puerto 443 permitido desde `0.0.0.0/0`).\n* **Origen del Drift:** La regla SSH pública (`0.0.0.0/0` en el puerto 22) se introdujo manualmente fuera de banda (por ejemplo, para depuración) y no corresponde a un requerimiento de arquitectura válido pendiente de documentar.\n* **Acceso Administrativo Alternativo:** Los accesos de administración pueden canalizarse mediante vías privadas y seguras (por ejemplo, AWS Systems Manager Session Manager, VPN corporativa o bastión privado).\n* **Entorno de Ejecución:** Es una evaluación de solo lectura en simulación local; no se ejecutarán comandos ni modificaciones sobre la infraestructura.\n\n---\n\n### 2. Cambio Previsto Alineado con Terraform\n* **Recurso Afectado:** `aws_security_group.app_sg`\n* **Acción:** Eliminar la regla de ingreso no gestionada:\n  * **Protocolo:** TCP\n  * **Rango de Puertos:** 22\n  * **Bloque CIDR:** `0.0.0.0/0`\n  * **Descripción:** `\"SSH (manual change outside Terraform)\"`\n* **Estado Objetivo:** Restaurar las reglas de ingreso exactamente a lo declarado en Terraform: permitir exclusivamente tráfico TCP en puerto 443 (HTTPS) desde `0.0.0.0/0`.\n\n---\n\n### 3. Verificaciones Previas (Pre-Checks)\n1. **Verificación de Sesiones Activas:** Comprobar si existen sesiones SSH activas en las instancias EC2 vinculadas para evitar desconectar inesperadamente a operadores en tareas de resolución.\n2. **Disponibilidad de Vías Alternativas:** Confirmar que AWS Systems Manager (SSM) Session Manager esté operativo o que exista una ruta segura mediante VPN/bastión privado.\n3. **Inspección de Plan (Solo Lectura):** Ejecutar `terraform plan` para validar que el cambio planificado únicamente remueva la regla de ingreso del puerto 22, sin provocar recreación ni impactos colaterales en el recurso.\n\n---\n\n### 4. Verificaciones Posteriores (Post-Checks)\n1. **Prueba de Accesibilidad de Red:** Validar externamente que el puerto TCP 22 ya no sea accesible desde internet público (`0.0.0.0/0`).\n2. **Certificación de Cero Drift:** Correr una nueva detección de drift o `terraform plan` para certificar la alineación total con el código.\n3. **Disponibilidad del Servicio:** Asegurar que el tráfico HTTPS en el puerto 443 continúe operando con normalidad.\n4. **Revisión de Auditoría y Logs:** Analizar VPC Flow Logs, CloudTrail y los logs de autenticación de las instancias durante el periodo de exposición para detectar posibles accesos no autorizados.\n\n---\n\n### 5. Por Qué se Requiere Aprobación Humana\n* **Riesgo de Disrupción Operativa:** Cerrar el puerto 22 sin coordinación previa puede interrumpir tareas críticas de soporte o dejar fuera al equipo administrativo.\n* **Preservación Forense y Respuesta a Incidentes:** Si la regla fue generada por un actor no autorizado o en el contexto de un incidente de seguridad, eliminarla sin visto bueno del equipo de seguridad podría alterar la recolección de evidencia forense.\n* **Validación de Intención:** Un responsable humano debe corroborar la causa raíz del cambio manual y asegurar que el equipo cuente con el mecanismo de acceso recomendado antes de aplicar la remediación.\n",
+            "at": "2026-09-26T23:47:51.068Z"
+          }
+        ]
+      }
+    ]
+  },
+  "decision": {
+    "value": "approve",
+    "decided_at": "2026-09-26T23:47:53.497Z"
+  },
+  "verification": {
+    "status": "healthy",
+    "drift_detectado": false,
+    "estado_declarado_fuente": "terraform_plan",
+    "scenario_id": "healthy",
+    "cantidad_de_diferencias": 0,
+    "risk_score": 0,
+    "risk_level": "none",
+    "detalle": [],
+    "recommendations": [
+      {
+        "id": "continue-monitoring",
+        "priority": "monitor",
+        "title": {
+          "en": "Continue monitoring",
+          "es": "Continuar monitoreando"
+        },
+        "action": {
+          "en": "Keep periodic drift checks enabled and review every infrastructure change through code.",
+          "es": "Mantener verificaciones periodicas de drift y revisar cada cambio de infraestructura mediante codigo."
+        }
+      }
+    ],
+    "message": "No se detecto drift. El estado real coincide exactamente con lo declarado en el codigo."
+  },
+  "safety": {
+    "cloud_changes_applied": false,
+    "terraform_apply_executed": false,
+    "scope": "local_simulation"
+  }
+}

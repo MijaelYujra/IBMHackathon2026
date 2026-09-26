@@ -34,7 +34,11 @@ function sanitize(value) {
 function extractText(value) {
   if (typeof value === "string") return value;
   if (!value || typeof value !== "object") return "";
-  for (const key of ["text", "content", "message", "summary", "output", "error"]) {
+  
+  if (value.step_update && typeof value.step_update.text_delta === "string") return value.step_update.text_delta;
+  if (value.result && typeof value.result.response === "string") return value.result.response;
+
+  for (const key of ["text", "content", "message", "summary", "output", "error", "text_delta", "response"]) {
     if (typeof value[key] === "string") return value[key];
   }
   return "";
@@ -55,7 +59,7 @@ function eventFromLine(line) {
 }
 
 function commandForPlatform() {
-  return process.platform === "win32" ? "bob.cmd" : "bob";
+  return process.platform === "win32" ? "agy.exe" : "agy";
 }
 
 function safeReport(report) {
@@ -112,22 +116,15 @@ export function runBobPhase({ phase, prompt, onEvent }) {
   const events = [];
   const stderr = [];
   const args = [
-    "run",
-    "--format",
+    "--output-format",
     "stream-json",
-    "--workspace",
+    "--add-dir",
     PROJECT_ROOT,
-    "--mode",
-    phase,
-    "--max-cost",
-    String(DEFAULT_MAX_COST),
-    "--max-turns",
-    String(DEFAULT_MAX_TURNS),
-    "--disable-subagents",
-    "--log-level",
-    "warn",
-    prompt,
+    "--dangerously-skip-permissions"
   ];
+  if (phase === "plan") args.push("--mode", "plan");
+  else if (phase === "agent") args.push("--mode", "accept-edits");
+  args.push("--print", prompt);
 
   return new Promise((resolve) => {
     let child;
@@ -155,7 +152,7 @@ export function runBobPhase({ phase, prompt, onEvent }) {
     try {
       child = spawn(commandForPlatform(), args, {
         cwd: PROJECT_ROOT,
-        shell: process.platform === "win32",
+        shell: false,
         windowsHide: true,
         env: { ...process.env, BOB_LOG_LEVEL: "warn" },
       });

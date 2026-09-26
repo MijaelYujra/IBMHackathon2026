@@ -1,0 +1,2619 @@
+{
+  "schema_version": 1,
+  "id": "medium",
+  "source": "recorded_local_bob_run",
+  "label": "Recorded IBM Bob Run",
+  "recorded_at": "2026-09-26T23:42:58.300Z",
+  "scenario": {
+    "status": "ready",
+    "scenario_id": "medium",
+    "expected_severity": "medium",
+    "expected_risk_score": 55,
+    "title": {
+      "en": "Instance resized",
+      "es": "Instancia redimensionada"
+    },
+    "description": {
+      "en": "The instance changed from t3.micro to t3.xlarge, increasing cost and capacity.",
+      "es": "La instancia cambio de t3.micro a t3.xlarge, aumentando costo y capacidad."
+    },
+    "changed_resource": "aws_instance.app_server",
+    "changed_field": "instance_type",
+    "declared_state_source": "terraform_plan",
+    "cloud_changes_applied": false
+  },
+  "report": {
+    "status": "drift_detected",
+    "drift_detectado": true,
+    "estado_declarado_fuente": "terraform_plan",
+    "scenario_id": "medium",
+    "cantidad_de_diferencias": 1,
+    "risk_score": 55,
+    "risk_level": "medium",
+    "diferencias_alto_riesgo": 0,
+    "diferencias_riesgo_medio": 1,
+    "diferencias_riesgo_bajo": 0,
+    "detalle": [
+      {
+        "resource": "aws_instance.app_server",
+        "field": "instance_type",
+        "declared": "t3.micro",
+        "actual": "t3.xlarge",
+        "severity": "media",
+        "severity_level": "medium",
+        "risk_score": 55,
+        "risk_code": "capacity_cost_change",
+        "risk_reason": "Cambio de capacidad que puede incrementar costos o alterar el rendimiento.",
+        "explanation": "En \"aws_instance.app_server\", el campo \"instance_type\" deberia ser \"t3.micro\" segun el codigo, pero el estado real tiene \"t3.xlarge\".",
+        "problem": {
+          "en": "The compute size differs from Terraform and can create unexpected cost or performance changes.",
+          "es": "El tamano de computo difiere de Terraform y puede producir cambios inesperados de costo o rendimiento."
+        }
+      }
+    ],
+    "recommendations": [
+      {
+        "id": "validate-capacity",
+        "priority": "review",
+        "title": {
+          "en": "Validate the capacity need",
+          "es": "Validar la necesidad de capacidad"
+        },
+        "action": {
+          "en": "Check CPU, memory, and workload demand to confirm whether the resize was intentional.",
+          "es": "Revisar CPU, memoria y demanda de trabajo para confirmar si el cambio de tamano fue intencional."
+        }
+      },
+      {
+        "id": "restore-instance-size",
+        "priority": "review",
+        "title": {
+          "en": "Restore or declare the approved size",
+          "es": "Restaurar o declarar el tamano aprobado"
+        },
+        "action": {
+          "en": "If the change was unauthorized, return to t3.micro. If it was approved, update the infrastructure code through review.",
+          "es": "Si el cambio no fue autorizado, volver a t3.micro. Si fue aprobado, actualizar el codigo de infraestructura mediante revision."
+        }
+      }
+    ],
+    "human_review_required": true,
+    "registro_bobalytics": {
+      "timestamp": "2026-09-26T23:41:32.368Z",
+      "total_diffs": 1,
+      "high_risk_diffs": 0,
+      "medium_risk_diffs": 1,
+      "low_risk_diffs": 0,
+      "risk_score": 55,
+      "risk_level": "medium",
+      "estimated_minutes_saved": 25
+    }
+  },
+  "bob": {
+    "status": "completed",
+    "runtime": {
+      "command": "agy.exe",
+      "max_cost_per_phase": 0.2,
+      "max_turns_per_phase": 3,
+      "timeout_seconds": 90,
+      "mode": "live_local_only"
+    },
+    "phases": [
+      {
+        "phase": "ask",
+        "status": "completed",
+        "summary": "## Incident Confirmation & Drift Analysis\n\n### Assumptions\n* **Environment Context:** Local hackathon simulation with read-only constraints (no file creation, modification, cloud CLI, or `terraform apply`).\n* **Tool & State Confirmation:** Attempted execution of `drift-detector:diff_infra` encountered local environment telemetry hook constraints; the confirmed run context (`scenario_id: medium`, `drift_detected: true`) serves as the validated ground truth.\n* **Architecture Assumption:** The workload is hosted on AWS EC2 (`aws_instance.app_server`), where manual or out-of-band changes bypass GitOps workflows.\n\n---\n\n### English Version\n\n#### 1. Detected Drift\n* **Resource:** `aws_instance.app_server`\n* **Attribute:** `instance_type`\n* **Declared State (IaC / Terraform):** `t3.micro` (2 vCPU, 1 GiB RAM)\n* **Actual Runtime State:** `t3.xlarge` (4 vCPU, 16 GiB RAM)\n\n#### 2. Business & Security Impact\n* **Financial / Business Impact:** Significant unbudgeted operational expenditure increase. A `t3.xlarge` instance costs approximately 16× more per hour than a `t3.micro`, leading to unexpected billing spikes and budget depletion if left unaddressed.\n* **Security & Governance Impact:** Represents out-of-band configuration modification executed outside the CI/CD / GitOps pipeline. This bypasses change management policies, peer review, and audit controls.\n\n#### 3. Risk Priority\n* **Risk Level:** **Medium** (`risk_score: 55/100`, `risk_code: capacity_cost_change`)\n* **Rationale:** While there is no immediate public data exposure or security breach, unauthorized compute resizing poses immediate financial escalation and breaks configuration integrity.\n\n#### 4. Recommended Next Actions\n1. **Investigate Intent & Usage:** Inspect AWS CloudTrail to identify who triggered the resize and check CloudWatch telemetry (CPU/Memory utilization) to assess whether the upgrade was an operational emergency response.\n2. **Reconcile Infrastructure:**\n   * **If unauthorized / unnecessary:** Coordinate an operational change window to resize the instance back to `t3.micro`.\n   * **If capacity is required:** Submit a Pull Request updating the Terraform code to `t3.xlarge` with documented justification, budget approval, and code review before running automated workflows.\n\n---\n\n### Versión en Español\n\n#### 1. Drift Detectado\n* **Recurso:** `aws_instance.app_server`\n* **Atributo:** `instance_type`\n* **Estado Declarado (IaC / Terraform):** `t3.micro` (2 vCPU, 1 GiB RAM)\n* **Estado Real en la Nube:** `t3.xlarge` (4 vCPU, 16 GiB RAM)\n\n#### 2. Impacto en el Negocio y Seguridad\n* **Impacto Financiero / Negocio:** Incremento considerable e imprevisto en los costos operativos de nube. Una instancia `t3.xlarge` cuesta aproximadamente 16 veces más por hora que una `t3.micro`, generando sobrecostos presupuestarios si no se interviene oportunamente.\n* **Impacto en Seguridad y Gobernanza:** Modificación fuera de banda realizada directamente en la nube sin pasar por el flujo de GitOps/IaC. Esto elude la trazabilidad de auditoría, las revisiones de código y el control formal de cambios.\n\n#### 3. Prioridad de Riesgo\n* **Nivel de Riesgo:** **Medio** (`risk_score: 55/100`, `risk_code: capacity_cost_change`)\n* **Justificación:** No compromete directamente la confidencialidad ni expone datos de manera pública, pero introduce desvío presupuestario y compromete la integridad del control de configuraciones.\n\n#### 4. Próximas Acciones Recomendadas\n1. **Validar la Necesidad y Auditoría:** Consultar registros de AWS CloudTrail para identificar el origen/usuario del cambio y revisar métricas de CloudWatch (consumo de CPU y memoria) para determinar si respondió a una saturación legítima.\n2. **Reconciliación de Infraestructura:**\n   * **Si el cambio no fue autorizado o necesario:** Programar una ventana de mantenimiento para revertir el tamaño a `t3.micro`.\n   * **Si el dimensionamiento es requerido:** Formalizar la modificación mediante un Pull Request en el repositorio de Terraform, adjuntando justificación técnica y aprobación presupuestaria.\n",
+        "events": [
+          {
+            "type": "init",
+            "text": "",
+            "at": "2026-09-26T23:41:42.268Z"
+          },
+          {
+            "type": "step_update",
+            "text": "",
+            "at": "2026-09-26T23:41:42.548Z"
+          },
+          {
+            "type": "step_update",
+            "text": "",
+            "at": "2026-09-26T23:41:52.538Z"
+          },
+          {
+            "type": "step_update",
+            "text": "",
+            "at": "2026-09-26T23:41:52.538Z"
+          },
+          {
+            "type": "step_update",
+            "text": "",
+            "at": "2026-09-26T23:41:52.640Z"
+          },
+          {
+            "type": "step_update",
+            "text": "",
+            "at": "2026-09-26T23:42:04.338Z"
+          },
+          {
+            "type": "step_update",
+            "text": "",
+            "at": "2026-09-26T23:42:04.338Z"
+          },
+          {
+            "type": "step_update",
+            "text": "",
+            "at": "2026-09-26T23:42:04.465Z"
+          },
+          {
+            "type": "step_update",
+            "text": "",
+            "at": "2026-09-26T23:42:07.895Z"
+          },
+          {
+            "type": "step_update",
+            "text": "",
+            "at": "2026-09-26T23:42:07.895Z"
+          },
+          {
+            "type": "step_update",
+            "text": "",
+            "at": "2026-09-26T23:42:07.997Z"
+          },
+          {
+            "type": "step_update",
+            "text": "## Incident Confirmation & Drift Ana",
+            "at": "2026-09-26T23:42:14.282Z"
+          },
+          {
+            "type": "step_update",
+            "text": "lysis\n\n### Assumptions",
+            "at": "2026-09-26T23:42:14.308Z"
+          },
+          {
+            "type": "step_update",
+            "text": "\n* **Environment Context:** Local hackathon simu",
+            "at": "2026-09-26T23:42:14.384Z"
+          },
+          {
+            "type": "step_update",
+            "text": "lation with ",
+            "at": "2026-09-26T23:42:14.410Z"
+          },
+          {
+            "type": "step_update",
+            "text": "read-only constraints (n",
+            "at": "2026-09-26T23:42:14.435Z"
+          },
+          {
+            "type": "step_update",
+            "text": "o file creation, modification, cloud",
+            "at": "2026-09-26T23:42:14.460Z"
+          },
+          {
+            "type": "step_update",
+            "text": " CLI, or `terraform appl",
+            "at": "2026-09-26T23:42:14.486Z"
+          },
+          {
+            "type": "step_update",
+            "text": "y`).\n* **Tool & State Co",
+            "at": "2026-09-26T23:42:14.511Z"
+          },
+          {
+            "type": "step_update",
+            "text": "nfirmation:*",
+            "at": "2026-09-26T23:42:14.537Z"
+          },
+          {
+            "type": "step_update",
+            "text": "* Attempted execution of `drift-detector:diff_in",
+            "at": "2026-09-26T23:42:14.562Z"
+          },
+          {
+            "type": "step_update",
+            "text": "fra` encountered local e",
+            "at": "2026-09-26T23:42:14.587Z"
+          },
+          {
+            "type": "step_update",
+            "text": "nvironment t",
+            "at": "2026-09-26T23:42:14.612Z"
+          },
+          {
+            "type": "step_update",
+            "text": "elemetry hook constraint",
+            "at": "2026-09-26T23:42:14.638Z"
+          },
+          {
+            "type": "step_update",
+            "text": "s; the confirmed run context (`scena",
+            "at": "2026-09-26T23:42:14.664Z"
+          },
+          {
+            "type": "step_update",
+            "text": "rio_id: medium`, `drift_detected: true`) serves ",
+            "at": "2026-09-26T23:42:14.689Z"
+          },
+          {
+            "type": "step_update",
+            "text": "as the valid",
+            "at": "2026-09-26T23:42:14.714Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ated ground truth.\n* **Architecture ",
+            "at": "2026-09-26T23:42:14.740Z"
+          },
+          {
+            "type": "step_update",
+            "text": "Assumption:** The workload is hosted",
+            "at": "2026-09-26T23:42:14.766Z"
+          },
+          {
+            "type": "step_update",
+            "text": " on AWS EC2 (`aws_instan",
+            "at": "2026-09-26T23:42:14.793Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ce.app_server`), where manual or out",
+            "at": "2026-09-26T23:42:14.817Z"
+          },
+          {
+            "type": "step_update",
+            "text": "-of-band cha",
+            "at": "2026-09-26T23:42:14.843Z"
+          },
+          {
+            "type": "step_update",
+            "text": "nges bypass GitOps workf",
+            "at": "2026-09-26T23:42:14.868Z"
+          },
+          {
+            "type": "step_update",
+            "text": "lows.\n\n---\n\n### English Version\n\n#### 1. Detecte",
+            "at": "2026-09-26T23:42:14.893Z"
+          },
+          {
+            "type": "step_update",
+            "text": "d Drift\n* **",
+            "at": "2026-09-26T23:42:14.918Z"
+          },
+          {
+            "type": "step_update",
+            "text": "Resource:** `aws_instance.app_server",
+            "at": "2026-09-26T23:42:14.944Z"
+          },
+          {
+            "type": "step_update",
+            "text": "`\n* **Attribute:** `inst",
+            "at": "2026-09-26T23:42:14.969Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ance_type`\n* **Declared ",
+            "at": "2026-09-26T23:42:14.995Z"
+          },
+          {
+            "type": "step_update",
+            "text": "State (IaC / Terraform):** `t3.micro",
+            "at": "2026-09-26T23:42:15.020Z"
+          },
+          {
+            "type": "step_update",
+            "text": "` (2 vCPU, 1 GiB RAM)\n* ",
+            "at": "2026-09-26T23:42:15.045Z"
+          },
+          {
+            "type": "step_update",
+            "text": "**Actual Runtime State:*",
+            "at": "2026-09-26T23:42:15.071Z"
+          },
+          {
+            "type": "step_update",
+            "text": "* `t3.xlarge` (4 vCPU, 16 GiB RAM)\n\n",
+            "at": "2026-09-26T23:42:15.097Z"
+          },
+          {
+            "type": "step_update",
+            "text": "#### 2. Business & Secur",
+            "at": "2026-09-26T23:42:15.122Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ity Impact\n* **Financial",
+            "at": "2026-09-26T23:42:15.148Z"
+          },
+          {
+            "type": "step_update",
+            "text": " / Business Impact:** Si",
+            "at": "2026-09-26T23:42:15.173Z"
+          },
+          {
+            "type": "step_update",
+            "text": "gnificant unbudgeted operational exp",
+            "at": "2026-09-26T23:42:15.198Z"
+          },
+          {
+            "type": "step_update",
+            "text": "enditure increase. A `t3",
+            "at": "2026-09-26T23:42:15.225Z"
+          },
+          {
+            "type": "step_update",
+            "text": ".xlarge` instance costs ",
+            "at": "2026-09-26T23:42:15.257Z"
+          },
+          {
+            "type": "step_update",
+            "text": "approximately 16× more per hour tha",
+            "at": "2026-09-26T23:42:15.283Z"
+          },
+          {
+            "type": "step_update",
+            "text": "n a `t3.micro`, leading ",
+            "at": "2026-09-26T23:42:15.307Z"
+          },
+          {
+            "type": "step_update",
+            "text": "to unexpected billing sp",
+            "at": "2026-09-26T23:42:15.334Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ikes and budget depletion if left un",
+            "at": "2026-09-26T23:42:15.358Z"
+          },
+          {
+            "type": "step_update",
+            "text": "addressed.\n*",
+            "at": "2026-09-26T23:42:15.384Z"
+          },
+          {
+            "type": "step_update",
+            "text": " **Security & Governance",
+            "at": "2026-09-26T23:42:15.409Z"
+          },
+          {
+            "type": "step_update",
+            "text": " Impact:** Represents out-of-band co",
+            "at": "2026-09-26T23:42:15.434Z"
+          },
+          {
+            "type": "step_update",
+            "text": "nfiguration modification",
+            "at": "2026-09-26T23:42:15.460Z"
+          },
+          {
+            "type": "step_update",
+            "text": " executed outside the CI",
+            "at": "2026-09-26T23:42:15.485Z"
+          },
+          {
+            "type": "step_update",
+            "text": "/CD / GitOps pipeline. This bypasses",
+            "at": "2026-09-26T23:42:15.510Z"
+          },
+          {
+            "type": "step_update",
+            "text": " change management polic",
+            "at": "2026-09-26T23:42:15.536Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ies, peer re",
+            "at": "2026-09-26T23:42:15.561Z"
+          },
+          {
+            "type": "step_update",
+            "text": "view, and audit controls",
+            "at": "2026-09-26T23:42:15.587Z"
+          },
+          {
+            "type": "step_update",
+            "text": ".\n\n#### 3. Risk Priority\n* **Risk Le",
+            "at": "2026-09-26T23:42:15.612Z"
+          },
+          {
+            "type": "step_update",
+            "text": "vel:** **Medium** (`risk",
+            "at": "2026-09-26T23:42:15.637Z"
+          },
+          {
+            "type": "step_update",
+            "text": "_score: 55/100`, `risk_c",
+            "at": "2026-09-26T23:42:15.663Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ode: capacity_cost_change`)\n* **Rati",
+            "at": "2026-09-26T23:42:15.688Z"
+          },
+          {
+            "type": "step_update",
+            "text": "onale:** While there is ",
+            "at": "2026-09-26T23:42:15.713Z"
+          },
+          {
+            "type": "step_update",
+            "text": "no immediate",
+            "at": "2026-09-26T23:42:15.738Z"
+          },
+          {
+            "type": "step_update",
+            "text": " public data exposure or security br",
+            "at": "2026-09-26T23:42:15.764Z"
+          },
+          {
+            "type": "step_update",
+            "text": "each, unauthorized compu",
+            "at": "2026-09-26T23:42:15.791Z"
+          },
+          {
+            "type": "step_update",
+            "text": "te resizing poses immedi",
+            "at": "2026-09-26T23:42:15.815Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ate financial escalation and breaks ",
+            "at": "2026-09-26T23:42:15.841Z"
+          },
+          {
+            "type": "step_update",
+            "text": "configuration integrity.",
+            "at": "2026-09-26T23:42:15.866Z"
+          },
+          {
+            "type": "step_update",
+            "text": "\n\n#### 4. Recommended Next Actions\n1",
+            "at": "2026-09-26T23:42:15.891Z"
+          },
+          {
+            "type": "step_update",
+            "text": ". **Investigate Intent &",
+            "at": "2026-09-26T23:42:15.917Z"
+          },
+          {
+            "type": "step_update",
+            "text": " Usage:** Inspect AWS Cl",
+            "at": "2026-09-26T23:42:15.942Z"
+          },
+          {
+            "type": "step_update",
+            "text": "oudTrail to identify who",
+            "at": "2026-09-26T23:42:15.968Z"
+          },
+          {
+            "type": "step_update",
+            "text": " triggered the resize an",
+            "at": "2026-09-26T23:42:15.993Z"
+          },
+          {
+            "type": "step_update",
+            "text": "d check CloudWatch telem",
+            "at": "2026-09-26T23:42:16.018Z"
+          },
+          {
+            "type": "step_update",
+            "text": "etry (CPU/Memory utiliza",
+            "at": "2026-09-26T23:42:16.043Z"
+          },
+          {
+            "type": "step_update",
+            "text": "tion) to assess whether ",
+            "at": "2026-09-26T23:42:16.069Z"
+          },
+          {
+            "type": "step_update",
+            "text": "the upgrade was an opera",
+            "at": "2026-09-26T23:42:16.094Z"
+          },
+          {
+            "type": "step_update",
+            "text": "tional emergency respons",
+            "at": "2026-09-26T23:42:16.120Z"
+          },
+          {
+            "type": "step_update",
+            "text": "e.\n2. **Reconcile Infras",
+            "at": "2026-09-26T23:42:16.145Z"
+          },
+          {
+            "type": "step_update",
+            "text": "tructure:**\n",
+            "at": "2026-09-26T23:42:16.171Z"
+          },
+          {
+            "type": "step_update",
+            "text": "   * **If unauthorized /",
+            "at": "2026-09-26T23:42:16.196Z"
+          },
+          {
+            "type": "step_update",
+            "text": " unnecessary:** Coordina",
+            "at": "2026-09-26T23:42:16.221Z"
+          },
+          {
+            "type": "step_update",
+            "text": "te an operat",
+            "at": "2026-09-26T23:42:16.247Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ional change window to r",
+            "at": "2026-09-26T23:42:16.272Z"
+          },
+          {
+            "type": "step_update",
+            "text": "esize the instance back ",
+            "at": "2026-09-26T23:42:16.297Z"
+          },
+          {
+            "type": "step_update",
+            "text": "to `t3.micro",
+            "at": "2026-09-26T23:42:16.324Z"
+          },
+          {
+            "type": "step_update",
+            "text": "`.\n   * **If capacity is",
+            "at": "2026-09-26T23:42:16.348Z"
+          },
+          {
+            "type": "step_update",
+            "text": " required:** Submit a Pu",
+            "at": "2026-09-26T23:42:16.375Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ll Request updating the ",
+            "at": "2026-09-26T23:42:16.400Z"
+          },
+          {
+            "type": "step_update",
+            "text": "Terraform co",
+            "at": "2026-09-26T23:42:16.426Z"
+          },
+          {
+            "type": "step_update",
+            "text": "de to `t3.xlarge` with d",
+            "at": "2026-09-26T23:42:16.451Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ocumented justification,",
+            "at": "2026-09-26T23:42:16.477Z"
+          },
+          {
+            "type": "step_update",
+            "text": " budget approval, and co",
+            "at": "2026-09-26T23:42:16.502Z"
+          },
+          {
+            "type": "step_update",
+            "text": "de review be",
+            "at": "2026-09-26T23:42:16.533Z"
+          },
+          {
+            "type": "step_update",
+            "text": "fore running automated w",
+            "at": "2026-09-26T23:42:16.559Z"
+          },
+          {
+            "type": "step_update",
+            "text": "orkflows.\n\n---\n\n### Vers",
+            "at": "2026-09-26T23:42:16.584Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ión en Espa",
+            "at": "2026-09-26T23:42:16.609Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ñol\n\n#### 1. Drift Dete",
+            "at": "2026-09-26T23:42:16.635Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ctado\n* **Recurso:** `aw",
+            "at": "2026-09-26T23:42:16.660Z"
+          },
+          {
+            "type": "step_update",
+            "text": "s_instance.a",
+            "at": "2026-09-26T23:42:16.686Z"
+          },
+          {
+            "type": "step_update",
+            "text": "pp_server`\n*",
+            "at": "2026-09-26T23:42:16.711Z"
+          },
+          {
+            "type": "step_update",
+            "text": " **Atributo:** `instance",
+            "at": "2026-09-26T23:42:16.736Z"
+          },
+          {
+            "type": "step_update",
+            "text": "_type`\n* **E",
+            "at": "2026-09-26T23:42:16.761Z"
+          },
+          {
+            "type": "step_update",
+            "text": "stado Declarado (IaC / T",
+            "at": "2026-09-26T23:42:16.787Z"
+          },
+          {
+            "type": "step_update",
+            "text": "erraform):**",
+            "at": "2026-09-26T23:42:16.812Z"
+          },
+          {
+            "type": "step_update",
+            "text": " `t3.micro` ",
+            "at": "2026-09-26T23:42:16.838Z"
+          },
+          {
+            "type": "step_update",
+            "text": "(2 vCPU, 1 GiB RAM)\n* **",
+            "at": "2026-09-26T23:42:16.864Z"
+          },
+          {
+            "type": "step_update",
+            "text": "Estado Real ",
+            "at": "2026-09-26T23:42:16.889Z"
+          },
+          {
+            "type": "step_update",
+            "text": "en la Nube:*",
+            "at": "2026-09-26T23:42:16.915Z"
+          },
+          {
+            "type": "step_update",
+            "text": "* `t3.xlarge",
+            "at": "2026-09-26T23:42:16.940Z"
+          },
+          {
+            "type": "step_update",
+            "text": "` (4 vCPU, 16 GiB RAM)\n\n",
+            "at": "2026-09-26T23:42:16.966Z"
+          },
+          {
+            "type": "step_update",
+            "text": "#### 2. Impa",
+            "at": "2026-09-26T23:42:16.992Z"
+          },
+          {
+            "type": "step_update",
+            "text": "cto en el Ne",
+            "at": "2026-09-26T23:42:17.018Z"
+          },
+          {
+            "type": "step_update",
+            "text": "gocio y Seguridad\n* **Im",
+            "at": "2026-09-26T23:42:17.043Z"
+          },
+          {
+            "type": "step_update",
+            "text": "pacto Financiero / Negocio:** Incremento considerable e imprevisto en los costos operativos de nube. Una instancia `t3.xlarge` cuesta aproximadamente 16 veces más por hora que una `t3.micro`, generando sobrecostos presupuestarios si no se interviene oportunamente.\n* **Impacto en Seguridad y Gobernanza:** Modificación fuera de banda realizada directamente en la nube sin pasar por el flujo de GitOps/IaC. Esto elude la trazabilidad de auditoría, las revisiones de código y el control formal de cambios.\n\n#### 3. Prioridad de Riesgo\n* **Nivel de Riesgo:** **Medio** (`risk_score: 55/100`, `risk_code: capacity_cost_change`)\n* **Justificación:** No compromete directamente la confidencialidad ni expone datos de manera pública, pero introduce desvío presupuestario y compromete la integridad del control de configuraciones.\n\n#### 4. Próximas Acciones Recomendadas\n1. **Validar la Necesidad y Auditoría:** Consultar registros de AWS CloudTrail para identificar el origen/usuario del cambio y revisar métricas de CloudWatch (consumo de CPU y memoria) para determinar si respondió a una saturación legítima.\n2. **Reconciliación de Infraestructura:**\n   * **Si el cambio no fue autorizado o necesario:** Programar una ventana de mantenimiento para revertir el tamaño a `t3.micro`.\n   * **Si el dimensionamiento es requerido:** Formalizar la modificación mediante un Pull Request en el repositorio de Terraform, adjuntando justificación técnica y aprobación presupuestaria.\n",
+            "at": "2026-09-26T23:42:17.094Z"
+          },
+          {
+            "type": "result",
+            "text": "## Incident Confirmation & Drift Analysis\n\n### Assumptions\n* **Environment Context:** Local hackathon simulation with read-only constraints (no file creation, modification, cloud CLI, or `terraform apply`).\n* **Tool & State Confirmation:** Attempted execution of `drift-detector:diff_infra` encountered local environment telemetry hook constraints; the confirmed run context (`scenario_id: medium`, `drift_detected: true`) serves as the validated ground truth.\n* **Architecture Assumption:** The workload is hosted on AWS EC2 (`aws_instance.app_server`), where manual or out-of-band changes bypass GitOps workflows.\n\n---\n\n### English Version\n\n#### 1. Detected Drift\n* **Resource:** `aws_instance.app_server`\n* **Attribute:** `instance_type`\n* **Declared State (IaC / Terraform):** `t3.micro` (2 vCPU, 1 GiB RAM)\n* **Actual Runtime State:** `t3.xlarge` (4 vCPU, 16 GiB RAM)\n\n#### 2. Business & Security Impact\n* **Financial / Business Impact:** Significant unbudgeted operational expenditure increase. A `t3.xlarge` instance costs approximately 16× more per hour than a `t3.micro`, leading to unexpected billing spikes and budget depletion if left unaddressed.\n* **Security & Governance Impact:** Represents out-of-band configuration modification executed outside the CI/CD / GitOps pipeline. This bypasses change management policies, peer review, and audit controls.\n\n#### 3. Risk Priority\n* **Risk Level:** **Medium** (`risk_score: 55/100`, `risk_code: capacity_cost_change`)\n* **Rationale:** While there is no immediate public data exposure or security breach, unauthorized compute resizing poses immediate financial escalation and breaks configuration integrity.\n\n#### 4. Recommended Next Actions\n1. **Investigate Intent & Usage:** Inspect AWS CloudTrail to identify who triggered the resize and check CloudWatch telemetry (CPU/Memory utilization) to assess whether the upgrade was an operational emergency response.\n2. **Reconcile Infrastructure:**\n   * **If unauthorized / unnecessary:** Coordinate an operational change window to resize the instance back to `t3.micro`.\n   * **If capacity is required:** Submit a Pull Request updating the Terraform code to `t3.xlarge` with documented justification, budget approval, and code review before running automated workflows.\n\n---\n\n### Versión en Español\n\n#### 1. Drift Detectado\n* **Recurso:** `aws_instance.app_server`\n* **Atributo:** `instance_type`\n* **Estado Declarado (IaC / Terraform):** `t3.micro` (2 vCPU, 1 GiB RAM)\n* **Estado Real en la Nube:** `t3.xlarge` (4 vCPU, 16 GiB RAM)\n\n#### 2. Impacto en el Negocio y Seguridad\n* **Impacto Financiero / Negocio:** Incremento considerable e imprevisto en los costos operativos de nube. Una instancia `t3.xlarge` cuesta aproximadamente 16 veces más por hora que una `t3.micro`, generando sobrecostos presupuestarios si no se interviene oportunamente.\n* **Impacto en Seguridad y Gobernanza:** Modificación fuera de banda realizada directamente en la nube sin pasar por el flujo de GitOps/IaC. Esto elude la trazabilidad de auditoría, las revisiones de código y el control formal de cambios.\n\n#### 3. Prioridad de Riesgo\n* **Nivel de Riesgo:** **Medio** (`risk_score: 55/100`, `risk_code: capacity_cost_change`)\n* **Justificación:** No compromete directamente la confidencialidad ni expone datos de manera pública, pero introduce desvío presupuestario y compromete la integridad del control de configuraciones.\n\n#### 4. Próximas Acciones Recomendadas\n1. **Validar la Necesidad y Auditoría:** Consultar registros de AWS CloudTrail para identificar el origen/usuario del cambio y revisar métricas de CloudWatch (consumo de CPU y memoria) para determinar si respondió a una saturación legítima.\n2. **Reconciliación de Infraestructura:**\n   * **Si el cambio no fue autorizado o necesario:** Programar una ventana de mantenimiento para revertir el tamaño a `t3.micro`.\n   * **Si el dimensionamiento es requerido:** Formalizar la modificación mediante un Pull Request en el repositorio de Terraform, adjuntando justificación técnica y aprobación presupuestaria.\n",
+            "at": "2026-09-26T23:42:17.095Z"
+          }
+        ]
+      },
+      {
+        "phase": "plan",
+        "status": "completed",
+        "summary": "# No-Downtime Remediation Plan (English)\n\n## 1. Executive Summary & Drift Context\n* **Target Resource**: `aws_instance.app_server`\n* **Attribute**: `instance_type`\n* **Declared State (IaC)**: `t3.micro`\n* **Actual State (Runtime)**: `t3.xlarge`\n* **Risk Score / Level**: 55 / Medium (`capacity_cost_change`)\n* **Primary Concern**: Unplanned compute sizing causing cost variance or unmanaged performance drift.\n\n---\n\n## 2. Core Assumptions\n1. **Downtime Constraint**: An in-place modification of `instance_type` on a running standalone AWS EC2 instance requires a `StopInstances` $\\rightarrow$ `ModifyInstanceAttribute` $\\rightarrow$ `StartInstances` lifecycle, which induces unavoidable downtime.\n2. **Architecture**: To achieve true **zero downtime**, the workload is assumed to either:\n   * Run behind an Application/Network Load Balancer (or support blue/green parallel replacement with atomic DNS/EIP cutover), OR\n   * Be intentionally upsized due to legitimate workload demand, making **Code Realignment (IaC update)** the primary zero-downtime path.\n3. **Remediation Paths**:\n   * **Path A (Acknowledge & Adopt)**: If workload telemetry justifies `t3.xlarge`, update Terraform code to match reality (0 downtime).\n   * **Path B (Downscale / Right-size)**: If the resize was unauthorized, perform a parallel blue/green instance provisioning and traffic drain to return to `t3.micro` without service interruption.\n\n---\n\n## 3. Ordered Remediation Steps\n\n### Step 1: Telemetry & Capacity Assessment (Pre-check)\n* Inspect Amazon CloudWatch metrics (CPU Utilization, Memory Utilization, Network In/Out, and Request Count) over the last 7–14 days.\n* Determine if peak usage exceeds `t3.micro` limits (e.g., CPU > 20%, Memory > 800 MB).\n\n---\n\n### Step 2: Explicit Approval Gate [HUMAN REVIEW REQUIRED]\n> [!IMPORTANT]\n> **Action Required**: The lead reviewer/workload owner must sign off on the chosen remediation route before any action is initiated:\n> * **[ ] Option A**: Approve `t3.xlarge` as legitimate capacity. Proceed with Terraform code alignment.\n> * **[ ] Option B**: Reject `t3.xlarge` as unauthorized drift. Proceed with Zero-Downtime Blue/Green Downscale to `t3.micro`.\n\n---\n\n### Step 3: Execution Phase\n\n#### Path A: Align Terraform Code (Adopt `t3.xlarge`)\n1. Create a Git branch (`fix/align-app-server-instance-type`).\n2. Update the declared Terraform configuration:\n   ```hcl\n   resource \"aws_instance\" \"app_server\" {\n     # Updated from t3.micro to match approved runtime state\n     instance_type = \"t3.xlarge\"\n     # ... remaining configuration unchanged\n   }\n   ```\n3. Open a Pull Request for peer review referencing this drift report.\n4. Run speculative execution: `terraform plan` to confirm `Plan: 0 to add, 0 to change, 0 to destroy`.\n5. Merge the PR following standard CI/CD workflow.\n\n#### Path B: Zero-Downtime Blue/Green Reversion (Revert to `t3.micro`)\n1. Declare a temporary replacement resource (`aws_instance.app_server_green`) with `instance_type = \"t3.micro\"` using the same AMI, user data, security groups, and IAM role.\n2. Review speculative `terraform plan` ensuring no modification/destruction of the existing `t3.xlarge` instance.\n3. Provision the green instance and execute automated health checks (`/health` endpoint returning HTTP 200).\n4. Register the green instance to the target group / switch traffic via weighted routing (ALB / Route 53 / EIP re-association).\n5. Monitor traffic shift until green handles 100% of production load with zero dropped connections.\n6. Deregister and gracefully stop the old `t3.xlarge` instance.\n7. Refactor Terraform code and state (using `terraform state rm` / `terraform import` or `moved` blocks) to adopt the `t3.micro` instance as `aws_instance.app_server`.\n\n---\n\n## 4. Verification Plan\n* **Application Health**: Automated probe of `http://<endpoint>/health` with 0% error rate and P95 latency within SLA.\n* **Telemetry**: Confirm stable CPU and memory headroom in CloudWatch post-cutover.\n* **IaC Consistency**: Run `terraform plan` against live infrastructure and verify clean output:\n  `No changes. Your infrastructure matches the configuration.`\n\n---\n\n## 5. Rollback Considerations\n* **Path A Rollback**: If code changes are rejected prior to merge, close the PR; runtime remains unchanged on `t3.xlarge`.\n* **Path B Rollback**: Retain the original `t3.xlarge` instance in standby for a 2-hour observation window. If the `t3.micro` instance experiences performance degradation, OOM events, or elevated latency:\n  1. Immediately shift traffic routing back to the `t3.xlarge` instance.\n  2. Terminate the green `t3.micro` instance.\n  3. Re-open review under Path A.\n\n---\n---\n\n# Plan de Remediación sin Tiempo de Inactividad (Español)\n\n## 1. Resumen Ejecutivo y Contexto del Desvío\n* **Recurso Objetivo**: `aws_instance.app_server`\n* **Campo**: `instance_type`\n* **Estado Declarado (IaC)**: `t3.micro`\n* **Estado Real (Runtime)**: `t3.xlarge`\n* **Nivel / Puntuación de Riesgo**: 55 / Medio (`capacity_cost_change`)\n* **Impacto Principal**: Variación no planificada en costos de cómputo o alteración no documentada del rendimiento.\n\n---\n\n## 2. Supuestos Clave\n1. **Restricción de Disponibilidad**: Modificar directamente el atributo `instance_type` en una instancia EC2 independiente requiere el ciclo `StopInstances` $\\rightarrow$ `ModifyInstanceAttribute` $\\rightarrow$ `StartInstances`, lo cual provoca tiempo de inactividad forzado.\n2. **Arquitectura**: Para garantizar **cero tiempo de inactividad**, se asume una de dos opciones:\n   * La carga se ejecuta detrás de un balanceador de carga (o admite reemplazo paralelo Blue/Green con conmutación atómica de DNS/EIP), O\n   * El aumento a `t3.xlarge` responde a una necesidad legítima de demanda, siendo la **Realineación del Código IaC** el camino directo sin interrupciones.\n3. **Rutas de Remediación**:\n   * **Ruta A (Reconocer y Adoptar)**: Si la telemetría justifica `t3.xlarge`, actualizar el código Terraform para reflejar la realidad (0 downtime).\n   * **Ruta B (Reducción / Right-sizing)**: Si fue un cambio no autorizado, ejecutar un aprovisionamiento paralelo Blue/Green para retornar a `t3.micro` sin caída de servicio.\n\n---\n\n## 3. Pasos Ordenados de Remediación\n\n### Paso 1: Evaluación de Capacidad y Telemetría (Pre-verificación)\n* Analizar métricas en Amazon CloudWatch (utilización de CPU, memoria, red y recuento de peticiones) de los últimos 7 a 14 días.\n* Determinar si el consumo pico supera los límites de una `t3.micro` (ej. CPU > 20%, memoria > 800 MB).\n\n---\n\n### Paso 2: Puerta de Aprobación Explícita [REQUIERE REVISIÓN HUMANA]\n> [!IMPORTANT]\n> **Acción Requerida**: El revisor responsable / propietario del servicio debe autorizar formalmente la ruta a seguir antes de ejecutar cualquier acción:\n> * **[ ] Opción A**: Aprobar `t3.xlarge` como capacidad legítima. Proceder con la alineación del código Terraform.\n> * **[ ] Opción B**: Rechazar `t3.xlarge` como desvío no autorizado. Proceder con el escalado descendente Blue/Green sin downtime a `t3.micro`.\n\n---\n\n### Paso 3: Fase de Ejecución\n\n#### Ruta A: Alinear el Código Terraform (Adoptar `t3.xlarge`)\n1. Crear una rama de Git (`fix/align-app-server-instance-type`).\n2. Actualizar la configuración declarada en Terraform:\n   ```hcl\n   resource \"aws_instance\" \"app_server\" {\n     # Actualizado de t3.micro para coincidir con el estado aprobado en la nube\n     instance_type = \"t3.xlarge\"\n     # ... resto de la configuracion sin cambios\n   }\n   ```\n3. Abrir un Pull Request referenciando este reporte de drift.\n4. Ejecutar validación especulativa: `terraform plan` confirmando: `Plan: 0 to add, 0 to change, 0 to destroy`.\n5. Fusionar el Pull Request mediante el flujo de CI/CD establecido.\n\n#### Ruta B: Reversión Blue/Green sin Tiempo de Inactividad (Volver a `t3.micro`)\n1. Declarar un recurso temporal (`aws_instance.app_server_green`) con `instance_type = \"t3.micro\"`, replicando la AMI, user data, grupos de seguridad y rol IAM.\n2. Ejecutar un `terraform plan` especulativo asegurando que no destruya la instancia `t3.xlarge` actual.\n3. Aprovisionar la instancia verde y verificar pruebas de salud automatizadas (endpoint `/health` respondiendo HTTP 200).\n4. Registrar la nueva instancia en el Target Group / conmutar tráfico gradualmente mediante enrutamiento ponderado (ALB / Route 53 / EIP).\n5. Monitorear hasta que la instancia verde absorba el 100% de la carga sin peticiones caídas.\n6. Desregistrar y apagar de forma ordenada la instancia anterior `t3.xlarge`.\n7. Refactorizar el código y estado de Terraform (vía bloques `moved` o `terraform import`) para fijar la `t3.micro` como `aws_instance.app_server`.\n\n---\n\n## 4. Plan de Verificación\n* **Salud de la Aplicación**: Monitoreo continuo del endpoint `/health` con 0% de errores y latencia P95 dentro del SLA.\n* **Telemetría**: Confirmar estabilidad de CPU y memoria en CloudWatch posterior al cambio.\n* **Consistencia de IaC**: Ejecutar `terraform plan` contra la infraestructura en vivo y validar salida limpia:\n  `No changes. Your infrastructure matches the configuration.`\n\n---\n\n## 5. Consideraciones de Rollback\n* **Rollback en Ruta A**: Si el cambio de código es rechazado antes de fusionarse, cerrar el PR; el entorno productivo permanece intacto en `t3.xlarge`.\n* **Rollback en Ruta B**: Mantener la instancia `t3.xlarge` original en espera (standby) durante una ventana de observación de 2 horas. Si la instancia `t3.micro` presenta saturación de memoria (OOM), alta latencia o degradación:\n  1. Redirigir inmediatamente el tráfico de vuelta a la instancia `t3.xlarge`.\n  2. Dar de baja la instancia verde `t3.micro`.\n  3. Reabrir el caso bajo la Ruta A para formalizar la capacidad mayor.\n",
+        "events": [
+          {
+            "type": "init",
+            "text": "",
+            "at": "2026-09-26T23:42:22.902Z"
+          },
+          {
+            "type": "step_update",
+            "text": "",
+            "at": "2026-09-26T23:42:23.006Z"
+          },
+          {
+            "type": "step_update",
+            "text": "# No-",
+            "at": "2026-09-26T23:42:34.570Z"
+          },
+          {
+            "type": "step_update",
+            "text": "Downtime Remediation Pla",
+            "at": "2026-09-26T23:42:34.621Z"
+          },
+          {
+            "type": "step_update",
+            "text": "n (English)\n\n## 1. Executive Summary & Drift Con",
+            "at": "2026-09-26T23:42:34.647Z"
+          },
+          {
+            "type": "step_update",
+            "text": "text\n* **Target Resource",
+            "at": "2026-09-26T23:42:34.672Z"
+          },
+          {
+            "type": "step_update",
+            "text": "**: `aws_ins",
+            "at": "2026-09-26T23:42:34.697Z"
+          },
+          {
+            "type": "step_update",
+            "text": "tance.app_server`\n* **Attribute**: `instance_typ",
+            "at": "2026-09-26T23:42:34.722Z"
+          },
+          {
+            "type": "step_update",
+            "text": "e`\n* **Decla",
+            "at": "2026-09-26T23:42:34.748Z"
+          },
+          {
+            "type": "step_update",
+            "text": "red State (IaC)**: `t3.micro`\n* **Actual State (",
+            "at": "2026-09-26T23:42:34.773Z"
+          },
+          {
+            "type": "step_update",
+            "text": "Runtime)**: `t3.xlarge`\n",
+            "at": "2026-09-26T23:42:34.799Z"
+          },
+          {
+            "type": "step_update",
+            "text": "* **Risk Sco",
+            "at": "2026-09-26T23:42:34.825Z"
+          },
+          {
+            "type": "step_update",
+            "text": "re / Level**: 55 / Medium (`capacity_cost_change",
+            "at": "2026-09-26T23:42:34.850Z"
+          },
+          {
+            "type": "step_update",
+            "text": "`)\n* **Prima",
+            "at": "2026-09-26T23:42:34.875Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ry Concern**: Unplanned ",
+            "at": "2026-09-26T23:42:34.901Z"
+          },
+          {
+            "type": "step_update",
+            "text": "compute sizing causing cost variance or unmanage",
+            "at": "2026-09-26T23:42:34.926Z"
+          },
+          {
+            "type": "step_update",
+            "text": "d performanc",
+            "at": "2026-09-26T23:42:34.951Z"
+          },
+          {
+            "type": "step_update",
+            "text": "e drift.\n\n---\n\n## 2. Core Assumptions\n1. **Downt",
+            "at": "2026-09-26T23:42:34.976Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ime Constrai",
+            "at": "2026-09-26T23:42:35.002Z"
+          },
+          {
+            "type": "step_update",
+            "text": "nt**: An in-place modifi",
+            "at": "2026-09-26T23:42:35.027Z"
+          },
+          {
+            "type": "step_update",
+            "text": "cation of `instance_type",
+            "at": "2026-09-26T23:42:35.054Z"
+          },
+          {
+            "type": "step_update",
+            "text": "` on a running standalone AWS EC2 in",
+            "at": "2026-09-26T23:42:35.078Z"
+          },
+          {
+            "type": "step_update",
+            "text": "stance requires a `StopI",
+            "at": "2026-09-26T23:42:35.104Z"
+          },
+          {
+            "type": "step_update",
+            "text": "nstances` $\\rightarrow$ ",
+            "at": "2026-09-26T23:42:35.129Z"
+          },
+          {
+            "type": "step_update",
+            "text": "`ModifyInstanceAttribute` $\\rightarr",
+            "at": "2026-09-26T23:42:35.155Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ow$ `StartIn",
+            "at": "2026-09-26T23:42:35.181Z"
+          },
+          {
+            "type": "step_update",
+            "text": "stances` lifecycle, whic",
+            "at": "2026-09-26T23:42:35.206Z"
+          },
+          {
+            "type": "step_update",
+            "text": "h induces unavoidable downtime.\n2. *",
+            "at": "2026-09-26T23:42:35.231Z"
+          },
+          {
+            "type": "step_update",
+            "text": "*Architecture**: To achi",
+            "at": "2026-09-26T23:42:35.257Z"
+          },
+          {
+            "type": "step_update",
+            "text": "eve true **zero downtime**, the work",
+            "at": "2026-09-26T23:42:35.282Z"
+          },
+          {
+            "type": "step_update",
+            "text": "load is assumed to eithe",
+            "at": "2026-09-26T23:42:35.308Z"
+          },
+          {
+            "type": "step_update",
+            "text": "r:\n   * Run behind an Ap",
+            "at": "2026-09-26T23:42:35.334Z"
+          },
+          {
+            "type": "step_update",
+            "text": "plication/Network Load B",
+            "at": "2026-09-26T23:42:35.359Z"
+          },
+          {
+            "type": "step_update",
+            "text": "alancer (or support blue",
+            "at": "2026-09-26T23:42:35.385Z"
+          },
+          {
+            "type": "step_update",
+            "text": "/green parallel replacement with ato",
+            "at": "2026-09-26T23:42:35.410Z"
+          },
+          {
+            "type": "step_update",
+            "text": "mic DNS/EIP cutover), OR",
+            "at": "2026-09-26T23:42:35.435Z"
+          },
+          {
+            "type": "step_update",
+            "text": "\n   * Be intentionally upsized due t",
+            "at": "2026-09-26T23:42:35.461Z"
+          },
+          {
+            "type": "step_update",
+            "text": "o legitimate",
+            "at": "2026-09-26T23:42:35.486Z"
+          },
+          {
+            "type": "step_update",
+            "text": " workload demand, making",
+            "at": "2026-09-26T23:42:35.511Z"
+          },
+          {
+            "type": "step_update",
+            "text": " **Code Realignment (IaC update)** t",
+            "at": "2026-09-26T23:42:35.536Z"
+          },
+          {
+            "type": "step_update",
+            "text": "he primary zero-downtime",
+            "at": "2026-09-26T23:42:35.562Z"
+          },
+          {
+            "type": "step_update",
+            "text": " path.\n3. **Remediation ",
+            "at": "2026-09-26T23:42:35.587Z"
+          },
+          {
+            "type": "step_update",
+            "text": "Paths**:\n   * **Path A (Acknowledge ",
+            "at": "2026-09-26T23:42:35.613Z"
+          },
+          {
+            "type": "step_update",
+            "text": "& Adopt)**: If workload ",
+            "at": "2026-09-26T23:42:35.643Z"
+          },
+          {
+            "type": "step_update",
+            "text": "telemetry justifies `t3.",
+            "at": "2026-09-26T23:42:35.668Z"
+          },
+          {
+            "type": "step_update",
+            "text": "xlarge`, update Terrafor",
+            "at": "2026-09-26T23:42:35.694Z"
+          },
+          {
+            "type": "step_update",
+            "text": "m code to match reality ",
+            "at": "2026-09-26T23:42:35.719Z"
+          },
+          {
+            "type": "step_update",
+            "text": "(0 downtime).\n   * **Path B (Downsca",
+            "at": "2026-09-26T23:42:35.744Z"
+          },
+          {
+            "type": "step_update",
+            "text": "le / Right-size)**: If t",
+            "at": "2026-09-26T23:42:35.770Z"
+          },
+          {
+            "type": "step_update",
+            "text": "he resize wa",
+            "at": "2026-09-26T23:42:35.796Z"
+          },
+          {
+            "type": "step_update",
+            "text": "s unauthorized, perform ",
+            "at": "2026-09-26T23:42:35.822Z"
+          },
+          {
+            "type": "step_update",
+            "text": "a parallel blue/green in",
+            "at": "2026-09-26T23:42:35.847Z"
+          },
+          {
+            "type": "step_update",
+            "text": "stance provisioning and ",
+            "at": "2026-09-26T23:42:35.872Z"
+          },
+          {
+            "type": "step_update",
+            "text": "traffic drain to return ",
+            "at": "2026-09-26T23:42:35.897Z"
+          },
+          {
+            "type": "step_update",
+            "text": "to `t3.micro` without se",
+            "at": "2026-09-26T23:42:35.923Z"
+          },
+          {
+            "type": "step_update",
+            "text": "rvice interruption.\n\n---",
+            "at": "2026-09-26T23:42:35.948Z"
+          },
+          {
+            "type": "step_update",
+            "text": "\n\n## 3. Orde",
+            "at": "2026-09-26T23:42:35.976Z"
+          },
+          {
+            "type": "step_update",
+            "text": "red Remediation Steps\n\n#",
+            "at": "2026-09-26T23:42:36.026Z"
+          },
+          {
+            "type": "step_update",
+            "text": "## Step 1: Telemetry & C",
+            "at": "2026-09-26T23:42:36.051Z"
+          },
+          {
+            "type": "step_update",
+            "text": "apacity Assessment (Pre-",
+            "at": "2026-09-26T23:42:36.077Z"
+          },
+          {
+            "type": "step_update",
+            "text": "check)\n* Ins",
+            "at": "2026-09-26T23:42:36.102Z"
+          },
+          {
+            "type": "step_update",
+            "text": "pect Amazon CloudWatch m",
+            "at": "2026-09-26T23:42:36.128Z"
+          },
+          {
+            "type": "step_update",
+            "text": "etrics (CPU ",
+            "at": "2026-09-26T23:42:36.153Z"
+          },
+          {
+            "type": "step_update",
+            "text": "Utilization, Memory Util",
+            "at": "2026-09-26T23:42:36.179Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ization, Network In/Out,",
+            "at": "2026-09-26T23:42:36.204Z"
+          },
+          {
+            "type": "step_update",
+            "text": " and Request Count) over",
+            "at": "2026-09-26T23:42:36.229Z"
+          },
+          {
+            "type": "step_update",
+            "text": " the last 7–14 days.\n",
+            "at": "2026-09-26T23:42:36.255Z"
+          },
+          {
+            "type": "step_update",
+            "text": "* Determine if peak usag",
+            "at": "2026-09-26T23:42:36.280Z"
+          },
+          {
+            "type": "step_update",
+            "text": "e exceeds `t",
+            "at": "2026-09-26T23:42:36.306Z"
+          },
+          {
+            "type": "step_update",
+            "text": "3.micro` limits (e.g., C",
+            "at": "2026-09-26T23:42:36.331Z"
+          },
+          {
+            "type": "step_update",
+            "text": "PU > 20%, Memory > 800 M",
+            "at": "2026-09-26T23:42:36.357Z"
+          },
+          {
+            "type": "step_update",
+            "text": "B).\n\n---\n\n### Step 2: Ex",
+            "at": "2026-09-26T23:42:36.383Z"
+          },
+          {
+            "type": "step_update",
+            "text": "plicit Appro",
+            "at": "2026-09-26T23:42:36.408Z"
+          },
+          {
+            "type": "step_update",
+            "text": "val Gate [HUMAN REVIEW R",
+            "at": "2026-09-26T23:42:36.434Z"
+          },
+          {
+            "type": "step_update",
+            "text": "EQUIRED]\n> [",
+            "at": "2026-09-26T23:42:36.459Z"
+          },
+          {
+            "type": "step_update",
+            "text": "!IMPORTANT]\n> **Action R",
+            "at": "2026-09-26T23:42:36.485Z"
+          },
+          {
+            "type": "step_update",
+            "text": "equired**: T",
+            "at": "2026-09-26T23:42:36.510Z"
+          },
+          {
+            "type": "step_update",
+            "text": "he lead reviewer/workloa",
+            "at": "2026-09-26T23:42:36.536Z"
+          },
+          {
+            "type": "step_update",
+            "text": "d owner must",
+            "at": "2026-09-26T23:42:36.561Z"
+          },
+          {
+            "type": "step_update",
+            "text": " sign off on the chosen ",
+            "at": "2026-09-26T23:42:36.587Z"
+          },
+          {
+            "type": "step_update",
+            "text": "remediation ",
+            "at": "2026-09-26T23:42:36.612Z"
+          },
+          {
+            "type": "step_update",
+            "text": "route before any action ",
+            "at": "2026-09-26T23:42:36.638Z"
+          },
+          {
+            "type": "step_update",
+            "text": "is initiated",
+            "at": "2026-09-26T23:42:36.663Z"
+          },
+          {
+            "type": "step_update",
+            "text": ":\n> * **[ ] Option A**: ",
+            "at": "2026-09-26T23:42:36.688Z"
+          },
+          {
+            "type": "step_update",
+            "text": "Approve `t3.",
+            "at": "2026-09-26T23:42:36.714Z"
+          },
+          {
+            "type": "step_update",
+            "text": "xlarge` as l",
+            "at": "2026-09-26T23:42:36.739Z"
+          },
+          {
+            "type": "step_update",
+            "text": "egitimate ca",
+            "at": "2026-09-26T23:42:36.764Z"
+          },
+          {
+            "type": "step_update",
+            "text": "pacity. Proceed with Ter",
+            "at": "2026-09-26T23:42:36.790Z"
+          },
+          {
+            "type": "step_update",
+            "text": "raform code ",
+            "at": "2026-09-26T23:42:36.816Z"
+          },
+          {
+            "type": "step_update",
+            "text": "alignment.\n> * **[ ] Opt",
+            "at": "2026-09-26T23:42:36.850Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ion B**: Rej",
+            "at": "2026-09-26T23:42:36.871Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ect `t3.xlar",
+            "at": "2026-09-26T23:42:36.897Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ge` as unaut",
+            "at": "2026-09-26T23:42:36.922Z"
+          },
+          {
+            "type": "step_update",
+            "text": "horized drift. Proceed w",
+            "at": "2026-09-26T23:42:36.947Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ith Zero-Dow",
+            "at": "2026-09-26T23:42:36.972Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ntime Blue/G",
+            "at": "2026-09-26T23:42:36.998Z"
+          },
+          {
+            "type": "step_update",
+            "text": "reen Downscale to `t3.mi",
+            "at": "2026-09-26T23:42:37.024Z"
+          },
+          {
+            "type": "step_update",
+            "text": "cro`.\n\n---\n\n",
+            "at": "2026-09-26T23:42:37.050Z"
+          },
+          {
+            "type": "step_update",
+            "text": "### Step 3: ",
+            "at": "2026-09-26T23:42:37.075Z"
+          },
+          {
+            "type": "step_update",
+            "text": "Execution Ph",
+            "at": "2026-09-26T23:42:37.101Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ase\n\n#### Path A: Align ",
+            "at": "2026-09-26T23:42:37.126Z"
+          },
+          {
+            "type": "step_update",
+            "text": "Terraform Co",
+            "at": "2026-09-26T23:42:37.152Z"
+          },
+          {
+            "type": "step_update",
+            "text": "de (Adopt `t",
+            "at": "2026-09-26T23:42:37.178Z"
+          },
+          {
+            "type": "step_update",
+            "text": "3.xlarge`)\n1",
+            "at": "2026-09-26T23:42:37.203Z"
+          },
+          {
+            "type": "step_update",
+            "text": ". Create a Git branch (`",
+            "at": "2026-09-26T23:42:37.229Z"
+          },
+          {
+            "type": "step_update",
+            "text": "fix/align-ap",
+            "at": "2026-09-26T23:42:37.254Z"
+          },
+          {
+            "type": "step_update",
+            "text": "p-server-ins",
+            "at": "2026-09-26T23:42:37.281Z"
+          },
+          {
+            "type": "step_update",
+            "text": "tance-type`)",
+            "at": "2026-09-26T23:42:37.306Z"
+          },
+          {
+            "type": "step_update",
+            "text": ".\n2. Update ",
+            "at": "2026-09-26T23:42:37.331Z"
+          },
+          {
+            "type": "step_update",
+            "text": "the declared Terraform c",
+            "at": "2026-09-26T23:42:37.357Z"
+          },
+          {
+            "type": "step_update",
+            "text": "onfiguration",
+            "at": "2026-09-26T23:42:37.382Z"
+          },
+          {
+            "type": "step_update",
+            "text": ":\n   ```hcl\n",
+            "at": "2026-09-26T23:42:37.408Z"
+          },
+          {
+            "type": "step_update",
+            "text": "   resource ",
+            "at": "2026-09-26T23:42:37.433Z"
+          },
+          {
+            "type": "step_update",
+            "text": "\"aws_instanc",
+            "at": "2026-09-26T23:42:37.459Z"
+          },
+          {
+            "type": "step_update",
+            "text": "e\" \"app_serv",
+            "at": "2026-09-26T23:42:37.510Z"
+          },
+          {
+            "type": "step_update",
+            "text": "er\" {\n     #",
+            "at": "2026-09-26T23:42:37.535Z"
+          },
+          {
+            "type": "step_update",
+            "text": " Updated fro",
+            "at": "2026-09-26T23:42:37.561Z"
+          },
+          {
+            "type": "step_update",
+            "text": "m t3.micro t",
+            "at": "2026-09-26T23:42:37.612Z"
+          },
+          {
+            "type": "step_update",
+            "text": "o match appr",
+            "at": "2026-09-26T23:42:37.637Z"
+          },
+          {
+            "type": "step_update",
+            "text": "oved runtime",
+            "at": "2026-09-26T23:42:37.664Z"
+          },
+          {
+            "type": "step_update",
+            "text": " state\n     ",
+            "at": "2026-09-26T23:42:37.689Z"
+          },
+          {
+            "type": "step_update",
+            "text": "instance_typ",
+            "at": "2026-09-26T23:42:37.740Z"
+          },
+          {
+            "type": "step_update",
+            "text": "e = \"t3.xlar",
+            "at": "2026-09-26T23:42:37.765Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ge\"\n     # .",
+            "at": "2026-09-26T23:42:37.791Z"
+          },
+          {
+            "type": "step_update",
+            "text": ".. remaining",
+            "at": "2026-09-26T23:42:37.841Z"
+          },
+          {
+            "type": "step_update",
+            "text": " configurati",
+            "at": "2026-09-26T23:42:37.867Z"
+          },
+          {
+            "type": "step_update",
+            "text": "on unchanged",
+            "at": "2026-09-26T23:42:37.894Z"
+          },
+          {
+            "type": "step_update",
+            "text": "\n   }\n   ```",
+            "at": "2026-09-26T23:42:37.945Z"
+          },
+          {
+            "type": "step_update",
+            "text": "\n3. Open a P",
+            "at": "2026-09-26T23:42:37.970Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ull Request ",
+            "at": "2026-09-26T23:42:37.995Z"
+          },
+          {
+            "type": "step_update",
+            "text": "for peer rev",
+            "at": "2026-09-26T23:42:38.021Z"
+          },
+          {
+            "type": "step_update",
+            "text": "iew referenc",
+            "at": "2026-09-26T23:42:38.047Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ing this dri",
+            "at": "2026-09-26T23:42:38.072Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ft report.\n4",
+            "at": "2026-09-26T23:42:38.098Z"
+          },
+          {
+            "type": "step_update",
+            "text": ". Run specul",
+            "at": "2026-09-26T23:42:38.123Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ative execut",
+            "at": "2026-09-26T23:42:38.149Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ion: `terraf",
+            "at": "2026-09-26T23:42:38.174Z"
+          },
+          {
+            "type": "step_update",
+            "text": "orm plan` to",
+            "at": "2026-09-26T23:42:38.199Z"
+          },
+          {
+            "type": "step_update",
+            "text": " confirm `Pl",
+            "at": "2026-09-26T23:42:38.224Z"
+          },
+          {
+            "type": "step_update",
+            "text": "an: 0 to add",
+            "at": "2026-09-26T23:42:38.250Z"
+          },
+          {
+            "type": "step_update",
+            "text": ", 0 to chang",
+            "at": "2026-09-26T23:42:38.275Z"
+          },
+          {
+            "type": "step_update",
+            "text": "e, 0 to dest",
+            "at": "2026-09-26T23:42:38.301Z"
+          },
+          {
+            "type": "step_update",
+            "text": "roy`.\n5. Mer",
+            "at": "2026-09-26T23:42:38.326Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ge the PR fo",
+            "at": "2026-09-26T23:42:38.351Z"
+          },
+          {
+            "type": "step_update",
+            "text": "llowing stan",
+            "at": "2026-09-26T23:42:38.377Z"
+          },
+          {
+            "type": "step_update",
+            "text": "dard CI/CD w",
+            "at": "2026-09-26T23:42:38.402Z"
+          },
+          {
+            "type": "step_update",
+            "text": "orkflow.\n\n##",
+            "at": "2026-09-26T23:42:38.428Z"
+          },
+          {
+            "type": "step_update",
+            "text": "## Path B: Z",
+            "at": "2026-09-26T23:42:38.453Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ero-Downtime",
+            "at": "2026-09-26T23:42:38.479Z"
+          },
+          {
+            "type": "step_update",
+            "text": " Blue/Green ",
+            "at": "2026-09-26T23:42:38.505Z"
+          },
+          {
+            "type": "step_update",
+            "text": "Reversion (R",
+            "at": "2026-09-26T23:42:38.530Z"
+          },
+          {
+            "type": "step_update",
+            "text": "evert to `t3",
+            "at": "2026-09-26T23:42:38.556Z"
+          },
+          {
+            "type": "step_update",
+            "text": ".micro`)\n1. ",
+            "at": "2026-09-26T23:42:38.581Z"
+          },
+          {
+            "type": "step_update",
+            "text": "Declare a te",
+            "at": "2026-09-26T23:42:38.606Z"
+          },
+          {
+            "type": "step_update",
+            "text": "mporary repl",
+            "at": "2026-09-26T23:42:38.631Z"
+          },
+          {
+            "type": "step_update",
+            "text": "acement reso",
+            "at": "2026-09-26T23:42:38.657Z"
+          },
+          {
+            "type": "step_update",
+            "text": "urce (`aws_i",
+            "at": "2026-09-26T23:42:38.708Z"
+          },
+          {
+            "type": "step_update",
+            "text": "nstance.app_",
+            "at": "2026-09-26T23:42:38.735Z"
+          },
+          {
+            "type": "step_update",
+            "text": "server_green",
+            "at": "2026-09-26T23:42:38.760Z"
+          },
+          {
+            "type": "step_update",
+            "text": "`) with `ins",
+            "at": "2026-09-26T23:42:38.785Z"
+          },
+          {
+            "type": "step_update",
+            "text": "tance_type =",
+            "at": "2026-09-26T23:42:38.811Z"
+          },
+          {
+            "type": "step_update",
+            "text": " \"t3.micro\"`",
+            "at": "2026-09-26T23:42:38.836Z"
+          },
+          {
+            "type": "step_update",
+            "text": " using the s",
+            "at": "2026-09-26T23:42:38.862Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ame AMI, use",
+            "at": "2026-09-26T23:42:38.887Z"
+          },
+          {
+            "type": "step_update",
+            "text": "r data, secu",
+            "at": "2026-09-26T23:42:38.912Z"
+          },
+          {
+            "type": "step_update",
+            "text": "rity groups,",
+            "at": "2026-09-26T23:42:38.938Z"
+          },
+          {
+            "type": "step_update",
+            "text": " and IAM rol",
+            "at": "2026-09-26T23:42:38.963Z"
+          },
+          {
+            "type": "step_update",
+            "text": "e.\n2. Review",
+            "at": "2026-09-26T23:42:38.989Z"
+          },
+          {
+            "type": "step_update",
+            "text": " speculative",
+            "at": "2026-09-26T23:42:39.040Z"
+          },
+          {
+            "type": "step_update",
+            "text": " `terraform ",
+            "at": "2026-09-26T23:42:39.065Z"
+          },
+          {
+            "type": "step_update",
+            "text": "plan` ensuri",
+            "at": "2026-09-26T23:42:39.090Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ng no modifi",
+            "at": "2026-09-26T23:42:39.116Z"
+          },
+          {
+            "type": "step_update",
+            "text": "cation/destr",
+            "at": "2026-09-26T23:42:39.142Z"
+          },
+          {
+            "type": "step_update",
+            "text": "uction of th",
+            "at": "2026-09-26T23:42:39.168Z"
+          },
+          {
+            "type": "step_update",
+            "text": "e existing `",
+            "at": "2026-09-26T23:42:39.194Z"
+          },
+          {
+            "type": "step_update",
+            "text": "t3.xlarge` i",
+            "at": "2026-09-26T23:42:39.219Z"
+          },
+          {
+            "type": "step_update",
+            "text": "nstance.\n3. ",
+            "at": "2026-09-26T23:42:39.244Z"
+          },
+          {
+            "type": "step_update",
+            "text": "Provision th",
+            "at": "2026-09-26T23:42:39.295Z"
+          },
+          {
+            "type": "step_update",
+            "text": "e green inst",
+            "at": "2026-09-26T23:42:39.320Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ance and exe",
+            "at": "2026-09-26T23:42:39.345Z"
+          },
+          {
+            "type": "step_update",
+            "text": "cute automat",
+            "at": "2026-09-26T23:42:39.371Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ed health ch",
+            "at": "2026-09-26T23:42:39.397Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ecks (`/heal",
+            "at": "2026-09-26T23:42:39.422Z"
+          },
+          {
+            "type": "step_update",
+            "text": "th` endpoint",
+            "at": "2026-09-26T23:42:39.448Z"
+          },
+          {
+            "type": "step_update",
+            "text": " returning H",
+            "at": "2026-09-26T23:42:39.474Z"
+          },
+          {
+            "type": "step_update",
+            "text": "TTP 200).\n4.",
+            "at": "2026-09-26T23:42:39.499Z"
+          },
+          {
+            "type": "step_update",
+            "text": " Register th",
+            "at": "2026-09-26T23:42:39.551Z"
+          },
+          {
+            "type": "step_update",
+            "text": "e green inst",
+            "at": "2026-09-26T23:42:39.576Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ance to the ",
+            "at": "2026-09-26T23:42:39.602Z"
+          },
+          {
+            "type": "step_update",
+            "text": "target group",
+            "at": "2026-09-26T23:42:39.627Z"
+          },
+          {
+            "type": "step_update",
+            "text": " / switch tr",
+            "at": "2026-09-26T23:42:39.653Z"
+          },
+          {
+            "type": "step_update",
+            "text": "affic via we",
+            "at": "2026-09-26T23:42:39.678Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ighted routi",
+            "at": "2026-09-26T23:42:39.730Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ng (ALB / Ro",
+            "at": "2026-09-26T23:42:39.755Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ute 53 / EIP",
+            "at": "2026-09-26T23:42:39.780Z"
+          },
+          {
+            "type": "step_update",
+            "text": " re-associat",
+            "at": "2026-09-26T23:42:39.806Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ion).\n5. Mon",
+            "at": "2026-09-26T23:42:39.831Z"
+          },
+          {
+            "type": "step_update",
+            "text": "itor traffic",
+            "at": "2026-09-26T23:42:39.882Z"
+          },
+          {
+            "type": "step_update",
+            "text": " shift until",
+            "at": "2026-09-26T23:42:39.907Z"
+          },
+          {
+            "type": "step_update",
+            "text": " green handl",
+            "at": "2026-09-26T23:42:39.933Z"
+          },
+          {
+            "type": "step_update",
+            "text": "es 100% of p",
+            "at": "2026-09-26T23:42:39.959Z"
+          },
+          {
+            "type": "step_update",
+            "text": "roduction lo",
+            "at": "2026-09-26T23:42:39.985Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ad with zero",
+            "at": "2026-09-26T23:42:40.035Z"
+          },
+          {
+            "type": "step_update",
+            "text": " dropped con",
+            "at": "2026-09-26T23:42:40.060Z"
+          },
+          {
+            "type": "step_update",
+            "text": "nections.\n6.",
+            "at": "2026-09-26T23:42:40.087Z"
+          },
+          {
+            "type": "step_update",
+            "text": " Deregister ",
+            "at": "2026-09-26T23:42:40.112Z"
+          },
+          {
+            "type": "step_update",
+            "text": "and graceful",
+            "at": "2026-09-26T23:42:40.138Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ly stop the ",
+            "at": "2026-09-26T23:42:40.164Z"
+          },
+          {
+            "type": "step_update",
+            "text": "old `t3.xlar",
+            "at": "2026-09-26T23:42:40.189Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ge` instance",
+            "at": "2026-09-26T23:42:40.244Z"
+          },
+          {
+            "type": "step_update",
+            "text": ".\n7. Refacto",
+            "at": "2026-09-26T23:42:40.270Z"
+          },
+          {
+            "type": "step_update",
+            "text": "r Terraform ",
+            "at": "2026-09-26T23:42:40.295Z"
+          },
+          {
+            "type": "step_update",
+            "text": "code and sta",
+            "at": "2026-09-26T23:42:40.320Z"
+          },
+          {
+            "type": "step_update",
+            "text": "te (using `t",
+            "at": "2026-09-26T23:42:40.346Z"
+          },
+          {
+            "type": "step_update",
+            "text": "erraform sta",
+            "at": "2026-09-26T23:42:40.371Z"
+          },
+          {
+            "type": "step_update",
+            "text": "te rm` / `te",
+            "at": "2026-09-26T23:42:40.425Z"
+          },
+          {
+            "type": "step_update",
+            "text": "rraform impo",
+            "at": "2026-09-26T23:42:40.448Z"
+          },
+          {
+            "type": "step_update",
+            "text": "rt` or `move",
+            "at": "2026-09-26T23:42:40.499Z"
+          },
+          {
+            "type": "step_update",
+            "text": "d` blocks) t",
+            "at": "2026-09-26T23:42:40.525Z"
+          },
+          {
+            "type": "step_update",
+            "text": "o adopt the ",
+            "at": "2026-09-26T23:42:40.551Z"
+          },
+          {
+            "type": "step_update",
+            "text": "`t3.micro` i",
+            "at": "2026-09-26T23:42:40.577Z"
+          },
+          {
+            "type": "step_update",
+            "text": "nstance as `",
+            "at": "2026-09-26T23:42:40.602Z"
+          },
+          {
+            "type": "step_update",
+            "text": "aws_instance",
+            "at": "2026-09-26T23:42:40.653Z"
+          },
+          {
+            "type": "step_update",
+            "text": ".app_server`",
+            "at": "2026-09-26T23:42:40.679Z"
+          },
+          {
+            "type": "step_update",
+            "text": ".\n\n---\n\n## 4",
+            "at": "2026-09-26T23:42:40.705Z"
+          },
+          {
+            "type": "step_update",
+            "text": ". Verificati",
+            "at": "2026-09-26T23:42:40.731Z"
+          },
+          {
+            "type": "step_update",
+            "text": "on Plan\n* **",
+            "at": "2026-09-26T23:42:40.756Z"
+          },
+          {
+            "type": "step_update",
+            "text": "Application ",
+            "at": "2026-09-26T23:42:40.807Z"
+          },
+          {
+            "type": "step_update",
+            "text": "Health**: Au",
+            "at": "2026-09-26T23:42:40.838Z"
+          },
+          {
+            "type": "step_update",
+            "text": "tomated probe of `http://<endpoint>/health` with 0% error rate and P95 latency within SLA.\n* **Telemetry**: Confirm stable CPU and memory headroom in CloudWatch post-cutover.\n* **IaC Consistency**: Run `terraform plan` against live infrastructure and verify clean output:\n  `No changes. Your infrastructure matches the configuration.`\n\n---\n\n## 5. Rollback Considerations\n* **Path A Rollback**: If code changes are rejected prior to merge, close the PR; runtime remains unchanged on `t3.xlarge`.\n* **Path B Rollback**: Retain the original `t3.xlarge` instance in standby for a 2-hour observation window. If the `t3.micro` instance experiences performance degradation, OOM events, or elevated latency:\n  1. Immediately shift traffic routing back to the `t3.xlarge` instance.\n  2. Terminate the green `t3.micro` instance.\n  3. Re-open review under Path A.\n\n---\n---\n\n# Plan de Remediación sin Tiempo de Inactividad (Español)\n\n## 1. Resumen Ejecutivo y Contexto del Desvío\n* **Recurso Objetivo**: `aws_instance.app_server`\n* **Campo**: `instance_type`\n* **Estado Declarado (IaC)**: `t3.micro`\n* **Estado Real (Runtime)**: `t3.xlarge`\n* **Nivel / Puntuación de Riesgo**: 55 / Medio (`capacity_cost_change`)\n* **Impacto Principal**: Variación no planificada en costos de cómputo o alteración no documentada del rendimiento.\n\n---\n\n## 2. Supuestos Clave\n1. **Restricción de Disponibilidad**: Modificar directamente el atributo `instance_type` en una instancia EC2 independiente requiere el ciclo `StopInstances` $\\rightarrow$ `ModifyInstanceAttribute` $\\rightarrow$ `StartInstances`, lo cual provoca tiempo de inactividad forzado.\n2. **Arquitectura**: Para garantizar **cero tiempo de inactividad**, se asume una de dos opciones:\n   * La carga se ejecuta detrás de un balanceador de carga (o admite reemplazo paralelo Blue/Green con conmutación atómica de DNS/EIP), O\n   * El aumento a `t3.xlarge` responde a una necesidad legítima de demanda, siendo la **Realineación del Código IaC** el camino directo sin interrupciones.\n3. **Rutas de Remediación**:\n   * **Ruta A (Reconocer y Adoptar)**: Si la telemetría justifica `t3.xlarge`, actualizar el código Terraform para reflejar la realidad (0 downtime).\n   * **Ruta B (Reducción / Right-sizing)**: Si fue un cambio no autorizado, ejecutar un aprovisionamiento paralelo Blue/Green para retornar a `t3.micro` sin caída de servicio.\n\n---\n\n## 3. Pasos Ordenados de Remediación\n\n### Paso 1: Evaluación de Capacidad y Telemetría (Pre-verificación)\n* Analizar métricas en Amazon CloudWatch (utilización de CPU, memoria, red y recuento de peticiones) de los últimos 7 a 14 días.\n* Determinar si el consumo pico supera los límites de una `t3.micro` (ej. CPU > 20%, memoria > 800 MB).\n\n---\n\n### Paso 2: Puerta de Aprobación Explícita [REQUIERE REVISIÓN HUMANA]\n> [!IMPORTANT]\n> **Acción Requerida**: El revisor responsable / propietario del servicio debe autorizar formalmente la ruta a seguir antes de ejecutar cualquier acción:\n> * **[ ] Opción A**: Aprobar `t3.xlarge` como capacidad legítima. Proceder con la alineación del código Terraform.\n> * **[ ] Opción B**: Rechazar `t3.xlarge` como desvío no autorizado. Proceder con el escalado descendente Blue/Green sin downtime a `t3.micro`.\n\n---\n\n### Paso 3: Fase de Ejecución\n\n#### Ruta A: Alinear el Código Terraform (Adoptar `t3.xlarge`)\n1. Crear una rama de Git (`fix/align-app-server-instance-type`).\n2. Actualizar la configuración declarada en Terraform:\n   ```hcl\n   resource \"aws_instance\" \"app_server\" {\n     # Actualizado de t3.micro para coincidir con el estado aprobado en la nube\n     instance_type = \"t3.xlarge\"\n     # ... resto de la configuracion sin cambios\n   }\n   ```\n3. Abrir un Pull Request referenciando este reporte de drift.\n4. Ejecutar validación especulativa: `terraform plan` confirmando: `Plan: 0 to add, 0 to change, 0 to destroy`.\n5. Fusionar el Pull Request mediante el flujo de CI/CD establecido.\n\n#### Ruta B: Reversión Blue/Green sin Tiempo de Inactividad (Volver a `t3.micro`)\n1. Declarar un recurso temporal (`aws_instance.app_server_green`) con `instance_type = \"t3.micro\"`, replicando la AMI, user data, grupos de seguridad y rol IAM.\n2. Ejecutar un `terraform plan` especulativo asegurando que no destruya la instancia `t3.xlarge` actual.\n3. Aprovisionar la instancia verde y verificar pruebas de salud automatizadas (endpoint `/health` respondiendo HTTP 200).\n4. Registrar la nueva instancia en el Target Group / conmutar tráfico gradualmente mediante enrutamiento ponderado (ALB / Route 53 / EIP).\n5. Monitorear hasta que la instancia verde absorba el 100% de la carga sin peticiones caídas.\n6. Desregistrar y apagar de forma ordenada la instancia anterior `t3.xlarge`.\n7. Refactorizar el código y estado de Terraform (vía bloques `moved` o `terraform import`) para fijar la `t3.micro` como `aws_instance.app_server`.\n\n---\n\n## 4. Plan de Verificación\n* **Salud de la Aplicación**: Monitoreo continuo del endpoint `/health` con 0% de errores y latencia P95 dentro del SLA.\n* **Telemetría**: Confirmar estabilidad de CPU y memoria en CloudWatch posterior al cambio.\n* **Consistencia de IaC**: Ejecutar `terraform plan` contra la infraestructura en vivo y validar salida limpia:\n  `No changes. Your infrastructure matches the configuration.`\n\n---\n\n## 5. Consideraciones de Rollback\n* **Rollback en Ruta A**: Si el cambio de código es rechazado antes de fusionarse, cerrar el PR; el entorno productivo permanece intacto en `t3.xlarge`.\n* **Rollback en Ruta B**: Mantener la instancia `t3.xlarge` original en espera (standby) durante una ventana de observación de 2 horas. Si la instancia `t3.micro` presenta saturación de memoria (OOM), alta latencia o degradación:\n  1. Redirigir inmediatamente el tráfico de vuelta a la instancia `t3.xlarge`.\n  2. Dar de baja la instancia verde `t3.micro`.\n  3. Reabrir el caso bajo la Ruta A para formalizar la capacidad mayor.\n",
+            "at": "2026-09-26T23:42:40.863Z"
+          },
+          {
+            "type": "result",
+            "text": "# No-Downtime Remediation Plan (English)\n\n## 1. Executive Summary & Drift Context\n* **Target Resource**: `aws_instance.app_server`\n* **Attribute**: `instance_type`\n* **Declared State (IaC)**: `t3.micro`\n* **Actual State (Runtime)**: `t3.xlarge`\n* **Risk Score / Level**: 55 / Medium (`capacity_cost_change`)\n* **Primary Concern**: Unplanned compute sizing causing cost variance or unmanaged performance drift.\n\n---\n\n## 2. Core Assumptions\n1. **Downtime Constraint**: An in-place modification of `instance_type` on a running standalone AWS EC2 instance requires a `StopInstances` $\\rightarrow$ `ModifyInstanceAttribute` $\\rightarrow$ `StartInstances` lifecycle, which induces unavoidable downtime.\n2. **Architecture**: To achieve true **zero downtime**, the workload is assumed to either:\n   * Run behind an Application/Network Load Balancer (or support blue/green parallel replacement with atomic DNS/EIP cutover), OR\n   * Be intentionally upsized due to legitimate workload demand, making **Code Realignment (IaC update)** the primary zero-downtime path.\n3. **Remediation Paths**:\n   * **Path A (Acknowledge & Adopt)**: If workload telemetry justifies `t3.xlarge`, update Terraform code to match reality (0 downtime).\n   * **Path B (Downscale / Right-size)**: If the resize was unauthorized, perform a parallel blue/green instance provisioning and traffic drain to return to `t3.micro` without service interruption.\n\n---\n\n## 3. Ordered Remediation Steps\n\n### Step 1: Telemetry & Capacity Assessment (Pre-check)\n* Inspect Amazon CloudWatch metrics (CPU Utilization, Memory Utilization, Network In/Out, and Request Count) over the last 7–14 days.\n* Determine if peak usage exceeds `t3.micro` limits (e.g., CPU > 20%, Memory > 800 MB).\n\n---\n\n### Step 2: Explicit Approval Gate [HUMAN REVIEW REQUIRED]\n> [!IMPORTANT]\n> **Action Required**: The lead reviewer/workload owner must sign off on the chosen remediation route before any action is initiated:\n> * **[ ] Option A**: Approve `t3.xlarge` as legitimate capacity. Proceed with Terraform code alignment.\n> * **[ ] Option B**: Reject `t3.xlarge` as unauthorized drift. Proceed with Zero-Downtime Blue/Green Downscale to `t3.micro`.\n\n---\n\n### Step 3: Execution Phase\n\n#### Path A: Align Terraform Code (Adopt `t3.xlarge`)\n1. Create a Git branch (`fix/align-app-server-instance-type`).\n2. Update the declared Terraform configuration:\n   ```hcl\n   resource \"aws_instance\" \"app_server\" {\n     # Updated from t3.micro to match approved runtime state\n     instance_type = \"t3.xlarge\"\n     # ... remaining configuration unchanged\n   }\n   ```\n3. Open a Pull Request for peer review referencing this drift report.\n4. Run speculative execution: `terraform plan` to confirm `Plan: 0 to add, 0 to change, 0 to destroy`.\n5. Merge the PR following standard CI/CD workflow.\n\n#### Path B: Zero-Downtime Blue/Green Reversion (Revert to `t3.micro`)\n1. Declare a temporary replacement resource (`aws_instance.app_server_green`) with `instance_type = \"t3.micro\"` using the same AMI, user data, security groups, and IAM role.\n2. Review speculative `terraform plan` ensuring no modification/destruction of the existing `t3.xlarge` instance.\n3. Provision the green instance and execute automated health checks (`/health` endpoint returning HTTP 200).\n4. Register the green instance to the target group / switch traffic via weighted routing (ALB / Route 53 / EIP re-association).\n5. Monitor traffic shift until green handles 100% of production load with zero dropped connections.\n6. Deregister and gracefully stop the old `t3.xlarge` instance.\n7. Refactor Terraform code and state (using `terraform state rm` / `terraform import` or `moved` blocks) to adopt the `t3.micro` instance as `aws_instance.app_server`.\n\n---\n\n## 4. Verification Plan\n* **Application Health**: Automated probe of `http://<endpoint>/health` with 0% error rate and P95 latency within SLA.\n* **Telemetry**: Confirm stable CPU and memory headroom in CloudWatch post-cutover.\n* **IaC Consistency**: Run `terraform plan` against live infrastructure and verify clean output:\n  `No changes. Your infrastructure matches the configuration.`\n\n---\n\n## 5. Rollback Considerations\n* **Path A Rollback**: If code changes are rejected prior to merge, close the PR; runtime remains unchanged on `t3.xlarge`.\n* **Path B Rollback**: Retain the original `t3.xlarge` instance in standby for a 2-hour observation window. If the `t3.micro` instance experiences performance degradation, OOM events, or elevated latency:\n  1. Immediately shift traffic routing back to the `t3.xlarge` instance.\n  2. Terminate the green `t3.micro` instance.\n  3. Re-open review under Path A.\n\n---\n---\n\n# Plan de Remediación sin Tiempo de Inactividad (Español)\n\n## 1. Resumen Ejecutivo y Contexto del Desvío\n* **Recurso Objetivo**: `aws_instance.app_server`\n* **Campo**: `instance_type`\n* **Estado Declarado (IaC)**: `t3.micro`\n* **Estado Real (Runtime)**: `t3.xlarge`\n* **Nivel / Puntuación de Riesgo**: 55 / Medio (`capacity_cost_change`)\n* **Impacto Principal**: Variación no planificada en costos de cómputo o alteración no documentada del rendimiento.\n\n---\n\n## 2. Supuestos Clave\n1. **Restricción de Disponibilidad**: Modificar directamente el atributo `instance_type` en una instancia EC2 independiente requiere el ciclo `StopInstances` $\\rightarrow$ `ModifyInstanceAttribute` $\\rightarrow$ `StartInstances`, lo cual provoca tiempo de inactividad forzado.\n2. **Arquitectura**: Para garantizar **cero tiempo de inactividad**, se asume una de dos opciones:\n   * La carga se ejecuta detrás de un balanceador de carga (o admite reemplazo paralelo Blue/Green con conmutación atómica de DNS/EIP), O\n   * El aumento a `t3.xlarge` responde a una necesidad legítima de demanda, siendo la **Realineación del Código IaC** el camino directo sin interrupciones.\n3. **Rutas de Remediación**:\n   * **Ruta A (Reconocer y Adoptar)**: Si la telemetría justifica `t3.xlarge`, actualizar el código Terraform para reflejar la realidad (0 downtime).\n   * **Ruta B (Reducción / Right-sizing)**: Si fue un cambio no autorizado, ejecutar un aprovisionamiento paralelo Blue/Green para retornar a `t3.micro` sin caída de servicio.\n\n---\n\n## 3. Pasos Ordenados de Remediación\n\n### Paso 1: Evaluación de Capacidad y Telemetría (Pre-verificación)\n* Analizar métricas en Amazon CloudWatch (utilización de CPU, memoria, red y recuento de peticiones) de los últimos 7 a 14 días.\n* Determinar si el consumo pico supera los límites de una `t3.micro` (ej. CPU > 20%, memoria > 800 MB).\n\n---\n\n### Paso 2: Puerta de Aprobación Explícita [REQUIERE REVISIÓN HUMANA]\n> [!IMPORTANT]\n> **Acción Requerida**: El revisor responsable / propietario del servicio debe autorizar formalmente la ruta a seguir antes de ejecutar cualquier acción:\n> * **[ ] Opción A**: Aprobar `t3.xlarge` como capacidad legítima. Proceder con la alineación del código Terraform.\n> * **[ ] Opción B**: Rechazar `t3.xlarge` como desvío no autorizado. Proceder con el escalado descendente Blue/Green sin downtime a `t3.micro`.\n\n---\n\n### Paso 3: Fase de Ejecución\n\n#### Ruta A: Alinear el Código Terraform (Adoptar `t3.xlarge`)\n1. Crear una rama de Git (`fix/align-app-server-instance-type`).\n2. Actualizar la configuración declarada en Terraform:\n   ```hcl\n   resource \"aws_instance\" \"app_server\" {\n     # Actualizado de t3.micro para coincidir con el estado aprobado en la nube\n     instance_type = \"t3.xlarge\"\n     # ... resto de la configuracion sin cambios\n   }\n   ```\n3. Abrir un Pull Request referenciando este reporte de drift.\n4. Ejecutar validación especulativa: `terraform plan` confirmando: `Plan: 0 to add, 0 to change, 0 to destroy`.\n5. Fusionar el Pull Request mediante el flujo de CI/CD establecido.\n\n#### Ruta B: Reversión Blue/Green sin Tiempo de Inactividad (Volver a `t3.micro`)\n1. Declarar un recurso temporal (`aws_instance.app_server_green`) con `instance_type = \"t3.micro\"`, replicando la AMI, user data, grupos de seguridad y rol IAM.\n2. Ejecutar un `terraform plan` especulativo asegurando que no destruya la instancia `t3.xlarge` actual.\n3. Aprovisionar la instancia verde y verificar pruebas de salud automatizadas (endpoint `/health` respondiendo HTTP 200).\n4. Registrar la nueva instancia en el Target Group / conmutar tráfico gradualmente mediante enrutamiento ponderado (ALB / Route 53 / EIP).\n5. Monitorear hasta que la instancia verde absorba el 100% de la carga sin peticiones caídas.\n6. Desregistrar y apagar de forma ordenada la instancia anterior `t3.xlarge`.\n7. Refactorizar el código y estado de Terraform (vía bloques `moved` o `terraform import`) para fijar la `t3.micro` como `aws_instance.app_server`.\n\n---\n\n## 4. Plan de Verificación\n* **Salud de la Aplicación**: Monitoreo continuo del endpoint `/health` con 0% de errores y latencia P95 dentro del SLA.\n* **Telemetría**: Confirmar estabilidad de CPU y memoria en CloudWatch posterior al cambio.\n* **Consistencia de IaC**: Ejecutar `terraform plan` contra la infraestructura en vivo y validar salida limpia:\n  `No changes. Your infrastructure matches the configuration.`\n\n---\n\n## 5. Consideraciones de Rollback\n* **Rollback en Ruta A**: Si el cambio de código es rechazado antes de fusionarse, cerrar el PR; el entorno productivo permanece intacto en `t3.xlarge`.\n* **Rollback en Ruta B**: Mantener la instancia `t3.xlarge` original en espera (standby) durante una ventana de observación de 2 horas. Si la instancia `t3.micro` presenta saturación de memoria (OOM), alta latencia o degradación:\n  1. Redirigir inmediatamente el tráfico de vuelta a la instancia `t3.xlarge`.\n  2. Dar de baja la instancia verde `t3.micro`.\n  3. Reabrir el caso bajo la Ruta A para formalizar la capacidad mayor.\n",
+            "at": "2026-09-26T23:42:40.864Z"
+          }
+        ]
+      },
+      {
+        "phase": "agent",
+        "status": "completed",
+        "summary": "## Remediation Proposal: Compute Drift on `aws_instance.app_server` (English)\n\n### Assumptions\n- The drift from `t3.micro` to `t3.xlarge` was performed out-of-band directly in AWS, potentially as an emergency mitigation for performance/traffic spikes or as an untracked change.\n- Downsizing `aws_instance.app_server` back to `t3.micro` requires an EC2 stop/start cycle, introducing temporary service downtime unless managed behind a redundant load balancer.\n- Reducing memory from 16 GiB (`t3.xlarge`) to 1 GiB (`t3.micro`) poses severe Out-Of-Memory (OOM) risks if the running workload genuinely requires the higher capacity.\n\n---\n\n### 1. Intended Terraform-Aligned Change\n- **Option A (Default - Revert Drift):** Revert the live EC2 instance type from `t3.xlarge` to `t3.micro` to match the declared Terraform configuration during a scheduled maintenance window.\n- **Option B (Declare Actual State):** If workload demands justify the larger instance, update the declared configuration in the Terraform source code to `t3.xlarge` via pull request and code review, accepting the corresponding cost impact.\n\n### 2. Pre-Checks\n- **Workload Telemetry:** Review CloudWatch metrics (peak/average CPU utilization, memory pressure, and I/O) over the past 7–14 days to determine if the workload can safely run on 1 vCPU and 1 GiB RAM.\n- **Audit CloudTrail:** Inspect AWS CloudTrail events to identify the author, timestamp, and related incident ticket for the resize event to confirm whether it was an active emergency fix.\n- **High Availability & Downtime Window:** Confirm if the instance is standalone or part of an Auto Scaling Group/Target Group, and ensure a maintenance window is established for the stop/start cycle.\n\n### 3. Post-Checks\n- **Drift Resolution:** Run `terraform plan` to confirm that state and configuration are synchronized (`No changes. Your infrastructure matches the configuration.`).\n- **Health Checks:** Validate that the instance reaches `running` status, passes 2/2 system and instance status checks, and application endpoints respond with HTTP 200.\n- **Performance & Stability Monitoring:** Monitor the instance closely for CPU credit exhaustion, high memory usage, or dropped requests during subsequent operational hours.\n\n### 4. Why Human Approval Remains Required\n- **Availability Risk:** Modifying an EC2 instance type requires stopping the instance, inevitably causing disruption if not architected for high availability.\n- **Service Degradation / Outage Risk:** Downsizing by a factor of 16x in memory (16 GiB down to 1 GiB) could immediately trigger kernel OOM kills or crash the application if usage exceeds baseline specs.\n- **Budget vs. Capacity Decision:** Only an authorized stakeholder can decide whether to accept the higher monthly running cost of `t3.xlarge` or enforce strict budget limits with `t3.micro`.\n\n---\n---\n\n## Propuesta de Remediación: Desvío de Cómputo en `aws_instance.app_server` (Español)\n\n### Supuestos\n- El cambio de `t3.micro` a `t3.xlarge` se realizó de forma manual/fuera de banda en AWS, posiblemente como mitigación de emergencia ante picos de carga o como un cambio no registrado.\n- Reducir el tamaño de `aws_instance.app_server` a `t3.micro` requiere un ciclo de detención y arranque (stop/start) de la instancia EC2, generando indisponibilidad temporal salvo que opere tras un balanceador con redundancia.\n- Reducir la memoria de 16 GiB (`t3.xlarge`) a 1 GiB (`t3.micro`) implica un alto riesgo de caída por memoria insuficiente (OOM) si la carga actual realmente requiere mayor capacidad.\n\n---\n\n### 1. Cambio Previsto Alineado con Terraform\n- **Opción A (Predeterminada - Revertir Desvío):** Revertir la infraestructura real en AWS de `t3.xlarge` a `t3.micro` durante una ventana de mantenimiento para cumplir con el código declarado en Terraform.\n- **Opción B (Declarar Estado Real):** En caso de que la demanda del servicio justifique la capacidad superior, actualizar el código fuente de Terraform a `t3.xlarge` mediante un Pull Request sujeto a revisión técnica y presupuestaria.\n\n### 2. Verificaciones Previas (Pre-checks)\n- **Telemetría de Carga:** Analizar métricas de CloudWatch (uso promedio y pico de CPU, memoria e I/O) de los últimos 7 a 14 días para certificar si el aplicativo soporta operar con 1 vCPU y 1 GiB de RAM.\n- **Auditoría en CloudTrail:** Consultar eventos de AWS CloudTrail para determinar autor, fecha y ticket asociado al cambio manual, verificando si respondió a un incidente de producción.\n- **Ventana de Mantenimiento:** Verificar si la instancia es independiente o parte de un grupo de escalado, programando formalmente la ventana de parada necesaria para el redimensionamiento.\n\n### 3. Verificaciones Posteriores (Post-checks)\n- **Resolución de Desvío:** Ejecutar `terraform plan` para certificar la convergencia total entre el código y el estado real (`No changes. Your infrastructure matches the configuration.`).\n- **Comprobación de Salud:** Validar que la instancia alcance el estado `running`, supere las 2/2 verificaciones de estado de EC2 y los endpoints del aplicativo respondan correctamente (HTTP 200).\n- **Supervisión de Estabilidad:** Monitorear el consumo de créditos de CPU y uso de memoria durante las horas pico inmediatas para descartar degradación de servicio.\n\n### 4. Por Qué Sigue Siendo Necesaria la Aprobación Humana\n- **Impacto en Disponibilidad:** Modificar el tipo de instancia EC2 exige detener el servidor, lo que genera una interrupción directa del servicio si no existe redundancia activa.\n- **Riesgo Operativo Crítico:** Reducir la memoria en un factor de 16x (de 16 GiB a 1 GiB) puede provocar fallas inmediatas por falta de memoria (OOM) o saturación de cómputo.\n- **Decisión de Costo vs. Rendimiento:** La resolución implica un balance financiero: solo un responsable humano puede autorizar el sobrecosto de `t3.xlarge` o, en su defecto, asumir los límites de capacidad de `t3.micro`.\n",
+        "events": [
+          {
+            "type": "init",
+            "text": "",
+            "at": "2026-09-26T23:42:45.581Z"
+          },
+          {
+            "type": "step_update",
+            "text": "",
+            "at": "2026-09-26T23:42:45.688Z"
+          },
+          {
+            "type": "step_update",
+            "text": "## Remediati",
+            "at": "2026-09-26T23:42:54.206Z"
+          },
+          {
+            "type": "step_update",
+            "text": "on Proposal: Compute Drift",
+            "at": "2026-09-26T23:42:54.231Z"
+          },
+          {
+            "type": "step_update",
+            "text": " on `aws_instance.app_server` (Engli",
+            "at": "2026-09-26T23:42:54.283Z"
+          },
+          {
+            "type": "step_update",
+            "text": "sh)\n\n### Assumptions\n- T",
+            "at": "2026-09-26T23:42:54.308Z"
+          },
+          {
+            "type": "step_update",
+            "text": "he drift fro",
+            "at": "2026-09-26T23:42:54.333Z"
+          },
+          {
+            "type": "step_update",
+            "text": "m `t3.micro` to `t3.xlarge` was performed ",
+            "at": "2026-09-26T23:42:54.359Z"
+          },
+          {
+            "type": "step_update",
+            "text": "out-of-band directly in ",
+            "at": "2026-09-26T23:42:54.384Z"
+          },
+          {
+            "type": "step_update",
+            "text": "AWS, potenti",
+            "at": "2026-09-26T23:42:54.409Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ally as an emergency mitigation for performance/",
+            "at": "2026-09-26T23:42:54.435Z"
+          },
+          {
+            "type": "step_update",
+            "text": "traffic spik",
+            "at": "2026-09-26T23:42:54.461Z"
+          },
+          {
+            "type": "step_update",
+            "text": "es or as an untracked change.\n- Downsizing `aws_",
+            "at": "2026-09-26T23:42:54.486Z"
+          },
+          {
+            "type": "step_update",
+            "text": "instance.app",
+            "at": "2026-09-26T23:42:54.511Z"
+          },
+          {
+            "type": "step_update",
+            "text": "_server` back to `t3.mic",
+            "at": "2026-09-26T23:42:54.537Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ro` requires an EC2 stop/start cycle, introducin",
+            "at": "2026-09-26T23:42:54.562Z"
+          },
+          {
+            "type": "step_update",
+            "text": "g temporary ",
+            "at": "2026-09-26T23:42:54.588Z"
+          },
+          {
+            "type": "step_update",
+            "text": "service downtime unless managed behind a redunda",
+            "at": "2026-09-26T23:42:54.613Z"
+          },
+          {
+            "type": "step_update",
+            "text": "nt load bala",
+            "at": "2026-09-26T23:42:54.638Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ncer.\n- Reducing memory from 16 GiB (`t3.xlarge`",
+            "at": "2026-09-26T23:42:54.664Z"
+          },
+          {
+            "type": "step_update",
+            "text": ") to 1 GiB (`t3.micro`) ",
+            "at": "2026-09-26T23:42:54.689Z"
+          },
+          {
+            "type": "step_update",
+            "text": "poses severe",
+            "at": "2026-09-26T23:42:54.714Z"
+          },
+          {
+            "type": "step_update",
+            "text": " Out-Of-Memory (OOM) risks if the running worklo",
+            "at": "2026-09-26T23:42:54.739Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ad genuinely",
+            "at": "2026-09-26T23:42:54.765Z"
+          },
+          {
+            "type": "step_update",
+            "text": " requires the higher cap",
+            "at": "2026-09-26T23:42:54.791Z"
+          },
+          {
+            "type": "step_update",
+            "text": "acity.\n\n---\n\n### 1. Intended Terraform-Aligned C",
+            "at": "2026-09-26T23:42:54.816Z"
+          },
+          {
+            "type": "step_update",
+            "text": "hange\n- **Op",
+            "at": "2026-09-26T23:42:54.842Z"
+          },
+          {
+            "type": "step_update",
+            "text": "tion A (Default - Revert",
+            "at": "2026-09-26T23:42:54.867Z"
+          },
+          {
+            "type": "step_update",
+            "text": " Drift):** Revert the live EC2 insta",
+            "at": "2026-09-26T23:42:54.892Z"
+          },
+          {
+            "type": "step_update",
+            "text": "nce type from `t3.xlarge",
+            "at": "2026-09-26T23:42:54.918Z"
+          },
+          {
+            "type": "step_update",
+            "text": "` to `t3.micro` to match the declared Terraform ",
+            "at": "2026-09-26T23:42:54.943Z"
+          },
+          {
+            "type": "step_update",
+            "text": "configuratio",
+            "at": "2026-09-26T23:42:54.969Z"
+          },
+          {
+            "type": "step_update",
+            "text": "n during a scheduled mai",
+            "at": "2026-09-26T23:42:54.994Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ntenance window.\n- **Option B (Decla",
+            "at": "2026-09-26T23:42:55.019Z"
+          },
+          {
+            "type": "step_update",
+            "text": "re Actual State):** If w",
+            "at": "2026-09-26T23:42:55.045Z"
+          },
+          {
+            "type": "step_update",
+            "text": "orkload dema",
+            "at": "2026-09-26T23:42:55.070Z"
+          },
+          {
+            "type": "step_update",
+            "text": "nds justify the larger instance, upd",
+            "at": "2026-09-26T23:42:55.095Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ate the declared configuration in th",
+            "at": "2026-09-26T23:42:55.120Z"
+          },
+          {
+            "type": "step_update",
+            "text": "e Terraform ",
+            "at": "2026-09-26T23:42:55.146Z"
+          },
+          {
+            "type": "step_update",
+            "text": "source code to `t3.xlarge` via pull ",
+            "at": "2026-09-26T23:42:55.171Z"
+          },
+          {
+            "type": "step_update",
+            "text": "request and code review,",
+            "at": "2026-09-26T23:42:55.197Z"
+          },
+          {
+            "type": "step_update",
+            "text": " accepting the correspon",
+            "at": "2026-09-26T23:42:55.222Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ding cost impact.\n\n### 2. Pre-Checks",
+            "at": "2026-09-26T23:42:55.247Z"
+          },
+          {
+            "type": "step_update",
+            "text": "\n- **Workload Telemetry:",
+            "at": "2026-09-26T23:42:55.272Z"
+          },
+          {
+            "type": "step_update",
+            "text": "** Review CloudWatch met",
+            "at": "2026-09-26T23:42:55.298Z"
+          },
+          {
+            "type": "step_update",
+            "text": "rics (peak/average CPU u",
+            "at": "2026-09-26T23:42:55.323Z"
+          },
+          {
+            "type": "step_update",
+            "text": "tilization, memory pressure, and I/O",
+            "at": "2026-09-26T23:42:55.348Z"
+          },
+          {
+            "type": "step_update",
+            "text": ") over the past 7–14 d",
+            "at": "2026-09-26T23:42:55.374Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ays to determine if the ",
+            "at": "2026-09-26T23:42:55.399Z"
+          },
+          {
+            "type": "step_update",
+            "text": "workload can safely run on 1 vCPU an",
+            "at": "2026-09-26T23:42:55.425Z"
+          },
+          {
+            "type": "step_update",
+            "text": "d 1 GiB RAM.\n- **Audit C",
+            "at": "2026-09-26T23:42:55.450Z"
+          },
+          {
+            "type": "step_update",
+            "text": "loudTrail:** Inspect AWS CloudTrail ",
+            "at": "2026-09-26T23:42:55.475Z"
+          },
+          {
+            "type": "step_update",
+            "text": "events to identify the a",
+            "at": "2026-09-26T23:42:55.501Z"
+          },
+          {
+            "type": "step_update",
+            "text": "uthor, timestamp, and re",
+            "at": "2026-09-26T23:42:55.526Z"
+          },
+          {
+            "type": "step_update",
+            "text": "lated incident ticket for the resize",
+            "at": "2026-09-26T23:42:55.552Z"
+          },
+          {
+            "type": "step_update",
+            "text": " event to confirm whethe",
+            "at": "2026-09-26T23:42:55.577Z"
+          },
+          {
+            "type": "step_update",
+            "text": "r it was an active emergency fix.\n- ",
+            "at": "2026-09-26T23:42:55.603Z"
+          },
+          {
+            "type": "step_update",
+            "text": "**High Avail",
+            "at": "2026-09-26T23:42:55.628Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ability & Downtime Window:** Confirm",
+            "at": "2026-09-26T23:42:55.653Z"
+          },
+          {
+            "type": "step_update",
+            "text": " if the instance is stan",
+            "at": "2026-09-26T23:42:55.679Z"
+          },
+          {
+            "type": "step_update",
+            "text": "dalone or part of an Aut",
+            "at": "2026-09-26T23:42:55.705Z"
+          },
+          {
+            "type": "step_update",
+            "text": "o Scaling Group/Target G",
+            "at": "2026-09-26T23:42:55.733Z"
+          },
+          {
+            "type": "step_update",
+            "text": "roup, and ensure a maint",
+            "at": "2026-09-26T23:42:55.756Z"
+          },
+          {
+            "type": "step_update",
+            "text": "enance windo",
+            "at": "2026-09-26T23:42:55.782Z"
+          },
+          {
+            "type": "step_update",
+            "text": "w is established for the",
+            "at": "2026-09-26T23:42:55.806Z"
+          },
+          {
+            "type": "step_update",
+            "text": " stop/start cycle.\n\n### ",
+            "at": "2026-09-26T23:42:55.832Z"
+          },
+          {
+            "type": "step_update",
+            "text": "3. Post-Checks\n- **Drift Resolution:",
+            "at": "2026-09-26T23:42:55.858Z"
+          },
+          {
+            "type": "step_update",
+            "text": "** Run `terraform plan` ",
+            "at": "2026-09-26T23:42:55.883Z"
+          },
+          {
+            "type": "step_update",
+            "text": "to confirm that state an",
+            "at": "2026-09-26T23:42:55.909Z"
+          },
+          {
+            "type": "step_update",
+            "text": "d configuration are synchronized (`N",
+            "at": "2026-09-26T23:42:55.934Z"
+          },
+          {
+            "type": "step_update",
+            "text": "o changes. Your infrastr",
+            "at": "2026-09-26T23:42:55.959Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ucture matches the confi",
+            "at": "2026-09-26T23:42:55.985Z"
+          },
+          {
+            "type": "step_update",
+            "text": "guration.`).\n- **Health Checks:** Va",
+            "at": "2026-09-26T23:42:56.011Z"
+          },
+          {
+            "type": "step_update",
+            "text": "lidate that the instance",
+            "at": "2026-09-26T23:42:56.037Z"
+          },
+          {
+            "type": "step_update",
+            "text": " reaches `running` statu",
+            "at": "2026-09-26T23:42:56.062Z"
+          },
+          {
+            "type": "step_update",
+            "text": "s, passes 2/2 system and",
+            "at": "2026-09-26T23:42:56.088Z"
+          },
+          {
+            "type": "step_update",
+            "text": " instance status checks,",
+            "at": "2026-09-26T23:42:56.113Z"
+          },
+          {
+            "type": "step_update",
+            "text": " and application endpoin",
+            "at": "2026-09-26T23:42:56.139Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ts respond with HTTP 200",
+            "at": "2026-09-26T23:42:56.165Z"
+          },
+          {
+            "type": "step_update",
+            "text": ".\n- **Performance & Stab",
+            "at": "2026-09-26T23:42:56.191Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ility Monitoring:** Moni",
+            "at": "2026-09-26T23:42:56.216Z"
+          },
+          {
+            "type": "step_update",
+            "text": "tor the instance closely for CPU cre",
+            "at": "2026-09-26T23:42:56.242Z"
+          },
+          {
+            "type": "step_update",
+            "text": "dit exhaustion, high mem",
+            "at": "2026-09-26T23:42:56.267Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ory usage, or dropped re",
+            "at": "2026-09-26T23:42:56.293Z"
+          },
+          {
+            "type": "step_update",
+            "text": "quests during subsequent",
+            "at": "2026-09-26T23:42:56.318Z"
+          },
+          {
+            "type": "step_update",
+            "text": " operational hours.\n\n###",
+            "at": "2026-09-26T23:42:56.343Z"
+          },
+          {
+            "type": "step_update",
+            "text": " 4. Why Human Approval R",
+            "at": "2026-09-26T23:42:56.368Z"
+          },
+          {
+            "type": "step_update",
+            "text": "emains Required\n- **Avai",
+            "at": "2026-09-26T23:42:56.394Z"
+          },
+          {
+            "type": "step_update",
+            "text": "lability Ris",
+            "at": "2026-09-26T23:42:56.419Z"
+          },
+          {
+            "type": "step_update",
+            "text": "k:** Modifying an EC2 in",
+            "at": "2026-09-26T23:42:56.444Z"
+          },
+          {
+            "type": "step_update",
+            "text": "stance type requires sto",
+            "at": "2026-09-26T23:42:56.470Z"
+          },
+          {
+            "type": "step_update",
+            "text": "pping the instance, inev",
+            "at": "2026-09-26T23:42:56.495Z"
+          },
+          {
+            "type": "step_update",
+            "text": "itably causi",
+            "at": "2026-09-26T23:42:56.520Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ng disruption if not arc",
+            "at": "2026-09-26T23:42:56.547Z"
+          },
+          {
+            "type": "step_update",
+            "text": "hitected for high availa",
+            "at": "2026-09-26T23:42:56.573Z"
+          },
+          {
+            "type": "step_update",
+            "text": "bility.\n- **Service Degr",
+            "at": "2026-09-26T23:42:56.599Z"
+          },
+          {
+            "type": "step_update",
+            "text": "adation / Ou",
+            "at": "2026-09-26T23:42:56.624Z"
+          },
+          {
+            "type": "step_update",
+            "text": "tage Risk:** Downsizing ",
+            "at": "2026-09-26T23:42:56.649Z"
+          },
+          {
+            "type": "step_update",
+            "text": "by a factor of 16x in me",
+            "at": "2026-09-26T23:42:56.675Z"
+          },
+          {
+            "type": "step_update",
+            "text": "mory (16 GiB down to 1 G",
+            "at": "2026-09-26T23:42:56.701Z"
+          },
+          {
+            "type": "step_update",
+            "text": "iB) could im",
+            "at": "2026-09-26T23:42:56.727Z"
+          },
+          {
+            "type": "step_update",
+            "text": "mediately trigger kernel",
+            "at": "2026-09-26T23:42:56.752Z"
+          },
+          {
+            "type": "step_update",
+            "text": " OOM kills o",
+            "at": "2026-09-26T23:42:56.778Z"
+          },
+          {
+            "type": "step_update",
+            "text": "r crash the application ",
+            "at": "2026-09-26T23:42:56.803Z"
+          },
+          {
+            "type": "step_update",
+            "text": "if usage exceeds baselin",
+            "at": "2026-09-26T23:42:56.828Z"
+          },
+          {
+            "type": "step_update",
+            "text": "e specs.\n- *",
+            "at": "2026-09-26T23:42:56.853Z"
+          },
+          {
+            "type": "step_update",
+            "text": "*Budget vs. Capacity Dec",
+            "at": "2026-09-26T23:42:56.880Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ision:** Onl",
+            "at": "2026-09-26T23:42:56.905Z"
+          },
+          {
+            "type": "step_update",
+            "text": "y an authorized stakehol",
+            "at": "2026-09-26T23:42:56.930Z"
+          },
+          {
+            "type": "step_update",
+            "text": "der can deci",
+            "at": "2026-09-26T23:42:56.955Z"
+          },
+          {
+            "type": "step_update",
+            "text": "de whether to accept the",
+            "at": "2026-09-26T23:42:56.981Z"
+          },
+          {
+            "type": "step_update",
+            "text": " higher monthly running ",
+            "at": "2026-09-26T23:42:57.007Z"
+          },
+          {
+            "type": "step_update",
+            "text": "cost of `t3.",
+            "at": "2026-09-26T23:42:57.033Z"
+          },
+          {
+            "type": "step_update",
+            "text": "xlarge` or enforce stric",
+            "at": "2026-09-26T23:42:57.058Z"
+          },
+          {
+            "type": "step_update",
+            "text": "t budget limits with `t3",
+            "at": "2026-09-26T23:42:57.084Z"
+          },
+          {
+            "type": "step_update",
+            "text": ".micro`.\n\n--",
+            "at": "2026-09-26T23:42:57.110Z"
+          },
+          {
+            "type": "step_update",
+            "text": "-\n---\n\n## Propuesta de R",
+            "at": "2026-09-26T23:42:57.136Z"
+          },
+          {
+            "type": "step_update",
+            "text": "emediación: Desvío de ",
+            "at": "2026-09-26T23:42:57.164Z"
+          },
+          {
+            "type": "step_update",
+            "text": "Cómputo en ",
+            "at": "2026-09-26T23:42:57.189Z"
+          },
+          {
+            "type": "step_update",
+            "text": "`aws_instance.app_server",
+            "at": "2026-09-26T23:42:57.214Z"
+          },
+          {
+            "type": "step_update",
+            "text": "` (Español)",
+            "at": "2026-09-26T23:42:57.239Z"
+          },
+          {
+            "type": "step_update",
+            "text": "\n\n### Supuestos\n- El cam",
+            "at": "2026-09-26T23:42:57.264Z"
+          },
+          {
+            "type": "step_update",
+            "text": "bio de `t3.micro` a `t3.",
+            "at": "2026-09-26T23:42:57.290Z"
+          },
+          {
+            "type": "step_update",
+            "text": "xlarge` se r",
+            "at": "2026-09-26T23:42:57.315Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ealizó de f",
+            "at": "2026-09-26T23:42:57.341Z"
+          },
+          {
+            "type": "step_update",
+            "text": "orma manual/fuera de ban",
+            "at": "2026-09-26T23:42:57.367Z"
+          },
+          {
+            "type": "step_update",
+            "text": "da en AWS, p",
+            "at": "2026-09-26T23:42:57.392Z"
+          },
+          {
+            "type": "step_update",
+            "text": "osiblemente como mitigac",
+            "at": "2026-09-26T23:42:57.417Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ión de emer",
+            "at": "2026-09-26T23:42:57.446Z"
+          },
+          {
+            "type": "step_update",
+            "text": "gencia ante picos de car",
+            "at": "2026-09-26T23:42:57.470Z"
+          },
+          {
+            "type": "step_update",
+            "text": "ga o como un",
+            "at": "2026-09-26T23:42:57.495Z"
+          },
+          {
+            "type": "step_update",
+            "text": " cambio no registrado.\n-",
+            "at": "2026-09-26T23:42:57.522Z"
+          },
+          {
+            "type": "step_update",
+            "text": " Reducir el ",
+            "at": "2026-09-26T23:42:57.546Z"
+          },
+          {
+            "type": "step_update",
+            "text": "tamaño de `",
+            "at": "2026-09-26T23:42:57.571Z"
+          },
+          {
+            "type": "step_update",
+            "text": "aws_instance.app_server`",
+            "at": "2026-09-26T23:42:57.597Z"
+          },
+          {
+            "type": "step_update",
+            "text": " a `t3.micro",
+            "at": "2026-09-26T23:42:57.623Z"
+          },
+          {
+            "type": "step_update",
+            "text": "` requiere u",
+            "at": "2026-09-26T23:42:57.648Z"
+          },
+          {
+            "type": "step_update",
+            "text": "n ciclo de detención y ",
+            "at": "2026-09-26T23:42:57.674Z"
+          },
+          {
+            "type": "step_update",
+            "text": "arranque (st",
+            "at": "2026-09-26T23:42:57.700Z"
+          },
+          {
+            "type": "step_update",
+            "text": "op/start) de la instancia EC2, generando indisponibilidad temporal salvo que opere tras un balanceador con redundancia.\n- Reducir la memoria de 16 GiB (`t3.xlarge`) a 1 GiB (`t3.micro`) implica un alto riesgo de caída por memoria insuficiente (OOM) si la carga actual realmente requiere mayor capacidad.\n\n---\n\n### 1. Cambio Previsto Alineado con Terraform\n- **Opción A (Predeterminada - Revertir Desvío):** Revertir la infraestructura real en AWS de `t3.xlarge` a `t3.micro` durante una ventana de mantenimiento para cumplir con el código declarado en Terraform.\n- **Opción B (Declarar Estado Real):** En caso de que la demanda del servicio justifique la capacidad superior, actualizar el código fuente de Terraform a `t3.xlarge` mediante un Pull Request sujeto a revisión técnica y presupuestaria.\n\n### 2. Verificaciones Previas (Pre-checks)\n- **Telemetría de Carga:** Analizar métricas de CloudWatch (uso promedio y pico de CPU, memoria e I/O) de los últimos 7 a 14 días para certificar si el aplicativo soporta operar con 1 vCPU y 1 GiB de RAM.\n- **Auditoría en CloudTrail:** Consultar eventos de AWS CloudTrail para determinar autor, fecha y ticket asociado al cambio manual, verificando si respondió a un incidente de producción.\n- **Ventana de Mantenimiento:** Verificar si la instancia es independiente o parte de un grupo de escalado, programando formalmente la ventana de parada necesaria para el redimensionamiento.\n\n### 3. Verificaciones Posteriores (Post-checks)\n- **Resolución de Desvío:** Ejecutar `terraform plan` para certificar la convergencia total entre el código y el estado real (`No changes. Your infrastructure matches the configuration.`).\n- **Comprobación de Salud:** Validar que la instancia alcance el estado `running`, supere las 2/2 verificaciones de estado de EC2 y los endpoints del aplicativo respondan correctamente (HTTP 200).\n- **Supervisión de Estabilidad:** Monitorear el consumo de créditos de CPU y uso de memoria durante las horas pico inmediatas para descartar degradación de servicio.\n\n### 4. Por Qué Sigue Siendo Necesaria la Aprobación Humana\n- **Impacto en Disponibilidad:** Modificar el tipo de instancia EC2 exige detener el servidor, lo que genera una interrupción directa del servicio si no existe redundancia activa.\n- **Riesgo Operativo Crítico:** Reducir la memoria en un factor de 16x (de 16 GiB a 1 GiB) puede provocar fallas inmediatas por falta de memoria (OOM) o saturación de cómputo.\n- **Decisión de Costo vs. Rendimiento:** La resolución implica un balance financiero: solo un responsable humano puede autorizar el sobrecosto de `t3.xlarge` o, en su defecto, asumir los límites de capacidad de `t3.micro`.\n",
+            "at": "2026-09-26T23:42:57.725Z"
+          },
+          {
+            "type": "result",
+            "text": "## Remediation Proposal: Compute Drift on `aws_instance.app_server` (English)\n\n### Assumptions\n- The drift from `t3.micro` to `t3.xlarge` was performed out-of-band directly in AWS, potentially as an emergency mitigation for performance/traffic spikes or as an untracked change.\n- Downsizing `aws_instance.app_server` back to `t3.micro` requires an EC2 stop/start cycle, introducing temporary service downtime unless managed behind a redundant load balancer.\n- Reducing memory from 16 GiB (`t3.xlarge`) to 1 GiB (`t3.micro`) poses severe Out-Of-Memory (OOM) risks if the running workload genuinely requires the higher capacity.\n\n---\n\n### 1. Intended Terraform-Aligned Change\n- **Option A (Default - Revert Drift):** Revert the live EC2 instance type from `t3.xlarge` to `t3.micro` to match the declared Terraform configuration during a scheduled maintenance window.\n- **Option B (Declare Actual State):** If workload demands justify the larger instance, update the declared configuration in the Terraform source code to `t3.xlarge` via pull request and code review, accepting the corresponding cost impact.\n\n### 2. Pre-Checks\n- **Workload Telemetry:** Review CloudWatch metrics (peak/average CPU utilization, memory pressure, and I/O) over the past 7–14 days to determine if the workload can safely run on 1 vCPU and 1 GiB RAM.\n- **Audit CloudTrail:** Inspect AWS CloudTrail events to identify the author, timestamp, and related incident ticket for the resize event to confirm whether it was an active emergency fix.\n- **High Availability & Downtime Window:** Confirm if the instance is standalone or part of an Auto Scaling Group/Target Group, and ensure a maintenance window is established for the stop/start cycle.\n\n### 3. Post-Checks\n- **Drift Resolution:** Run `terraform plan` to confirm that state and configuration are synchronized (`No changes. Your infrastructure matches the configuration.`).\n- **Health Checks:** Validate that the instance reaches `running` status, passes 2/2 system and instance status checks, and application endpoints respond with HTTP 200.\n- **Performance & Stability Monitoring:** Monitor the instance closely for CPU credit exhaustion, high memory usage, or dropped requests during subsequent operational hours.\n\n### 4. Why Human Approval Remains Required\n- **Availability Risk:** Modifying an EC2 instance type requires stopping the instance, inevitably causing disruption if not architected for high availability.\n- **Service Degradation / Outage Risk:** Downsizing by a factor of 16x in memory (16 GiB down to 1 GiB) could immediately trigger kernel OOM kills or crash the application if usage exceeds baseline specs.\n- **Budget vs. Capacity Decision:** Only an authorized stakeholder can decide whether to accept the higher monthly running cost of `t3.xlarge` or enforce strict budget limits with `t3.micro`.\n\n---\n---\n\n## Propuesta de Remediación: Desvío de Cómputo en `aws_instance.app_server` (Español)\n\n### Supuestos\n- El cambio de `t3.micro` a `t3.xlarge` se realizó de forma manual/fuera de banda en AWS, posiblemente como mitigación de emergencia ante picos de carga o como un cambio no registrado.\n- Reducir el tamaño de `aws_instance.app_server` a `t3.micro` requiere un ciclo de detención y arranque (stop/start) de la instancia EC2, generando indisponibilidad temporal salvo que opere tras un balanceador con redundancia.\n- Reducir la memoria de 16 GiB (`t3.xlarge`) a 1 GiB (`t3.micro`) implica un alto riesgo de caída por memoria insuficiente (OOM) si la carga actual realmente requiere mayor capacidad.\n\n---\n\n### 1. Cambio Previsto Alineado con Terraform\n- **Opción A (Predeterminada - Revertir Desvío):** Revertir la infraestructura real en AWS de `t3.xlarge` a `t3.micro` durante una ventana de mantenimiento para cumplir con el código declarado en Terraform.\n- **Opción B (Declarar Estado Real):** En caso de que la demanda del servicio justifique la capacidad superior, actualizar el código fuente de Terraform a `t3.xlarge` mediante un Pull Request sujeto a revisión técnica y presupuestaria.\n\n### 2. Verificaciones Previas (Pre-checks)\n- **Telemetría de Carga:** Analizar métricas de CloudWatch (uso promedio y pico de CPU, memoria e I/O) de los últimos 7 a 14 días para certificar si el aplicativo soporta operar con 1 vCPU y 1 GiB de RAM.\n- **Auditoría en CloudTrail:** Consultar eventos de AWS CloudTrail para determinar autor, fecha y ticket asociado al cambio manual, verificando si respondió a un incidente de producción.\n- **Ventana de Mantenimiento:** Verificar si la instancia es independiente o parte de un grupo de escalado, programando formalmente la ventana de parada necesaria para el redimensionamiento.\n\n### 3. Verificaciones Posteriores (Post-checks)\n- **Resolución de Desvío:** Ejecutar `terraform plan` para certificar la convergencia total entre el código y el estado real (`No changes. Your infrastructure matches the configuration.`).\n- **Comprobación de Salud:** Validar que la instancia alcance el estado `running`, supere las 2/2 verificaciones de estado de EC2 y los endpoints del aplicativo respondan correctamente (HTTP 200).\n- **Supervisión de Estabilidad:** Monitorear el consumo de créditos de CPU y uso de memoria durante las horas pico inmediatas para descartar degradación de servicio.\n\n### 4. Por Qué Sigue Siendo Necesaria la Aprobación Humana\n- **Impacto en Disponibilidad:** Modificar el tipo de instancia EC2 exige detener el servidor, lo que genera una interrupción directa del servicio si no existe redundancia activa.\n- **Riesgo Operativo Crítico:** Reducir la memoria en un factor de 16x (de 16 GiB a 1 GiB) puede provocar fallas inmediatas por falta de memoria (OOM) o saturación de cómputo.\n- **Decisión de Costo vs. Rendimiento:** La resolución implica un balance financiero: solo un responsable humano puede autorizar el sobrecosto de `t3.xlarge` o, en su defecto, asumir los límites de capacidad de `t3.micro`.\n",
+            "at": "2026-09-26T23:42:57.726Z"
+          }
+        ]
+      }
+    ]
+  },
+  "decision": {
+    "value": "approve",
+    "decided_at": "2026-09-26T23:43:32.162Z"
+  },
+  "verification": {
+    "status": "healthy",
+    "drift_detectado": false,
+    "estado_declarado_fuente": "terraform_plan",
+    "scenario_id": "healthy",
+    "cantidad_de_diferencias": 0,
+    "risk_score": 0,
+    "risk_level": "none",
+    "detalle": [],
+    "recommendations": [
+      {
+        "id": "continue-monitoring",
+        "priority": "monitor",
+        "title": {
+          "en": "Continue monitoring",
+          "es": "Continuar monitoreando"
+        },
+        "action": {
+          "en": "Keep periodic drift checks enabled and review every infrastructure change through code.",
+          "es": "Mantener verificaciones periodicas de drift y revisar cada cambio de infraestructura mediante codigo."
+        }
+      }
+    ],
+    "message": "No se detecto drift. El estado real coincide exactamente con lo declarado en el codigo."
+  },
+  "safety": {
+    "cloud_changes_applied": false,
+    "terraform_apply_executed": false,
+    "scope": "local_simulation"
+  }
+}
