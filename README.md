@@ -119,13 +119,15 @@ node .\scripts\inject-drift.js reset
 
 Cada detección escribe una entrada en `logs/bobalytics-log.jsonl`.
 
-La experiencia web tiene tres vistas con responsabilidades separadas:
+La experiencia web tiene cuatro vistas con responsabilidades separadas:
 
 - `dashboard/index.html`: página principal bilingüe de 3ntropy.
 - `dashboard/console.html`: ejecución local automática de escenarios, comparación
   MCP, recomendaciones, análisis real con IBM Bob, aprobación humana y descarga
   del reporte.
 - `dashboard/impact.html`: dashboard de métricas con la estética creada por el equipo.
+- `dashboard/replay.html`: modo público estático para Vercel; reproduce corridas
+  verificadas de Bob sin ejecutar Bob, Terraform ni APIs cloud.
 
 Para iniciar la web con la API local:
 
@@ -161,6 +163,37 @@ $env:DRIFT_BOB_TIMEOUT_MS = "90000"
 npm.cmd --prefix .\mcp-server run web
 ```
 
+### Exportar una corrida real para el modo Hosted Replay
+
+Cuando una corrida local de Bob termine correctamente, exporta solo los
+artefactos ya saneados al sitio público:
+
+```powershell
+node .\scripts\export-replay.js <run-id> high-ssh-bob-run
+```
+
+El script valida que Ask, Plan y Agent estén completados, genera
+`dashboard/replays/<slug>.json` y actualiza `dashboard/replays/index.json`.
+Revisa ese JSON antes de hacer commit: un replay publicado debe ser una corrida
+real, no una respuesta creada manualmente. Mientras no haya grabaciones, el
+sitio muestra previews MCP guiados, claramente marcados como tales.
+
+### Despliegue estático en Vercel
+
+El modo Hosted Replay se puede desplegar sin secretos. En Vercel importa el
+repositorio, establece **Root Directory** en `dashboard`, selecciona **Other**
+como Framework Preset y no uses Build Command. Luego despliega y prueba
+`/replay.html` en incógnito. La consola `console.html` sigue siendo solo local,
+porque necesita Bob Shell, Terraform y el servidor MCP por STDIO.
+
+Con la CLI de Vercel, después de iniciar sesión, el equivalente es:
+
+```powershell
+cd .\dashboard
+vercel link
+vercel --prod
+```
+
 ## Estructura principal
 
 ```text
@@ -178,6 +211,9 @@ mcp-server/web-server.js              API local y servidor de la experiencia web
 dashboard/index.html                  Landing bilingüe de 3ntropy
 dashboard/console.html                Consola automática de respuesta
 dashboard/impact.html                 Dashboard de impacto
+dashboard/replay.html                 Visor público de replays estáticos
+dashboard/replays/                    Corridas IBM Bob revisadas para Vercel
+scripts/export-replay.js              Exportador saneado de corridas locales
 pasos.txt                             Guía operativa para el equipo
 ```
 

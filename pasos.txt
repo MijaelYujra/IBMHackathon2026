@@ -115,6 +115,26 @@ DASHBOARD BOBALYTICS
 8. Para ver metricas, entrar a Open Impact Dashboard. Tambien se puede abrir
    dashboard\impact.html y cargar logs\bobalytics-log.jsonl manualmente.
 
+MODO PUBLICO PARA VERCEL
+------------------------
+1. Despues de completar una corrida real de Bob, copiar el run-id mostrado en
+   el reporte y exportarla para el sitio publico:
+
+     node .\scripts\export-replay.js <run-id> high-ssh-bob-run
+
+2. Revisar dashboard\replays\high-ssh-bob-run.json: debe contener una corrida
+   real y saneada, nunca rutas personales, secretos o respuestas inventadas.
+3. Hacer commit y push del replay revisado.
+4. En Vercel, importar el repositorio con Root Directory = dashboard,
+   Framework Preset = Other y Build Command vacio.
+5. Abrir la URL publica y mostrar /replay.html. Este modo no ejecuta Bob,
+   Terraform ni cloud: solo reproduce evidencia ya revisada.
+6. Alternativa CLI, despues de iniciar sesion en Vercel:
+
+     cd .\dashboard
+     vercel link
+     vercel --prod
+
 ALIASES DE LOS COMANDOS ANTERIORES
 ----------------------------------
   resize equivale a medium

@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Hosted replay of 3ntropy Drift Detector scenarios and recorded IBM Bob runs." />
+    <meta name="theme-color" content="#030712" />
+    <title>3ntropy · Hosted Replay</title>
+    <link rel="stylesheet" href="./replay.css" />
+  </head>
+  <body>
+    <div class="space" aria-hidden="true"><div></div></div>
+    <header class="header glass">
+      <a class="brand" href="./index.html"><span>3</span>ntropy</a>
+      <nav>
+        <a href="./index.html" data-i18n="home">Home</a>
+        <a href="./impact.html" data-i18n="impact">Impact Dashboard</a>
+      </nav>
+      <div class="header-actions">
+        <span class="hosted-badge" data-i18n="hostedBadge">HOSTED REPLAY</span>
+        <div class="language"><button type="button" data-language="en" class="active">EN</button><span>/</span><button type="button" data-language="es">ES</button></div>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <p class="eyebrow">03 / PUBLIC DEMO</p>
+        <h1 data-i18n="title">Evidence without cloud credentials.</h1>
+        <p data-i18n="intro">Explore reproducible drift cases from a static public site. Live IBM Bob runs stay local; verified recordings appear here only after export and review.</p>
+        <div class="mode-note glass"><strong data-i18n="modeTitle">Hosted Replay Mode</strong><span data-i18n="modeText">No Bob Shell, Terraform, cloud APIs, or credentials run in this deployment.</span></div>
+      </section>
+
+      <section class="workspace">
+        <aside class="run-list glass">
+          <div class="section-head"><span>01 / RUNS</span><h2 data-i18n="selectRun">Select a replay</h2></div>
+          <div id="replayList" class="replay-list" aria-live="polite"></div>
+        </aside>
+
+        <section class="detail">
+          <div class="detail-header glass">
+            <div><span id="sourceLabel" class="source-label"></span><h2 id="runTitle"></h2><p id="runDescription"></p></div>
+            <div class="risk"><strong id="riskScore">0</strong><span>/100</span><small id="riskLevel"></small></div>
+          </div>
+
+          <section class="findings glass">
+            <div class="section-head"><span>02 / DETECTION</span><h2 data-i18n="findings">Detected problem</h2></div>
+            <div id="findingList" class="finding-list"></div>
+            <div class="divider"><span></span><strong data-i18n="recommendations">Recommended actions</strong><span></span></div>
+            <div id="recommendationList" class="recommendation-list"></div>
+          </section>
+
+          <section class="bob-trace glass">
+            <div class="section-head"><span>03 / IBM BOB</span><h2 data-i18n="bobTrace">IBM Bob trace</h2></div>
+            <p id="bobDisclosure" class="disclosure"></p>
+            <div id="phaseList" class="phases"></div>
+            <div id="eventList" class="events" role="log"></div>
+          </section>
+
+          <section class="safety glass">
+            <span class="safety-mark">◇</span><p data-i18n="safety">The public replay never runs remediation. Human approval remains part of the live local workflow.</p>
+            <a href="./console.html" data-i18n="openLocal">Open Live Local Console</a>
+          </section>
+        </section>
+      </section>
+    </main>
+    <footer>3NTROPY // IBM BOB 2.0 HACKATHON</footer>
+    <script src="./replay.js"></script>
+  </body>
+</html>
