@@ -13,24 +13,27 @@
   <div class="wrap">
     <div class="top-title">
       <div class="title-double">
-        <h1 class="title">Drift Detector — Bobalytics</h1>
-        <p class="sub mono">Impacto acumulado de las detecciones de drift entre infraestructura declarada y real.</p>
+        <h1 class="title">Drift Detector <b>— Bobalytics</b></h1>
+        <p class="sub">Impacto acumulado de las detecciones de drift entre infraestructura declarada y real.</p>
       </div>
-      <h1 class="logo">3ntropy</h1>
+      <p class="logo">3ntropy</p>
     </div>
 
     <div class="panel carga">
       <h2>Cargar registro</h2>
       <p class="sub" style="margin-bottom:10px;">
-        Sube tu archivo <code>logs/bobalytics-log.jsonl</code> que genera el servidor MCP cada vez que
-        <code>diff_infra</code> detecta drift.
+        Sube tu archivo <code class="first">logs/bobalytics-log.jsonl</code> que genera el servidor MCP cada vez que
+        <code class="second">diff_infra</code> detecta drift.
       </p>
       <div class="file-input">
+        <div class="spans">
+          <span class="indicador-formato">Formato JSONL soportado</span>
+          <span id="nombre-archivo">Ningún archivo seleccionado</span>
+        </div>
         <label for="fileInput" class="input-personalizado">
           Seleccionar archivo
         </label>
         <input type="file" id="fileInput" accept=".jsonl,.json,.txt" />
-        <span id="nombre-archivo">Ningún archivo seleccionado</span>
       </div>
     </div>
 

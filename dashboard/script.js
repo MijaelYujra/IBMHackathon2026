@@ -47,35 +47,60 @@ function render(entries) {
 
     const cardsHtml = `
         <div class="cards">
-            <div class="card">
-                <div class="value">
-                    ${totalDetections}
+            <div class="card scans">
+                <div class="card-header">
+                    <span class="card-title">Escaneos activos</span>
+                    <span class="card-icon">I</span>
                 </div>
-                <div class="label">
-                    Corridas con drift detectado
-                </div>
-            </div>
-            <div class="card">
-                <div class="value">
-                    ${totalDiffs}
-                </div>
-                <div class="label">
-                    Diferencias totales encontradas
+                <div class="card-data">
+                    <div class="value">
+                        ${totalDetections}
+                    </div>
+                    <div class="label">
+                        Corridas con drift detectado
+                    </div>
                 </div>
             </div>
-            <div class="card">
-                <div class="value" style="color:var(--high)">
-                    ${totalHighRisk}</div>
-                <div class="label">
-                    De alto riesgo
+            <div class="card discrepancy">
+                <div class="card-header">
+                    <span class="card-title">Discrepancias</span>
+                    <span class="card-icon">I</span>
+                </div>
+                <div class="card-data">
+                    <div class="value">
+                        ${totalDiffs}
+                    </div>
+                    <div class="label">
+                        Diferencias totales encontradas
+                    </div>
                 </div>
             </div>
-            <div class="card">
-                <div class="value" style="color:var(--accent)">
-                    ${totalHours}h
+            <div class="card severity">
+                <div class="card-header">
+                    <span class="card-title">Severidad crítica</span>
+                    <span class="card-icon">I</span>
                 </div>
-                <div class="label">
-                    Tiempo estimado ahorrado
+                <div class="card-data">
+                    <div class="value" style="color:var(--high)">
+                        ${totalHighRisk}
+                    </div>
+                    <div class="label">
+                        De alto riesgo
+                    </div>
+                    </div>
+            </div>
+            <div class="card eficiency">
+                <div class="card-header">
+                    <span class="card-title">Eficiencia operativa</span>
+                    <span class="card-icon">I</span>
+                </div>
+                <div class="card-data">
+                    <div class="value" style="color:var(--accent)">
+                        ${totalHours}h
+                    </div>
+                    <div class="label">
+                        Tiempo estimado ahorrado
+                    </div>
                 </div>
             </div>
         </div>
