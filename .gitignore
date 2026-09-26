@@ -1,6 +1,15 @@
 mcp-server/node_modules/
 logs/
 reports/
+demo-runs/
+.vercel/
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
 infra/.terraform/
 infra/*.tfplan
 infra/plan.json

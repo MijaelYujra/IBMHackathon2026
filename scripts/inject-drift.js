@@ -16,10 +16,10 @@
 import { readFileSync, writeFileSync } from "fs";
 import { fileURLToPath } from "url";
 import path from "path";
+import { loadDeclaredState } from "../mcp-server/terraform-declared-state.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const actualPath = path.join(__dirname, "..", "mcp-server", "state", "actual-state.json");
-const declaredPath = path.join(__dirname, "..", "mcp-server", "state", "declared-state.json");
 
 const scenario = process.argv[2];
 
@@ -32,7 +32,22 @@ const actual = JSON.parse(readFileSync(actualPath, "utf-8"));
 
 switch (scenario) {
   case "open-ssh": {
-    actual.resources["aws_security_group.app_sg"].ingress_rules.push({
+    const ingressRules =
+      actual.resources["aws_security_group.app_sg"].ingress_rules;
+    const alreadyInjected = ingressRules.some(
+      (rule) =>
+        rule.from_port === 22 &&
+        rule.to_port === 22 &&
+        rule.protocol === "tcp" &&
+        rule.cidr_blocks?.includes("0.0.0.0/0")
+    );
+
+    if (alreadyInjected) {
+      console.log("El escenario ya estaba activo: no se duplico la regla SSH.");
+      break;
+    }
+
+    ingressRules.push({
       description: "SSH (agregado manualmente, no esta en el codigo)",
       from_port: 22,
       to_port: 22,
@@ -53,9 +68,16 @@ switch (scenario) {
     break;
   }
   case "reset": {
-    const declared = JSON.parse(readFileSync(declaredPath, "utf-8"));
-    writeFileSync(actualPath, JSON.stringify(declared, null, 2));
-    console.log("Estado real reseteado: ahora coincide con lo declarado (sin drift).");
+    const declared = loadDeclaredState();
+    const resetState = {
+      generated_note:
+        "Estado actual simulado. Restablecido desde el estado declarado generado por Terraform.",
+      resources: declared.resources,
+    };
+    writeFileSync(actualPath, `${JSON.stringify(resetState, null, 2)}\n`);
+    console.log(
+      `Estado real reseteado desde ${declared.source || "snapshot_json"}: ahora coincide con lo declarado (sin drift).`
+    );
     process.exit(0);
   }
   default: {

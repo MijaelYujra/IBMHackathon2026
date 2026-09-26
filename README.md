@@ -70,8 +70,9 @@ La configuración está en `.bob/mcp.json`.
 1. Abre el repositorio como workspace en Bob IDE.
 2. Ve a **Settings → MCP** y activa **Use MCP Servers**.
 3. Confirma que `drift-detector` aparezca como **Connected**.
-4. Si aparece **Disconnected**, cambia `cwd` en `.bob/mcp.json` por la ruta absoluta
-   de tu propio clon, guarda el archivo y pulsa **Restart**.
+4. Si aparece **Disconnected**, confirma que Node.js esté instalado, guarda
+   `.bob/mcp.json` y pulsa **Restart**. La configuración usa `${workspaceFolder}`,
+   por lo que ningún integrante debe escribir una ruta personal.
 
 ## Demo
 
@@ -101,13 +102,14 @@ Al terminar, restablece el estado simulado:
 node .\scripts\inject-drift.js reset
 ```
 
-## Dashboard
+## Sitio y dashboard
 
 Cada detección escribe una entrada en `logs/bobalytics-log.jsonl`.
 
-1. Abre `dashboard/index.html` en el navegador.
-2. Selecciona `logs/bobalytics-log.jsonl`.
-3. Muestra detecciones, diferencias, riesgos altos y tiempo estimado ahorrado.
+1. Abre `dashboard/index.html` para ver la introducción bilingüe EN/ES de 3ntropy.
+2. Entra a **Open Impact Dashboard** o abre `dashboard/impact.html`.
+3. Selecciona `logs/bobalytics-log.jsonl` para mostrar detecciones, diferencias,
+   riesgos altos y tiempo estimado ahorrado.
 
 ## Estructura principal
 
@@ -118,7 +120,8 @@ mcp-server/terraform-declared-state.js Generador y normalizador Terraform
 mcp-server/state/actual-state.json    Estado real simulado
 scripts/inject-drift.js               Inyección y reset de escenarios
 scripts/start-demo.ps1                Preparación del demo en Windows
-dashboard/index.html                  Dashboard Bobalytics
+dashboard/index.html                  Landing bilingüe de 3ntropy
+dashboard/impact.html                 Dashboard de impacto
 pasos.txt                             Guía operativa para el equipo
 ```
 

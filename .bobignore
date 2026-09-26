@@ -1,0 +1,30 @@
+# Dependencies and generated output
+**/node_modules/**
+**/.terraform/**
+logs/**
+reports/**
+demo-runs/**
+
+# Terraform plans and state can contain sensitive values
+**/*.tfplan
+**/tfplan
+**/plan.json
+**/*.tfstate
+**/*.tfstate.*
+**/declared-state.generated.json
+
+# Credentials and local configuration
+.env
+.env.*
+!.env.example
+**/*.pem
+**/*.key
+**/*.p12
+**/*.pfx
+**/*credentials*
+**/*secret*
+
+# Editor, OS, and Vercel local metadata
+.vercel/**
+.DS_Store
+Thumbs.db

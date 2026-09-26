@@ -1,10 +1,9 @@
 {
-    "mcpServers": {
-      "drift-detector": {
-        "command": "node",
-        "args": ["mcp-server/index.js"],
-        "cwd": "C:/Users/Mijael/Desktop/IBMHackathon2026",
-        "description": "Detecta drift entre Terraform y estado real simulado."
-      }
+  "mcpServers": {
+    "drift-detector": {
+      "command": "node",
+      "args": ["${workspaceFolder}/mcp-server/index.js"],
+      "description": "Detecta drift entre Terraform y estado real simulado."
     }
   }
+}
