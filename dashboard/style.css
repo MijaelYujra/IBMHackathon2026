@@ -454,7 +454,8 @@ hr {
 }
 
 .left-header p {
-    margin: 10px 0;
+    margin: 10px 0 20px 0;
+    font-family: 'JetBrains Mono', sans-serif;
 }
 
 /* Nuevos */
