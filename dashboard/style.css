@@ -1,5 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Offside&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap');
 
 :root {
@@ -22,23 +21,21 @@
 
 body {
     margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Google Sans", Roboto, Helvetica, Arial, sans-serif;
-    background: linear-gradient(45deg, rgb(0, 0, 26), rgb(19, 16, 59));
+    font-family: -apple-system, BlinkMacSystemFont, "Inter", Roboto, Helvetica, Arial, sans-serif;
+    background: 
+        radial-gradient(circle at 20% 30%, rgba(0, 255, 81, 0.15) 0%, transparent 40%),
+        radial-gradient(circle at 80% 70%, rgba(0, 200, 255, 0.15) 0%, transparent 50%),
+        rgb(0, 0, 26);
     color: var(--text);
     height: 100%;
 }
 
 .wrap {
-    max-width: 1500px;
+    max-width: 100%;
     min-height: 100dvh;
-    margin: 0 auto;
+    margin: 0 20px;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-}
-
-h1 {
-    font-size: 1.6rem;
 }
 
 .sub {
@@ -49,12 +46,6 @@ h1 {
 .info-desc .sub {
     color: white;
     letter-spacing: 2px;
-}
-
-.mono {
-    font-family: "JetBrains Mono", monospace;
-    color: white;
-    margin: 0;
 }
 
 .cards {
@@ -73,20 +64,20 @@ h1 {
 }
 
 .card .value {
-    text-align: center;
     font-size: 3rem;
     font-weight: 700;
 }
 
 .card .label {
-    text-align: center;
-    color: var(--muted);
+    color: var(--text);
     font-size: 0.82rem;
     margin-top: 4px;
 }
 
 .panel {
-    background-color: rgba(0, 0, 0, 0.25);
+    width: 80%;
+    margin: 0 auto;
+    background-color: rgba(0, 0, 0, 0.15);
     border-radius: 12px;
     padding: 35px;
     margin-bottom: 20px;
@@ -191,18 +182,21 @@ th {
 code {
     background: #1c2130;
     padding: 2px 6px;
-    border-radius: 4px;
+    border-radius: 10px;
     font-size: 0.85em;
 }
 
 .file-input {
-    width: 100%;
+    width: 40%;
     display: flex;
     flex-direction: row;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between;
     gap: 15px;
-    padding: 20px 0px 0px 0px;
+    margin-top: 20px;
+    padding: 15px;
+    border-radius: 15px;
+    border: 3px dashed #63cad371;
 }
 
 .file-input input {
@@ -210,14 +204,14 @@ code {
 }
 
 label {
-    font-family: 'Google Sans', sans-serif;
+    font-family: 'Inter', sans-serif;
 }
 
 .input-personalizado {
-    font-family: 'Google Sans', sans-serif;
+    font-family: 'Inter', sans-serif;
     font-weight: bold;
     font-size: 15px;
-    background-color: #1c2130;
+    background: linear-gradient(45deg, rgba(0, 255, 221, 0.5), rgba(0, 200, 255, 0.5));
     border: 1px solid #232838;
     color: white;
     padding: 10px 20px;
@@ -227,25 +221,22 @@ label {
     transition: background-color 0.3s;
 }
 
-.input-personalizado:hover {
-    background-color: #252b3e;
-}
-
 #nombre-archivo {
-    font-family: 'Google Sans', sans-serif;
-    color: #8b93a7;
+    font-family: 'Inter', sans-serif;
+    color: #cacaca;
     font-size: 14px;
 }
 
 .logo {
-    font-family: 'Space Mono', sans-serif;
-    font-size: 50px;
-    text-shadow: 
-    0 0 30px rgba(0, 21, 255, 0.8),
-    0 0 90px rgba(0, 21, 255, 0.4);
+    font-family: 'Offside', sans-serif;
+    font-size: 20px;
+    font-weight: 900;
+    padding: 5px 15px;
+    border-radius: 10px;
     margin: 0;
     margin-top: 20px;
-    padding: 0;
+    box-shadow: 5px 0px 10px rgba(0, 247, 255, 0.5), 
+                -5px 0px 10px rgba(0, 0, 255, 0.5);
 }
 
 .top-title {
@@ -253,18 +244,15 @@ label {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 70px;
-    margin-top: 30px;
+    margin-bottom: 40px;
+    margin-top: 10px;
 }
 
 .title {
-    font-size: 50px;
-    text-shadow: 
-    0 0 20px rgba(225, 225, 225, 0.8),
-    0 0 60px  rgba(225, 225, 225, 0.4);
-    margin: 0;
-    margin-top: 20px;
+    font-size: 35px;
+    font-weight: 900;
     padding: 0;
+    text-shadow: none;
 }
 
 .carga {
@@ -272,7 +260,81 @@ label {
     flex-direction: column;
     justify-content: space-between;
     align-items: center;
+    min-height: 280px;
 }
+
+b {
+    background: radial-gradient(circle, rgb(168, 224, 250), rgb(17, 164, 232), rgb(0, 174, 255));
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+}
+
+.first {
+    background-color: #27676b95;
+    color: #8de1ff;
+    border: 1px solid #63b5d3;
+}
+
+.second {
+    background-color: #27276b95;
+    color: #8d97ff;
+    border: 1px solid #6a63d3;
+}
+
+.spans {
+    display: flex;
+    flex-direction: column;
+}
+
+.indicador-formato {
+    text-transform: uppercase;
+    color: #63cad3;
+    font-weight: bold;
+    font-size: 12px;
+}
+
+.cards {
+    width: 80%;
+    margin: 0 auto;
+    margin-bottom: 20px;
+}
+
+.card-header {
+    font-family: 'Inter';
+    text-transform: uppercase;
+    font-weight: bold;
+    font-size: 14px;
+    display: flex;
+    flex-direction: row;
+    align-items: end;
+    justify-content: space-between;
+    margin: 5px 0 20px 0;
+}
+
+.card-title {
+    color: rgb(173, 173, 173);
+}
+
+.card-icon {
+    border: 1px solid #63cad3;
+    height: 35px;
+    width: 35px;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #63cad3;
+}
+
+.card-data {
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+}
+
+/* Nuevos */
 
 .back-link {
     color: var(--accent);
