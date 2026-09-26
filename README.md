@@ -119,10 +119,22 @@ node .\scripts\inject-drift.js reset
 
 Cada detección escribe una entrada en `logs/bobalytics-log.jsonl`.
 
-1. Abre `dashboard/index.html` para ver la introducción bilingüe EN/ES de 3ntropy.
-2. Entra a **Open Impact Dashboard** o abre `dashboard/impact.html`.
-3. Selecciona `logs/bobalytics-log.jsonl` para mostrar detecciones, diferencias,
-   riesgos altos y tiempo estimado ahorrado.
+La experiencia web tiene tres vistas con responsabilidades separadas:
+
+- `dashboard/index.html`: página principal bilingüe de 3ntropy.
+- `dashboard/console.html`: ejecución local automática de escenarios, comparación
+  MCP, recomendaciones, aprobación humana y descarga del reporte.
+- `dashboard/impact.html`: dashboard de métricas con la estética creada por el equipo.
+
+Para iniciar la web con la API local:
+
+```powershell
+npm.cmd --prefix .\mcp-server run web
+```
+
+Abre `http://127.0.0.1:4173`. Desde la página principal puedes entrar a la
+consola o al dashboard. La consola necesita este servidor local; el dashboard
+también permite cargar manualmente `logs/bobalytics-log.jsonl`.
 
 ## Estructura principal
 
@@ -135,7 +147,10 @@ scripts/inject-drift.js               Inyección y reset de escenarios
 scripts/start-demo.ps1                Preparación del demo en Windows
 mcp-server/scenario-engine.js         Catálogo y ejecución reproducible
 mcp-server/drift-engine.js            Comparación y puntuación de riesgo
+mcp-server/recommendation-engine.js   Problemas y acciones recomendadas EN/ES
+mcp-server/web-server.js              API local y servidor de la experiencia web
 dashboard/index.html                  Landing bilingüe de 3ntropy
+dashboard/console.html                Consola automática de respuesta
 dashboard/impact.html                 Dashboard de impacto
 pasos.txt                             Guía operativa para el equipo
 ```

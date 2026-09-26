@@ -100,9 +100,15 @@ Revisar el diff propuesto antes de aprobarlo. No activar aprobaciones automatica
 DASHBOARD BOBALYTICS
 --------------------
 1. Abrir dashboard\index.html para ver la introduccion de 3ntropy.
-2. Entrar a Open Impact Dashboard o abrir dashboard\impact.html.
-3. Seleccionar el archivo logs\bobalytics-log.jsonl.
-4. Mostrar cantidad de detecciones, riesgo alto y tiempo estimado ahorrado.
+2. Para la experiencia automatica, ejecutar:
+
+     npm.cmd --prefix .\mcp-server run web
+
+3. Abrir http://127.0.0.1:4173 y entrar a Open Response Console.
+4. Seleccionar un escenario, ejecutar el analisis, revisar el problema y las
+   recomendaciones, y aprobar o rechazar la remediacion simulada.
+5. Para ver metricas, entrar a Open Impact Dashboard. Tambien se puede abrir
+   dashboard\impact.html y cargar logs\bobalytics-log.jsonl manualmente.
 
 ALIASES DE LOS COMANDOS ANTERIORES
 ----------------------------------

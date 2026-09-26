@@ -9,7 +9,8 @@
     "test": "node test-scenarios.js && node test-client.js",
     "test:mcp": "node test-client.js",
     "test:scenarios": "node test-scenarios.js",
-    "generate:declared": "node terraform-declared-state.js"
+    "generate:declared": "node terraform-declared-state.js",
+    "web": "node web-server.js"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.30.1",

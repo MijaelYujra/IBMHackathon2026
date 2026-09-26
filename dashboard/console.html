@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Run reproducible infrastructure drift scenarios and review remediation recommendations." />
+    <meta name="theme-color" content="#030712" />
+    <title>Drift Detector · Response Console</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23030712'/%3E%3Ctext x='32' y='45' text-anchor='middle' font-size='42' font-family='Arial' font-weight='700' fill='%2300f0ff'%3E3%3C/text%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="./console.css" />
+  </head>
+  <body>
+    <div class="cosmic-background" aria-hidden="true">
+      <div class="console-grid"></div>
+      <div class="console-nebula console-nebula-cyan"></div>
+      <div class="console-nebula console-nebula-purple"></div>
+    </div>
+
+    <header class="console-header glass-panel">
+      <a class="console-brand" href="./index.html" aria-label="3ntropy home"><span>3</span>ntropy</a>
+      <nav class="console-nav" aria-label="Console navigation">
+        <a href="./index.html" data-console-i18n="home">Home</a>
+        <a href="./impact.html" data-console-i18n="impact">Impact Dashboard</a>
+      </nav>
+      <div class="console-header-actions">
+        <div class="language-control" aria-label="Language selector">
+          <button type="button" data-console-language="en" class="active">EN</button>
+          <span>/</span>
+          <button type="button" data-console-language="es">ES</button>
+        </div>
+        <span class="local-badge"><i></i><span data-console-i18n="localMode">LOCAL DEMO</span></span>
+      </div>
+    </header>
+
+    <main class="console-shell">
+      <section class="console-hero">
+        <div>
+          <p class="console-kicker"><span>SYS</span> / DRIFT_RESPONSE</p>
+          <h1 data-console-i18n="title">Infrastructure Drift Response Console</h1>
+          <p class="console-intro" data-console-i18n="intro">
+            Select a reproducible scenario, run the MCP comparison, review the risk and recommendations, then make the final human decision.
+          </p>
+        </div>
+        <div class="safety-chip glass-panel">
+          <span class="safety-icon">◇</span>
+          <div>
+            <strong data-console-i18n="safeTitle">Safe simulation</strong>
+            <small data-console-i18n="safeText">No cloud resources are changed</small>
+          </div>
+        </div>
+      </section>
+
+      <section class="scenario-section glass-panel" aria-labelledby="scenario-title">
+        <div class="section-title-row">
+          <div>
+            <span class="section-code">01 / SCENARIO</span>
+            <h2 id="scenario-title" data-console-i18n="chooseScenario">Choose a drift scenario</h2>
+          </div>
+          <span class="step-hint" data-console-i18n="scenarioHint">Each run starts from a clean Terraform baseline.</span>
+        </div>
+        <div id="scenarioGrid" class="scenario-grid" aria-live="polite">
+          <div class="scenario-loading" data-console-i18n="loadingScenarios">Loading scenarios…</div>
+        </div>
+        <div class="scenario-actions">
+          <button type="button" id="runButton" class="neon-button" disabled>
+            <span data-console-i18n="runScenario">Run selected scenario</span>
+            <span aria-hidden="true">→</span>
+          </button>
+          <button type="button" id="resetButton" class="secondary-button" data-console-i18n="resetBaseline">Reset baseline</button>
+          <span id="resetNotice" class="reset-notice hidden"></span>
+        </div>
+      </section>
+
+      <section id="runWorkspace" class="run-workspace hidden" aria-live="polite">
+        <div class="run-heading">
+          <div>
+            <span class="section-code">02 / ANALYSIS</span>
+            <h2 data-console-i18n="analysisTitle">Automated analysis</h2>
+          </div>
+          <div id="runStatus" class="run-status">—</div>
+        </div>
+
+        <div class="analysis-grid">
+          <article class="risk-panel glass-panel">
+            <span class="panel-label" data-console-i18n="riskAssessment">Risk assessment</span>
+            <div class="risk-gauge" id="riskGauge" style="--risk-angle: 0deg">
+              <div><strong id="riskScore">0</strong><span>/100</span></div>
+            </div>
+            <strong id="riskLevel" class="risk-level">NONE</strong>
+            <p id="riskSummary" class="risk-summary"></p>
+          </article>
+
+          <article class="timeline-panel glass-panel">
+            <span class="panel-label" data-console-i18n="executionTimeline">Execution timeline</span>
+            <ol id="timeline" class="timeline"></ol>
+          </article>
+
+          <article class="event-panel glass-panel">
+            <div class="event-header">
+              <span class="panel-label" data-console-i18n="systemEvents">System events</span>
+              <span class="event-live"><i></i> LIVE</span>
+            </div>
+            <div id="eventLog" class="event-log" role="log"></div>
+          </article>
+        </div>
+
+        <section class="finding-section glass-panel">
+          <div class="section-title-row compact">
+            <div>
+              <span class="section-code">03 / FINDINGS</span>
+              <h2 data-console-i18n="findingsTitle">Detected problem</h2>
+            </div>
+            <span id="findingCount" class="count-chip">0</span>
+          </div>
+          <div id="findings" class="findings-list"></div>
+
+          <div class="recommendation-divider">
+            <span></span>
+            <strong data-console-i18n="recommendationsTitle">Recommended actions</strong>
+            <span></span>
+          </div>
+          <div id="recommendations" class="recommendation-list"></div>
+        </section>
+
+        <section id="reviewPanel" class="review-panel glass-panel hidden">
+          <div>
+            <span class="section-code">04 / HUMAN GATE</span>
+            <h2 data-console-i18n="reviewTitle">Human review required</h2>
+            <p data-console-i18n="reviewText">Review the problem and recommendations before approving the local simulated remediation.</p>
+          </div>
+          <div class="review-actions">
+            <button type="button" id="rejectButton" class="danger-button" data-console-i18n="reject">Reject</button>
+            <button type="button" id="approveButton" class="neon-button" data-console-i18n="approve">Approve simulated remediation</button>
+          </div>
+        </section>
+
+        <section id="verificationPanel" class="verification-panel glass-panel hidden">
+          <div class="verification-icon">✓</div>
+          <div>
+            <span class="panel-label" data-console-i18n="verification">Verification</span>
+            <h2 id="verificationTitle"></h2>
+            <p id="verificationText"></p>
+          </div>
+        </section>
+
+        <div class="report-actions">
+          <button type="button" id="downloadButton" class="secondary-button" data-console-i18n="downloadReport">Download JSON report</button>
+        </div>
+      </section>
+
+      <section id="errorPanel" class="error-panel glass-panel hidden" role="alert">
+        <strong data-console-i18n="errorTitle">The run could not be completed</strong>
+        <p id="errorMessage"></p>
+      </section>
+    </main>
+
+    <footer class="console-footer">
+      <span>3NTROPY // IBM BOB 2.0 HACKATHON</span>
+      <span data-console-i18n="footerSafety">Terraform planning · MCP detection · Human approval</span>
+    </footer>
+
+    <script src="./console.js"></script>
+  </body>
+</html>

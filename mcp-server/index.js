@@ -6,6 +6,10 @@ import { readFileSync, appendFileSync, existsSync, mkdirSync } from "fs";
 import { fileURLToPath } from "url";
 import path from "path";
 import { diffResources, summarizeRisk } from "./drift-engine.js";
+import {
+  buildRecommendations,
+  enrichDifferences,
+} from "./recommendation-engine.js";
 import { loadDeclaredState } from "./terraform-declared-state.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -77,6 +81,8 @@ server.tool(
     const actual = loadState(ACTUAL_PATH);
     const diffs = diffResources(declared, actual);
     const risk = summarizeRisk(diffs);
+    const detailedDiffs = enrichDifferences(diffs);
+    const recommendations = buildRecommendations(diffs);
 
     if (diffs.length === 0) {
       const summary = {
@@ -88,6 +94,7 @@ server.tool(
         risk_score: 0,
         risk_level: "none",
         detalle: [],
+        recommendations,
         message:
           "No se detecto drift. El estado real coincide exactamente con lo declarado en el codigo.",
       };
@@ -109,7 +116,9 @@ server.tool(
       diferencias_alto_riesgo: risk.counts.high,
       diferencias_riesgo_medio: risk.counts.medium,
       diferencias_riesgo_bajo: risk.counts.low,
-      detalle: diffs,
+      detalle: detailedDiffs,
+      recommendations,
+      human_review_required: true,
       registro_bobalytics: logEntry,
     };
 
