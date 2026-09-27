@@ -76,13 +76,13 @@ powershell -ExecutionPolicy Bypass -File .\scripts\start-demo.ps1 high-ssh
 
 Scenarios are created as isolated copies of a Terraform-derived baseline, so they can be repeated without accumulating changes:
 
-| Scenario | Risk | Score | Simulated change |
-|---|---|---:|---|
-| `healthy` | none | 0 | No drift |
-| `low` | low | 20 | `Environment` tag modified |
-| `medium` | medium | 55 | Instance changed from `t3.micro` to `t3.xlarge` |
-| `high-ssh` | high | 95 | Port 22 open to `0.0.0.0/0` |
-| `high-bucket` | high | 92 | Bucket public-access protection disabled |
+| Scenario      | Risk   | Score | Simulated change                                |
+| ------------- | ------ | ----: | ----------------------------------------------- |
+| `healthy`     | none   |     0 | No drift                                        |
+| `low`         | low    |    20 | `Environment` tag modified                      |
+| `medium`      | medium |    55 | Instance changed from `t3.micro` to `t3.xlarge` |
+| `high-ssh`    | high   |    95 | Port 22 open to `0.0.0.0/0`                     |
+| `high-bucket` | high   |    92 | Bucket public-access protection disabled        |
 
 The older names `reset`, `resize`, `open-ssh`, and `expose-bucket` remain available as aliases. The complete model is documented in [`docs/risk-model.md`](docs/risk-model.md).
 
@@ -202,3 +202,7 @@ pasos.txt                              Team operating guide
 ## Media
 
 <img width="1903" height="952" alt="3ntropy Drift Detector dashboard" src="https://github.com/user-attachments/assets/fa32ceee-1f05-47a0-8e7e-529959f85345" />
+
+## IBM Bob Evidence
+
+As required for the hackathon, the evidence of IBM Bob's assistance, including the list of assisted files and the session summary screenshots from all team members, can be found in the [`ibm-bob-evidence/`](./ibm-bob-evidence/) directory.
