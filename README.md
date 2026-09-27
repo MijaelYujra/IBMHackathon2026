@@ -1,51 +1,46 @@
-## Drift Detector — IBM Bob 2.0 Hackathon
+# Drift Detector — IBM Bob 2.0 Hackathon
 
-Drift Detector conecta IBM Bob con infraestructura declarada como código mediante
-un servidor MCP. Detecta diferencias entre Terraform y el estado real, explica el
-riesgo, propone una corrección y mantiene una aprobación humana antes de cualquier
-cambio.
+Drift Detector connects IBM Bob to infrastructure declared as code through an MCP server. It detects differences between Terraform and the observed state, explains the risk, proposes a correction, and keeps a human approval step before any change.
 
-El demo no usa infraestructura AWS real. El estado declarado se genera desde
-`infra/main.tf` con `terraform plan` + `terraform show -json`; el estado real se
-simula en JSON para demostrar escenarios de seguridad sin credenciales ni costos.
+The demo does not use real AWS infrastructure. The declared state is generated from `infra/main.tf` using `terraform plan` and `terraform show -json`; the observed state is simulated in JSON to demonstrate security scenarios without credentials or cloud costs.
 
-## Características
+## Features
 
-- **Terraform real como fuente declarada:** el MCP evalúa el HCL, no un JSON escrito a mano.
-- **Fallback seguro:** si Terraform no responde, usa un snapshot y lo informa explícitamente.
-- **Manejo estricto de errores:** si falta el estado real, devuelve una alerta crítica en vez de un falso “sin drift”.
-- **Human-in-the-loop:** Bob detecta, planifica y prepara el cambio; un humano lo revisa.
-- **Bobalytics:** registra drifts, severidad y tiempo estimado ahorrado.
+- **Terraform as the declared source:** the MCP server evaluates HCL rather than a hand-written JSON file.
+- **Safe fallback:** if Terraform is unavailable, it uses a snapshot and reports that source explicitly.
+- **Strict error handling:** if observed state is missing, it returns a critical alert instead of a false “no drift” result.
+- **Human in the loop:** Bob detects, plans, and prepares a proposal; a human reviews it.
+- **Bobalytics:** records drift, severity, and estimated time saved.
 
-## Arquitectura
+## Architecture
 
 ```text
-infra/main.tf ──> terraform plan/show ──> estado declarado ─┐
-                                                            ├─> MCP diff_infra ─> IBM Bob
-actual-state.json ────────────────> estado real simulado ───┘          │
-                                                                        ├─ Ask: explica
-                                                                        ├─ Plan: propone
-                                                                        └─ Agent: prepara diff
-                                                                                 │
-                                                                       aprobación humana
+infra/main.tf ──> terraform plan/show ──> declared state ──┐
+                                                        ├──> MCP diff_infra ──> IBM Bob
+actual-state.json ────────────────────> simulated actual ─┘         │
+                                                                   ├── Ask: explain
+                                                                   ├── Plan: propose
+                                                                   └── Agent: prepare diff
+                                                                            │
+                                                                  human approval
 ```
 
-El servidor expone cuatro tools MCP:
+The server exposes four MCP tools:
 
 - `get_declared_state`
 - `get_actual_state`
 - `diff_infra`
 - `get_bobalytics_summary`
 
-## Requisitos
+## Requirements
 
 - IBM Bob IDE.
-- Node.js y npm.
+- Node.js and npm.
 - Terraform CLI.
 
-## Instalación
+## Installation
 
-Desde la raíz del repositorio, en Windows PowerShell:
+From the repository root in Windows PowerShell:
 
 ```powershell
 npm.cmd --prefix .\mcp-server install
@@ -54,107 +49,87 @@ npm.cmd --prefix .\mcp-server run generate:declared
 npm.cmd --prefix .\mcp-server test
 ```
 
-La generación debe mostrar:
+The generated output should show:
 
 ```json
 "source": "terraform_plan"
 ```
 
-`terraform plan` se ejecuta con refresh desactivado. El proyecto nunca ejecuta
-`terraform apply` ni necesita credenciales AWS reales.
+`terraform plan` runs with refresh disabled. The project never invokes `terraform apply` and does not require real AWS credentials.
 
-## Conectar IBM Bob
+## Connect IBM Bob
 
-La configuración está en `.bob/mcp.json`.
+The configuration is in `.bob/mcp.json`.
 
-1. Abre el repositorio como workspace en Bob IDE.
-2. Ve a **Settings → MCP** y activa **Use MCP Servers**.
-3. Confirma que `drift-detector` aparezca como **Connected**.
-4. Si aparece **Disconnected**, confirma que Node.js esté instalado, guarda
-   `.bob/mcp.json` y pulsa **Restart**. La configuración usa `${workspaceFolder}`,
-   por lo que ningún integrante debe escribir una ruta personal.
+1. Open the repository as a workspace in Bob IDE.
+2. Go to **Settings → MCP** and enable **Use MCP Servers**.
+3. Confirm that `drift-detector` appears as **Connected**.
+4. If it appears as **Disconnected**, confirm Node.js is installed, save `.bob/mcp.json`, and select **Restart**. The configuration uses `${workspaceFolder}`, so no team member needs to enter a personal path.
 
 ## Demo
 
-Prepara el escenario principal:
+Prepare the main scenario:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\scripts\start-demo.ps1 high-ssh
 ```
 
-Todos los escenarios comienzan desde una línea base limpia generada desde
-Terraform, por lo que pueden repetirse sin acumular cambios:
+Scenarios are created as isolated copies of a Terraform-derived baseline, so they can be repeated without accumulating changes:
 
-| Escenario     | Riesgo  | Score | Cambio simulado                             |
-| ------------- | ------- | ----: | ------------------------------------------- |
-| `healthy`     | ninguno |     0 | Sin drift                                   |
-| `low`         | bajo    |    20 | Etiqueta `Environment` modificada           |
-| `medium`      | medio   |    55 | Instancia `t3.micro` cambiada a `t3.xlarge` |
-| `high-ssh`    | alto    |    95 | Puerto 22 abierto a `0.0.0.0/0`             |
-| `high-bucket` | alto    |    92 | Protección pública del bucket desactivada   |
+| Scenario | Risk | Score | Simulated change |
+|---|---|---:|---|
+| `healthy` | none | 0 | No drift |
+| `low` | low | 20 | `Environment` tag modified |
+| `medium` | medium | 55 | Instance changed from `t3.micro` to `t3.xlarge` |
+| `high-ssh` | high | 95 | Port 22 open to `0.0.0.0/0` |
+| `high-bucket` | high | 92 | Bucket public-access protection disabled |
 
-Los nombres anteriores `reset`, `resize`, `open-ssh` y `expose-bucket` siguen
-funcionando como alias. El modelo completo está documentado en
-[`docs/risk-model.md`](docs/risk-model.md).
+The older names `reset`, `resize`, `open-ssh`, and `expose-bucket` remain available as aliases. The complete model is documented in [`docs/risk-model.md`](docs/risk-model.md).
 
-En Bob, modo Ask:
+In Bob, Ask mode:
 
-> Usa `diff_infra` del servidor `drift-detector`. Confirma de dónde se obtuvo el estado declarado, detecta el drift, explica el riesgo y prioriza la corrección.
+> Use `diff_infra` from the `drift-detector` server. Confirm where the declared state came from, detect the drift, explain the risk, and prioritize the correction.
 
-En modo Plan:
+In Plan mode:
 
-> Crea un plan para corregir el hallazgo sin downtime. No apliques cambios.
+> Create a plan to correct the finding without downtime. Do not apply changes.
 
-En modo Agent:
+In Agent mode:
 
-> Prepara una propuesta para devolver el estado observado a lo declarado en Terraform. No modifiques `infra/main.tf`, no ejecutes `terraform apply` y déjala lista para revisión humana.
+> Prepare a proposal to return the observed state to the Terraform-declared state. Do not modify `infra/main.tf`, do not run `terraform apply`, and leave it ready for human review.
 
-Al terminar, restablece el estado simulado:
+When finished, reset the simulated state:
 
 ```powershell
 node .\scripts\inject-drift.js reset
 ```
 
-## Sitio y dashboard
+## Website and dashboard
 
-Cada detección escribe una entrada en `logs/bobalytics-log.jsonl`.
+Each detection writes an entry to `logs/bobalytics-log.jsonl`.
 
-La experiencia web tiene cuatro vistas con responsabilidades separadas:
+The web experience has four separate views:
 
-- `dashboard/index.html`: página principal bilingüe de 3ntropy.
-- `dashboard/console.html`: ejecución local automática de escenarios, comparación
-  MCP, recomendaciones, análisis real con IBM Bob, aprobación humana y descarga
-  del reporte.
-- `dashboard/impact.html`: dashboard de métricas con la estética creada por el equipo.
-- `dashboard/replay.html`: modo público estático para Vercel; reproduce corridas
-  verificadas de Bob sin ejecutar Bob, Terraform ni APIs cloud.
+- `dashboard/index.html`: bilingual 3ntropy landing page.
+- `dashboard/console.html`: automated local scenario execution, MCP comparison, recommendations, real IBM Bob analysis, human approval, and report download.
+- `dashboard/impact.html`: metrics dashboard using the visual style created by the team.
+- `dashboard/replay.html`: static public Vercel mode that replays verified Bob runs without running Bob, Terraform, or cloud APIs.
 
-Para iniciar la web con la API local:
+To start the site with the local API:
 
 ```powershell
 npm.cmd --prefix .\mcp-server run web
 ```
 
-Abre `http://127.0.0.1:4173`. Desde la página principal puedes entrar a la
-consola o al dashboard. La consola necesita este servidor local; el dashboard
-también permite cargar manualmente `logs/bobalytics-log.jsonl`.
+Open `http://127.0.0.1:4173`. From the landing page, you can open the console or the dashboard. The console needs this local server; the dashboard can also load `logs/bobalytics-log.jsonl` manually.
 
-### IBM Bob local: Ask, Plan y Agent
+### Local IBM Bob: Ask, Plan, and Agent
 
-Después de ejecutar un escenario, usa **Run IBM Bob analysis** dentro de la
-consola. El backend ejecuta `bob.cmd run --format stream-json` localmente en
-tres fases: `ask`, `plan` y `agent`. Cada fase tiene un límite predeterminado
-de USD 0.20, tres turnos y 90 segundos. Bob debe estar instalado, autenticado y
-con el workspace confiable; este flujo no funciona en un hosting estático.
+After running a scenario, select **Run IBM Bob analysis** in the console. The backend runs `bob.cmd run --format stream-json` locally in three phases: `ask`, `plan`, and `agent`. Each phase has a default limit of USD 0.20, three turns, and 90 seconds. Bob must be installed, authenticated, and trust the workspace; this workflow does not run on static hosting.
 
-La consola captura los eventos y crea, para cada ejecución, `context.json`,
-`detection.json`, `ask.json`, `plan.json`, `agent.json` y `final-report.json`
-en `demo-runs/<run-id>/`. Esa carpeta está excluida de Git para no publicar
-datos locales. Los prompts prohíben `terraform apply`, cambios de archivos y
-cambios de infraestructura; la aprobación final solo restablece el estado
-simulado local.
+For each run, the console captures events and creates `context.json`, `detection.json`, `ask.json`, `plan.json`, `agent.json`, and `final-report.json` in `demo-runs/<run-id>/`. That folder is excluded from Git so local data is not published. Prompts prohibit `terraform apply`, file changes, and infrastructure changes; final approval only resets the local simulated state.
 
-Puedes ajustar los límites antes de iniciar la web:
+You can adjust limits before starting the website:
 
 ```powershell
 $env:DRIFT_BOB_MAX_COST = "0.20"
@@ -163,30 +138,21 @@ $env:DRIFT_BOB_TIMEOUT_MS = "90000"
 npm.cmd --prefix .\mcp-server run web
 ```
 
-### Exportar una corrida real para el modo Hosted Replay
+### Export a real run for Hosted Replay
 
-Cuando una corrida local de Bob termine correctamente, exporta solo los
-artefactos ya saneados al sitio público:
+After a local Bob run completes successfully, export only sanitized artifacts to the public site:
 
 ```powershell
 node .\scripts\export-replay.js <run-id> high-ssh-bob-run
 ```
 
-El script valida que Ask, Plan y Agent estén completados, genera
-`dashboard/replays/<slug>.json` y actualiza `dashboard/replays/index.json`.
-Revisa ese JSON antes de hacer commit: un replay publicado debe ser una corrida
-real, no una respuesta creada manualmente. Mientras no haya grabaciones, el
-sitio muestra previews MCP guiados, claramente marcados como tales.
+The script requires a completed Bob run, generates `dashboard/replays/<slug>.json`, and updates `dashboard/replays/index.json`. Review that JSON before committing: a published replay must be a real run, not a manually authored response. Until recordings are available, the site shows guided MCP previews that are clearly marked as such.
 
-### Despliegue estático en Vercel
+### Static Vercel deployment
 
-El modo Hosted Replay se puede desplegar sin secretos. En Vercel importa el
-repositorio, establece **Root Directory** en `dashboard`, selecciona **Other**
-como Framework Preset y no uses Build Command. Luego despliega y prueba
-`/replay.html` en incógnito. La consola `console.html` sigue siendo solo local,
-porque necesita Bob Shell, Terraform y el servidor MCP por STDIO.
+Hosted Replay can be deployed without secrets. In Vercel, import the repository, set **Root Directory** to `dashboard`, select **Other** as the Framework Preset, and leave Build Command empty. Then deploy and test `/replay.html` in an incognito window. `console.html` remains local-only because it needs Bob Shell, Terraform, and the MCP server over STDIO.
 
-Con la CLI de Vercel, después de iniciar sesión, el equivalente es:
+With the Vercel CLI, after signing in, the equivalent is:
 
 ```powershell
 cd .\dashboard
@@ -194,45 +160,45 @@ vercel link
 vercel --prod
 ```
 
-## Estructura principal
+## Main structure
 
 ```text
-infra/main.tf                         Terraform declarado
-mcp-server/index.js                   Servidor MCP
-mcp-server/terraform-declared-state.js Generador y normalizador Terraform
-mcp-server/state/actual-state.json    Estado real simulado
-scripts/inject-drift.js               Inyección y reset de escenarios
-scripts/start-demo.ps1                Preparación del demo en Windows
-mcp-server/scenario-engine.js         Catálogo y ejecución reproducible
-mcp-server/drift-engine.js            Comparación y puntuación de riesgo
-mcp-server/recommendation-engine.js   Problemas y acciones recomendadas EN/ES
-mcp-server/bob-runner.js              Adaptador IBM Bob stream-json y artefactos locales
-mcp-server/web-server.js              API local y servidor de la experiencia web
-dashboard/index.html                  Landing bilingüe de 3ntropy
-dashboard/console.html                Consola automática de respuesta
-dashboard/impact.html                 Dashboard de impacto
-dashboard/replay.html                 Visor público de replays estáticos
-dashboard/replays/                    Corridas IBM Bob revisadas para Vercel
-scripts/export-replay.js              Exportador saneado de corridas locales
-pasos.txt                             Guía operativa para el equipo
+infra/main.tf                          Declared Terraform configuration
+mcp-server/index.js                    MCP server
+mcp-server/terraform-declared-state.js Terraform generator and normalizer
+mcp-server/state/actual-state.json     Simulated observed state
+scripts/inject-drift.js                Scenario injection and reset
+scripts/start-demo.ps1                 Windows demo preparation
+mcp-server/scenario-engine.js          Scenario catalog and reproducible execution
+mcp-server/drift-engine.js             Comparison and risk scoring
+mcp-server/recommendation-engine.js    EN/ES findings and recommended actions
+mcp-server/bob-runner.js               IBM Bob stream-json adapter and local artifacts
+mcp-server/web-server.js               Local API and web-experience server
+dashboard/index.html                   Bilingual 3ntropy landing page
+dashboard/console.html                 Automated response console
+dashboard/impact.html                  Impact dashboard
+dashboard/replay.html                  Static public replay viewer
+dashboard/replays/                     Reviewed IBM Bob runs for Vercel
+scripts/export-replay.js               Sanitized local-run exporter
+pasos.txt                              Team operating guide
 ```
 
 ## Roadmap
 
-- Consultar un proveedor cloud mediante su SDK con permisos de solo lectura.
-- Extender el normalizador a módulos y más tipos de recursos Terraform.
-- Integrar una aprobación externa sin habilitar ejecución automática ciega.
+- Query a cloud provider through its SDK with read-only permissions.
+- Extend the normalizer to Terraform modules and more resource types.
+- Integrate external approval without enabling blind automatic execution.
 
-## Equipo
+## Team
 
 - Alexandra Cristal Salazar Gisbert
 - Sheyla Micaela Condori Alcazar
 - Mijael Daniel Yujra Apaza
 
-## Proyecto desplegado
+## Deployed project
 
-`https://3ntropy-dritf-detector.vercel.app/`
+<https://3ntropy-drift-detector.vercel.app/>
 
 ## Media
 
-<img width="1903" height="952" alt="Captura de pantalla 2026-09-26 171337" src="https://github.com/user-attachments/assets/fa32ceee-1f05-47a0-8e7e-529959f85345" />
+<img width="1903" height="952" alt="3ntropy Drift Detector dashboard" src="https://github.com/user-attachments/assets/fa32ceee-1f05-47a0-8e7e-529959f85345" />
